@@ -45,14 +45,14 @@ Simplified Access to Conceptual Tables
 --------------------------------------
 
 The MIB integration also plays a pivotal role in interpreting the index
-objects for conceptual tables in the MIB.  In [SNMPv2] 
-(https://www.ietf.org/rfc/rfc2578.txt) objects that serve as table row 
-indexes are not accessible.  An application that wishes to query table
-information from an SNMP agent must reconstruct the index object values from 
-the object identifier of another object in the table.  This restriction makes
-the agent implementation more efficient, but greatly complicates the work
-of the network management application.  Tnm4j completely encapsulates this 
-unpleasant truth of SNMPv2 tables, as illustrated in the following example.  
+objects for conceptual tables in the MIB.  [SNMPv2] 
+(https://www.ietf.org/rfc/rfc2578.txt) table row indexes are not accessible.  
+An application that wishes to query table information from an SNMP agent must 
+reconstruct the index object values from the object identifier of another 
+(accessible) object in the table.  This restriction makes the agent 
+implementation more efficient, but greatly complicates the work of the network 
+management application.  Tnm4j completely encapsulates this unpleasant truth of 
+SNMPv2 tables, as illustrated in the following example.  
 
 Suppose that our management application wants to use the [IPV6-MIB] 
 (http://www.ietf.org/rfc/rfc2465.txt) to obtain the IPv6 addresses 
@@ -76,9 +76,9 @@ snmp.setCommunity("public");
 List<Map<String, Varbind>> varbinds = snmp.walk("ipv6AddrPfxLength", 
     "ipv6AddrType", "ipv6AddrAnycastFlag", "ipv6AddrStatus");
 for (Map<String, Varbind> varbind : varbinds) {
-  System.out.format("%s %s %d %s %s %s\n", 
-    varbind.get("ipv6IfIndex"), varbind.get("ipv6AddrAddress"),
-    varbind.get("ipv6AddrPfxLength"), varbind.get("ipv6AddrType"),
+  System.out.format("%d %s %d %s %s %s\n", 
+    varbind.get("ipv6IfIndex").toInt(), varbind.get("ipv6AddrAddress"),
+    varbind.get("ipv6AddrPfxLength").toInt(), varbind.get("ipv6AddrType"),
     varbind.get("ipv6AddrAnycastFlag"), varbind.get("ipv6AddrStatus"));
 }
 
