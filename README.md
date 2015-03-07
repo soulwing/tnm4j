@@ -93,9 +93,8 @@ be among the objects retrieved from the table.  Tnm4j interprets the object
 identifiers returned from the first retrieved column value using the MIB to
 provide the corresponding index object values.
 
-The `Varbind` objects for each of any table object's indexes can also be 
-retrieved using `Varbind.getIndexes`.  This method returns an empty array
-for an object that was not retrieved from a conceptual table.
+The `Varbind.getIndexes` method also provides access to a table object's 
+indexes.
 
 
 Architecture
