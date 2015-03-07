@@ -2,10 +2,12 @@ tnm4j
 =====
 
 A simplified SNMP API for Java, inspired by Jürgen Schönwälder's Tnm
-extension for Tcl.  The original Tnm made it very easy to write network
-management applications using simple Tcl scripts.  Tnm4j attempts to
-bring this same simplicity to the task of writing network management
-applications in Java.
+extension for Tcl.  
+
+The original Tnm made it easy to write network management applications using 
+simple Tcl scripts.  Tnm4j attempts to bring this same simplicity to the 
+task of writing network management applications in Java or in Java-based
+scripting languages such as Groovy.
 
 Trivial Example
 ---------------
@@ -90,6 +92,10 @@ available for each retrieved table row, even though they were not (and cannot)
 be among the objects retrieved from the table.  Tnm4j interprets the object
 identifiers returned from the first retrieved column value using the MIB to
 provide the corresponding index object values.
+
+The `Varbind` objects for each of any table object's indexes can also be 
+retrieved using `Varbind.getIndexes`.  This method returns an empty array
+for an object that was not retrieved from a conceptual table.
 
 
 Architecture
