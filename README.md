@@ -105,9 +105,9 @@ adapt a third-party library for use with Tnm4j.  The JDK's [ServiceLoader]
 (http://docs.oracle.com/javase/7/docs/api/java/util/ServiceLoader.html)
 mechanism is used to locate adapters for SNMP and MIB parsing support.
 
-The default SNMP adapter uses Frank Fock's [Snmp4j] (http://www.snmp4j.org).
-Snmp4j is an outstanding library providing comprehensive support for SNMP
-communications in Java.
+The default SNMP adapter uses [Snmp4j] (http://www.snmp4j.org) by Frank Fock and
+Jochen Katz.  Snmp4j is an outstanding library providing comprehensive support 
+for SNMP communications in Java.
 
 The default MIB adapter uses Per Cederberg's excellent [Mibble] 
 (http://www.mibble.org) MIB parser.
