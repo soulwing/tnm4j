@@ -85,6 +85,12 @@ for (Map<String, Varbind> varbind : varbinds) {
 snmp.dispose();
 ```
 
+When using the `walk` method to walk a table, the index objects are implicitly
+available for each retrieved table row, even though they were not (and cannot)
+be among the objects retrieved from the table.  Tnm4j interprets the object
+identifiers returned from the first retrieved column value using the MIB to
+provide the corresponding index object values.
+
 
 Architecture
 ------------
