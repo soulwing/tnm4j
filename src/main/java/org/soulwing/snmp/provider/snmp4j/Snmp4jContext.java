@@ -20,10 +20,8 @@ package org.soulwing.snmp.provider.snmp4j;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.snmp4j.PDU;
@@ -41,12 +39,14 @@ import org.snmp4j.smi.VariableBinding;
 import org.soulwing.snmp.Formatter;
 import org.soulwing.snmp.IndexExtractor;
 import org.soulwing.snmp.Mib;
+import org.soulwing.snmp.MutableVarbindCollection;
 import org.soulwing.snmp.SnmpConfiguration;
 import org.soulwing.snmp.SnmpContext;
 import org.soulwing.snmp.SnmpTarget;
 import org.soulwing.snmp.TimeoutException;
 import org.soulwing.snmp.TruncatedResponseException;
 import org.soulwing.snmp.Varbind;
+import org.soulwing.snmp.VarbindCollection;
 
 class Snmp4jContext implements SnmpContext, VarbindFactory {
 
@@ -136,16 +136,16 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    * {@inheritDoc}
    */
   @Override
-  public List<Varbind> get(List<String> oids) throws IOException {
+  public VarbindCollection get(List<String> oids) throws IOException {
     PDU response = doGet(resolveOids(oids));
-    return createList(response);
+    return createList(response, oids);
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public List<Varbind> get(String... oids) 
+  public VarbindCollection get(String... oids) 
       throws IOException {
     return get(Arrays.asList(oids));
   }
@@ -154,17 +154,17 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    * {@inheritDoc}
    */
   @Override
-  public List<Varbind> getNext(List<String> oids)
+  public VarbindCollection getNext(List<String> oids)
       throws IOException {
     PDU response = doGetNext(resolveOids(oids));
-    return createList(response);
+    return createList(response, oids);
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public List<Varbind> getNext(String... oids)
+  public VarbindCollection getNext(String... oids)
       throws IOException {
     return getNext(Arrays.asList(oids));
   }
@@ -173,18 +173,18 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    * {@inheritDoc}
    */
   @Override
-  public List<Varbind> getBulk(int nonRepeaters, int maxRepetitions,
+  public VarbindCollection getBulk(int nonRepeaters, int maxRepetitions,
       List<String> oids) throws IOException {
     PDU response = doGetBulk(nonRepeaters, maxRepetitions, 
         resolveOids(oids));
-    return createList(response);
+    return createList(response, oids);
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public List<Varbind> getBulk(int nonRepeaters, int maxRepetitions,
+  public VarbindCollection getBulk(int nonRepeaters, int maxRepetitions,
       String... oids) throws IOException {
     return getBulk(nonRepeaters, maxRepetitions, Arrays.asList(oids));
   }
@@ -193,7 +193,7 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    * {@inheritDoc}
    */
   @Override
-  public List<Map<String, Varbind>> walk(int nonRepeaters, List<String> oids) 
+  public List<VarbindCollection> walk(int nonRepeaters, List<String> oids) 
       throws IOException {
     return doBulkWalk(nonRepeaters, resolveOids(oids));
   }
@@ -202,7 +202,7 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    * {@inheritDoc}
    */
   @Override
-  public List<Map<String, Varbind>> walk(int nonRepeaters, String... oids) 
+  public List<VarbindCollection> walk(int nonRepeaters, String... oids) 
       throws IOException {
     return doBulkWalk(nonRepeaters, resolveOids(Arrays.asList(oids)));
   }
@@ -211,7 +211,7 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    * {@inheritDoc}
    */
   @Override
-  public List<Map<String, Varbind>> walk(List<String> nonRepeaters,
+  public List<VarbindCollection> walk(List<String> nonRepeaters,
       List<String> repeaters) throws IOException {
     List<String> oids = new ArrayList<String>(nonRepeaters.size() 
         + repeaters.size());
@@ -224,9 +224,18 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    * {@inheritDoc}
    */
   @Override
-  public List<Map<String, Varbind>> walk(List<String> repeaters)
+  public List<VarbindCollection> walk(List<String> repeaters)
       throws IOException {
     return doBulkWalk(0, resolveOids(repeaters));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public List<VarbindCollection> walk(String... repeaters)
+      throws IOException {
+    return doBulkWalk(0, resolveOids(Arrays.asList(repeaters)));
   }
 
   private PDU doGet(OID... oids) throws IOException {
@@ -267,10 +276,10 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
     }
   }
   
-  private List<Map<String, Varbind>> doBulkWalk(final int nonRepeaters, OID... oids) 
+  private List<VarbindCollection> doBulkWalk(final int nonRepeaters, OID... oids) 
       throws IOException {
     OID[] nextOids = Arrays.copyOf(oids, oids.length);
-    List<Map<String, Varbind>> results = new LinkedList<Map<String, Varbind>>();
+    List<VarbindCollection> results = new LinkedList<VarbindCollection>();
 
     int repeaters = oids.length - nonRepeaters;
     if (repeaters == 0) {
@@ -368,41 +377,43 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
     return new OID(oid);
   }
 
-  private List<Varbind> createList(PDU response) {
-    List<Varbind> results = new ArrayList<Varbind>();
+  private VarbindCollection createList(PDU response, List<String> oids) {
+    MutableVarbindCollection results = new MutableVarbindCollection();
     for (int i = 0; i < response.size(); i++) {
-      results.add(newVarbind(response.get(i)));
+      Varbind varbind = newVarbind(response.get(i));
+      results.add(i, objectNameToKey(varbind), varbind);
     }
-    return results;
+    return results.immutableCopy();
   }
 
-  private Map<String, Varbind> createRow(OID[] oids, PDU response, 
+  private VarbindCollection createRow(OID[] oids, PDU response, 
       int nonRepeaters, int repeaters, int offset) {
     final int responseSize = response.size();
-    Map<String, Varbind> row = new LinkedHashMap<String, Varbind>();
+    MutableVarbindCollection row = new MutableVarbindCollection();
     for (int i = 0; i < nonRepeaters; i++) {
       if (i < responseSize && response.get(i).getOid().startsWith(oids[i])) {
         Varbind v = newVarbind(response.get(i));
-        row.put(objectNameToKey(v), v);
+        row.add(i, objectNameToKey(v), v);
       }
     }
     if (repeaters > 0) {
-      boolean haveIndexes = false;
+      Varbind[] indexes = null;
+      int count = 0;
       for (int i = 0; i < repeaters; i++) {
         if (i + offset < response.size() 
             && response.get(i + offset).getOid()
                   .startsWith(oids[i + nonRepeaters])) {
           Varbind v = newVarbind(response.get(i + offset));
-          row.put(objectNameToKey(v), v);
-          if (!haveIndexes) {
-            haveIndexes = true;
-            Varbind[] indexes = v.getIndexes();
-            for (int j = 0; j < indexes.length; j++) {
-              row.put(objectNameToKey(indexes[j]), indexes[j]);
-            }            
+          row.add(i, objectNameToKey(v), v);
+          count++;
+          if (indexes == null) {
+            indexes = v.getIndexes();
           }
         }
       }
+      for (int i = 0; i < indexes.length; i++) {
+        row.add(count + i, objectNameToKey(indexes[i]), indexes[i]);
+      }            
     }
     return row;
   }

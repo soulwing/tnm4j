@@ -19,7 +19,6 @@ package org.soulwing.snmp;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * An API for synchronous SNMP operations.
@@ -28,29 +27,152 @@ import java.util.Map;
  */
 public interface SnmpOperations {
 
-  List<Varbind> get(List<String> oids) throws IOException;
+  /**
+   * Performs an SNMP GET operation.
+   * @param oids MIB names or dotted-decimal object identifiers for the
+   *    objects to fetch
+   * @return retrieved varbinds in the same order and with the same keys
+   *   as the requested objects
+   * @throws IOException
+   */
+  VarbindCollection get(List<String> oids) throws IOException;
 
-  List<Varbind> get(String... oids) throws IOException;
+  /**
+   * Performs an SNMP GET operation.
+   * @param oids MIB names or dotted-decimal object identifiers for the
+   *    objects to fetch
+   * @return list of retrieved varbinds in the same order as the requested
+   *    objects
+   * @throws IOException
+   */
+  VarbindCollection get(String... oids) throws IOException;
 
-  List<Varbind> getNext(List<String> oids) throws IOException;
+  /**
+   * Performs an SNMP GETNEXT operation.
+   * @param oids MIB names or dotted-decimal object identifiers for the
+   *    objects to fetch
+   * @return retrieved varbinds in the same order and with the same keys
+   *   as the requested objects
+   * @throws IOException
+   */
+  VarbindCollection getNext(List<String> oids) throws IOException;
 
-  List<Varbind> getNext(String... oids) throws IOException;
+  /**
+   * Performs an SNMP GETNEXT operation.
+   * @param oids MIB names or dotted-decimal object identifiers for the
+   *    objects to fetch
+   * @return retrieved varbinds in the same order and with the same keys
+   *   as the requested objects
+   * @throws IOException
+   */
+  VarbindCollection getNext(String... oids) throws IOException;
 
-  List<Varbind> getBulk(int nonRepeaters, int maxRepetitions, 
+  /**
+   * Performs an SNMP GETBULK operation.
+   * @param nonRepeaters number of non-repeating objects at the beginning of
+   *    {@code oids}.
+   * @param maxRepetitions maximum number of repetitions to retrieve for the
+   *    repeating objects in {@code oids}
+   * @param oids MIB names or dotted-decimal object identifiers for the
+   *    objects to fetch; the first {@code nonRepeaters} identifiers in the list
+   *    are assumed to be non-repeating objects
+   * @return retrieved varbinds in the same order and with the same keys
+   *   as the requested objects
+   * @throws IOException
+   */
+  VarbindCollection getBulk(int nonRepeaters, int maxRepetitions, 
       List<String> oids) throws IOException;
 
-  List<Varbind> getBulk(int nonRepeaters, int maxRepetitions, 
+  /**
+   * Performs an SNMP GETBULK operation.
+   * @param nonRepeaters number of non-repeating objects at the beginning of
+   *   {@code oids}.
+   * @param maxRepetitions maximum number of repetitions to retrieve for the
+   *    repeating objects in {@code oids}
+   * @param oids MIB names or dotted-decimal object identifiers for the
+   *    objects to fetch; the first {@code nonRepeaters} identifiers in the 
+   *    list are assumed to be for non-repeating objects
+   * @return retrieved varbinds in the same order and with the same keys
+   *   as the requested objects
+   * @throws IOException
+   */
+  VarbindCollection getBulk(int nonRepeaters, int maxRepetitions, 
       String... oids) throws IOException;
-  
-  List<Map<String, Varbind>> walk(int nonRepeaters, List<String> oids)
+
+  /**
+   * Performs a walk of a MIB conceptual table.
+   * <p>
+   * This is a high level operation that can be used to retrieve all 
+   * rows of a conceptual table.
+   * @param nonRepeaters number of non-repeating objects at the beginning
+   *   of {@code oids}
+   * @param oids MIB names or dotted-decimal object identifiers; the first 
+   *   {@code nonRepeaters} identifiers in the list are assumed to be for 
+   *   non-repeating objects
+   * @return list of table rows (each row is a varbind collection in the
+   *    same order and with the same keys as the requested objects)
+   * @throws IOException
+   */
+  List<VarbindCollection> walk(int nonRepeaters, List<String> oids)
       throws IOException;
 
-  List<Map<String, Varbind>> walk(int nonRepeaters, String... oids)
+  /**
+   * Performs a walk of a MIB conceptual table.
+   * <p>
+   * This is a high level operation that can be used to retrieve all 
+   * rows of a conceptual table.
+   * @param nonRepeaters number of non-repeating objects at the beginning
+   *   of {@code oids}
+   * @param oids MIB names or dotted-decimal object identifiers; the first 
+   *   {@code nonRepeaters} identifiers in the list are assumed to be for 
+   *   non-repeating objects
+   * @return list of table rows (each row is a varbind collection in the
+   *    same order and with the same keys as the requested objects)
+   * @throws IOException
+   */
+  List<VarbindCollection> walk(int nonRepeaters, String... oids)
       throws IOException;
 
-  List<Map<String, Varbind>> walk(List<String> nonRepeaters, 
+  /**
+   * Performs a walk of a MIB conceptual table.
+   * <p>
+   * This is a high level operation that can be used to retrieve all 
+   * rows of a conceptual table.
+   * @param nonRepeaters MIB names or dotted-decimal object identifiers 
+   *   for the non-repeating elements to retrieve
+   * @param repeaters MIB names or dotted-decimal object identifiers 
+   *   for the table column elements to retrieve
+   * @return list of table rows (each row is a varbind collection in the
+   *    same order and with the same keys as the requested objects)
+   * @throws IOException
+   */
+  List<VarbindCollection> walk(List<String> nonRepeaters, 
       List<String> repeaters) throws IOException;
 
-  List<Map<String, Varbind>> walk(List<String> repeaters) throws IOException;
+  /**
+   * Performs a walk of a MIB conceptual table.
+   * <p>
+   * This is a high level operation that can be used to retrieve all 
+   * rows of a conceptual table.
+   * @param repeaters MIB names or dotted-decimal object identifiers 
+   *   for the table column elements to retrieve
+   * @return list of table rows (each row is a varbind collection in the
+   *    same order and with the same keys as the requested objects)
+   * @throws IOException
+   */
+  List<VarbindCollection> walk(List<String> repeaters) throws IOException;
+
+  /**
+   * Performs a walk of a MIB conceptual table.
+   * <p>
+   * This is a high level operation that can be used to retrieve all 
+   * rows of a conceptual table.
+   * @param repeaters MIB names or dotted-decimal object identifiers 
+   *   for the table column elements to retrieve
+   * @return list of table rows (each row is a varbind collection in the
+   *    same order and with the same keys as the requested objects)
+   * @throws IOException
+   */
+  List<VarbindCollection> walk(String... repeaters) throws IOException;
 
 }
