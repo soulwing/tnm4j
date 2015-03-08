@@ -29,7 +29,7 @@ import java.net.URL;
  *
  * @author Carl Harris
  */
-public interface MIB {
+public interface Mib {
 
   /**
    * Converts an object name to the corresponding object identifier.

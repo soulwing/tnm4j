@@ -19,20 +19,71 @@ package org.soulwing.snmp;
 
 public interface Varbind {
 
+  /**
+   * Gets the MIB name of the bound object.
+   * @return name
+   */
   String getName();
   
+  /**
+   * Gets the object identifier of the named object as a dotted decimal string.
+   * @return OID string
+   */
   String getOid();
   
+  /**
+   * Gets the MIB syntax type identifier of the object.
+   * @return
+   */
   int getSyntax();
 
+  /**
+   * Coerces the value of the bound object to a (signed) integer.
+   * @return integer value of the bound object
+   */
   int toInt();
   
+  /**
+   * Coerces the value of the bound object to a (signed) long.
+   * @return long value of the bound object
+   */
   long toLong();
 
-  Object toObject();
-  
+  /**
+   * Coerces the value of the bound object to a display string.
+   * <p>
+   * The implementation will incorporate the application textual convention
+   * and display hint (if available) of the corresponding MIB object
+   * definition.
+   * @return string representation of the bound object
+   */
   String toString();
   
+  /**
+   * Gets the value of the object as one of the fundamental types of SMI.
+   * <p>
+   * This method returns a value for each SMI type as follows:
+   * <ul>
+   * <li>OBJECT IDENTIFIER &mdash; {@code int} array of the OID components</li>
+   * <li>OCTET STRING &mdash; {@code byte} array containing the object's octets</li>
+   * <li>INTEGER &mdash; {@code Long} value of the object</li>
+   * <li>NULL &mdash; {@code null}</li>
+   * <li>IpAddress &mdash; {@code byte} array containing the address's octets</li>
+   * <li>Counter &mdash; {@code Long} value of the object</li>
+   * <li>Gauge &mdash; {@code Long} value of the object</li>
+   * <li>TimeTicks &mdash; {@code Long} value of the object</li>
+   * <li>Opaque &mdash; {@code byte} array containing the object's octets</li>
+   * </ul>
+   * @return
+   */
+  Object toObject();
+  
+  /**
+   * Gets the bindings that represent the index values the bound value.
+   * @return if the bound value is a member of a conceptual table, the
+   *    variable bindings representing the object's table index are returned;
+   *    an empty array is returned for an object that is not a table member
+   */
   Varbind[] getIndexes();
   
 }

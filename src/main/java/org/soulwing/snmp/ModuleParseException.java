@@ -23,7 +23,7 @@ package org.soulwing.snmp;
  *
  * @author Carl Harris
  */
-public class ModuleParseException extends MIBException {
+public class ModuleParseException extends MibException {
 
   private static final long serialVersionUID = -584299686841096907L;
   

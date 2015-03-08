@@ -23,7 +23,7 @@ package org.soulwing.snmp;
  *
  * @author Carl Harris
  */
-public class TruncatedResponseException extends SNMPException {
+public class TruncatedResponseException extends SnmpException {
 
   private static final long serialVersionUID = -6660192207091746358L;
 

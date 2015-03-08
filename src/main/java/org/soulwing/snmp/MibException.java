@@ -22,14 +22,14 @@ package org.soulwing.snmp;
  *
  * @author Carl Harris
  */
-public class MIBException extends RuntimeException {
+public class MibException extends RuntimeException {
 
   private static final long serialVersionUID = -7654832789689702654L;
 
   /**
    * Constructs a new instance.
    */
-  public MIBException() {
+  public MibException() {
     super();
   }
 
@@ -38,7 +38,7 @@ public class MIBException extends RuntimeException {
    * @param message
    * @param cause
    */
-  public MIBException(String message, Throwable cause) {
+  public MibException(String message, Throwable cause) {
     super(message, cause);
   }
 
@@ -46,7 +46,7 @@ public class MIBException extends RuntimeException {
    * Constructs a new instance.
    * @param message
    */
-  public MIBException(String message) {
+  public MibException(String message) {
     super(message);
   }
 
@@ -54,7 +54,7 @@ public class MIBException extends RuntimeException {
    * Constructs a new instance.
    * @param cause
    */
-  public MIBException(Throwable cause) {
+  public MibException(Throwable cause) {
     super(cause);
   }
   

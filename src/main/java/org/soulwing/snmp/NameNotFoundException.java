@@ -23,7 +23,7 @@ package org.soulwing.snmp;
  *
  * @author Carl Harris
  */
-public class NameNotFoundException extends MIBException {
+public class NameNotFoundException extends MibException {
 
   private static final long serialVersionUID = -6910583914778740034L;
 

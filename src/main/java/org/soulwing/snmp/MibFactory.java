@@ -20,34 +20,34 @@ package org.soulwing.snmp;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
-import org.soulwing.snmp.provider.MIBProvider;
+import org.soulwing.snmp.provider.MibProvider;
 
 /**
- * A factory that produces {@link MIB} objects.
+ * A factory that produces {@link Mib} objects.
  *
  * @author Carl Harris
  */
-public class MIBFactory {
+public class MibFactory {
 
-  private volatile static MIBFactory instance;
+  private volatile static MibFactory instance;
   
-  private final ServiceLoader<MIBProvider> loader = ServiceLoader.load(MIBProvider.class);
+  private final ServiceLoader<MibProvider> loader = ServiceLoader.load(MibProvider.class);
   
   /**
    * Constructs a new instance.
    */
-  private MIBFactory() {
+  private MibFactory() {
   }
 
   /**
    * Gets the singleton MIB factory instance.
    * @return MIB factory
    */
-  public static MIBFactory getInstance() {
+  public static MibFactory getInstance() {
     if (instance == null) {
-      synchronized (MIBFactory.class) {
+      synchronized (MibFactory.class) {
         if (instance == null) {
-          instance = new MIBFactory();
+          instance = new MibFactory();
         }
       }
     }
@@ -58,7 +58,7 @@ public class MIBFactory {
    * Creates a new MIB using the first available provider.
    * @return new MIB instance
    */
-  public MIB newMIB() {
+  public Mib newMIB() {
     return newMIB(null);
   }
   
@@ -69,14 +69,14 @@ public class MIBFactory {
    * @throws ProviderNotFoundException if the named provider is not found
    *    by the {@link ServiceLoader}
    */
-  public MIB newMIB(String providerName) {
+  public Mib newMIB(String providerName) {
     return findProvider(providerName).newMIB();
   }
   
-  private MIBProvider findProvider(String providerName) {
-    Iterator<MIBProvider> providers = loader.iterator();   
+  private MibProvider findProvider(String providerName) {
+    Iterator<MibProvider> providers = loader.iterator();   
     while (providers.hasNext()) {
-      MIBProvider provider = providers.next();
+      MibProvider provider = providers.next();
       if (providerName == null 
           || provider.getName().equalsIgnoreCase(providerName)) {
         return provider;

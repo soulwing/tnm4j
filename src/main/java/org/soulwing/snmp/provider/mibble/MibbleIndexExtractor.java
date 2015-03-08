@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.soulwing.snmp.IndexDescriptor;
 import org.soulwing.snmp.IndexExtractor;
-import org.soulwing.snmp.MIB;
+import org.soulwing.snmp.Mib;
 
 import net.percederberg.mibble.MibType;
 import net.percederberg.mibble.MibTypeTag;
@@ -36,11 +36,11 @@ import net.percederberg.mibble.type.ValueConstraint;
 
 class MibbleIndexExtractor implements IndexExtractor {
 
-  private final MibbleMIB mib;
+  private final MibbleMib mib;
   private final MibValueSymbol symbol;
   private final SnmpIndex[] indexes;
 
-  public MibbleIndexExtractor(MibbleMIB mib, MibValueSymbol symbol) {
+  public MibbleIndexExtractor(MibbleMib mib, MibValueSymbol symbol) {
     if (!symbol.isTableColumn()) {
       throw new IllegalArgumentException("symbol is not a table column: " 
           + symbol.getName());
@@ -55,7 +55,7 @@ class MibbleIndexExtractor implements IndexExtractor {
       rowType = (SnmpObjectType) augmentsSymbol.getType();
     }
     
-    List indexes = rowType.getIndex();
+    List<?> indexes = rowType.getIndex();
     this.indexes = new SnmpIndex[indexes.size()];
     for (int i = 0; i < this.indexes.length; i++) {
       this.indexes[i] = (SnmpIndex) indexes.get(i);
@@ -109,7 +109,7 @@ class MibbleIndexExtractor implements IndexExtractor {
       return 4;
     }
     else if (type.hasTag(MibTypeTag.OCTET_STRING))  {
-      List constraints = ((SizeConstraint) 
+      List<?> constraints = ((SizeConstraint) 
           ((StringType) type).getConstraint()).getValues();
       for (int i = 0; i < constraints.size(); i++) {
         if (constraints.get(i) instanceof ValueConstraint) {
@@ -131,7 +131,7 @@ class MibbleIndexExtractor implements IndexExtractor {
   }
 
   public static void main(String[] args) throws Exception {
-    MIB mib = new MibbleMIB();
+    Mib mib = new MibbleMib();
     mib.load("BRIDGE-MIB");
     mib.load("IPV6-MIB");
 

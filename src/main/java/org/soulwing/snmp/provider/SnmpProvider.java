@@ -15,25 +15,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.soulwing.snmp;
+package org.soulwing.snmp.provider;
+
+import org.soulwing.snmp.Mib;
+import org.soulwing.snmp.SnmpConfiguration;
+import org.soulwing.snmp.SnmpContext;
+import org.soulwing.snmp.SnmpTarget;
 
 /**
- * An {@link SNMPContext} for SNMPv2c.
+ * A provider of {@link SnmpContext} objects.
  *
  * @author Carl Harris
  */
-public interface SNMPv2cContext extends SNMPContext {
+public interface SnmpProvider {
 
   /**
-   * Gets the community string.
-   * @return community string or {@code null} if none has been set
+   * Gets the provider name.
+   * @return provider name (never {@code null})
    */
-  String getCommunity();
+  String getName();
   
   /**
-   * Sets the community string.
-   * @param community the community string to set
+   * Creates a new SNMPv2c context.
+   * @param target target agent
+   * @param config context configuration; the provider can safely 
+   *    assume that the configuration is immutable for the lifetime of the
+   *    returned context 
+   * @param mib MIB provider
+   * @return SNMP context
    */
-  void setCommunity(String community);
-  
+  SnmpContext newContext(SnmpTarget target, SnmpConfiguration config, 
+      Mib mib);
+
 }

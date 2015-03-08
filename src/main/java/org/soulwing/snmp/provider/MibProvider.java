@@ -17,14 +17,14 @@
  */
 package org.soulwing.snmp.provider;
 
-import org.soulwing.snmp.MIB;
+import org.soulwing.snmp.Mib;
 
 /**
- * A provider of {@link MIB} objects.
+ * A provider of {@link Mib} objects.
  *
  * @author Carl Harris
  */
-public interface MIBProvider {
+public interface MibProvider {
 
   /**
    * Gets the name of this provider.
@@ -33,9 +33,9 @@ public interface MIBProvider {
   String getName();
   
   /**
-   * Gets a new instance of {@link MIB} from the receiver.
+   * Gets a new instance of {@link Mib} from the receiver.
    * @return
    */
-  MIB newMIB();
+  Mib newMIB();
   
 }

@@ -15,34 +15,47 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.soulwing.snmp.provider.mibble;
-
-import org.soulwing.snmp.MIB;
-import org.soulwing.snmp.provider.MIBProvider;
+package org.soulwing.snmp;
 
 /**
- * DESCRIBE THE TYPE HERE.
+ * Base class for any SNMP exceptions.
  *
  * @author Carl Harris
  */
-public class MibbleMIBProvider implements MIBProvider {
+public class SnmpException extends RuntimeException {
 
-  private static final String PROVIDER_NAME = "Mibble";
-  
+  private static final long serialVersionUID = -713788800474374648L;
+
   /**
-   * {@inheritDoc}
+   * Constructs a new instance.
    */
-  @Override
-  public String getName() {
-    return PROVIDER_NAME;
+  public SnmpException() {
+    super();
   }
 
   /**
-   * {@inheritDoc}
+   * Constructs a new instance.
+   * @param message
+   * @param cause
    */
-  @Override
-  public MIB newMIB() {
-    return new MibbleMIB();
+  public SnmpException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  /**
+   * Constructs a new instance.
+   * @param message
+   */
+  public SnmpException(String message) {
+    super(message);
+  }
+
+  /**
+   * Constructs a new instance.
+   * @param cause
+   */
+  public SnmpException(Throwable cause) {
+    super(cause);
   }
 
 }

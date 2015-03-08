@@ -22,7 +22,7 @@ package org.soulwing.snmp;
  *
  * @author Carl Harris
  */
-public class TimeoutException extends SNMPException {
+public class TimeoutException extends SnmpException {
 
   private static final long serialVersionUID = 5680881747687002774L;
 

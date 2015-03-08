@@ -26,12 +26,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.soulwing.snmp.Formatter;
-import org.soulwing.snmp.IndexExtractor;
-import org.soulwing.snmp.MIB;
-import org.soulwing.snmp.ModuleParseException;
-
-import net.percederberg.mibble.Mib;
 import net.percederberg.mibble.MibLoader;
 import net.percederberg.mibble.MibLoaderException;
 import net.percederberg.mibble.MibType;
@@ -39,7 +33,12 @@ import net.percederberg.mibble.MibValueSymbol;
 import net.percederberg.mibble.snmp.SnmpObjectType;
 import net.percederberg.mibble.value.ObjectIdentifierValue;
 
-class MibbleMIB implements MIB {
+import org.soulwing.snmp.Formatter;
+import org.soulwing.snmp.IndexExtractor;
+import org.soulwing.snmp.Mib;
+import org.soulwing.snmp.ModuleParseException;
+
+class MibbleMib implements Mib {
 
   private static final ToStringFormatter TO_STRING_FORMATTER = 
       new ToStringFormatter();
@@ -48,7 +47,8 @@ class MibbleMIB implements MIB {
   
   private final List<String> mibNames = new LinkedList<String>();
   
-  private final Map<String, Mib> mibMap = new LinkedHashMap<String, Mib>();
+  private final Map<String, net.percederberg.mibble.Mib> mibMap = 
+      new LinkedHashMap<String, net.percederberg.mibble.Mib>();
   
   private final Map<MibValueSymbol, Formatter> formatterCache = 
       new HashMap<MibValueSymbol, Formatter>();
@@ -136,7 +136,7 @@ class MibbleMIB implements MIB {
   
   private ObjectIdentifierValue getSymbol(String scope, String name) {
     if (!mibMap.containsKey(scope)) return null;
-    Mib mib = mibMap.get(scope);
+    net.percederberg.mibble.Mib mib = mibMap.get(scope);
     MibValueSymbol symbol = (MibValueSymbol) mib.getSymbol(name);  
     if (symbol == null) return null;
     return (ObjectIdentifierValue) symbol.getValue();
@@ -207,7 +207,7 @@ class MibbleMIB implements MIB {
     }
   }
 
-  private void installMib(Mib mib) {
+  private void installMib(net.percederberg.mibble.Mib mib) {
     mibNames.add(0, mib.getName());
     mibMap.put(mib.getName(), mib);
   }

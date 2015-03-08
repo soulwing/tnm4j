@@ -23,7 +23,7 @@ package org.soulwing.snmp;
  *
  * @author Carl Harris
  */
-public class ProviderNotFoundException extends MIBException {
+public class ProviderNotFoundException extends MibException {
 
   private static final long serialVersionUID = -6910583914778740034L;
 
