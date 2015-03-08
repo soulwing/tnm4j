@@ -15,38 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.soulwing.snmp.provider.snmp4j;
+package org.soulwing.snmp;
 
-import org.soulwing.snmp.Mib;
-import org.soulwing.snmp.SnmpConfiguration;
-import org.soulwing.snmp.SnmpContext;
-import org.soulwing.snmp.SnmpTarget;
-import org.soulwing.snmp.provider.SnmpProvider;
+import java.util.Map;
 
 /**
- * An {@link SnmpProvider} based on SNMP4j.
+ * A object that represents an SNMP agent on a network.
  *
  * @author Carl Harris
  */
-public class Snmp4jProvider implements SnmpProvider {
+public interface SnmpTarget {
 
-  private static final String PROVIDER_NAME = "snmp4j";
+  /**
+   * Gets the network address of the targeted agent. 
+   * @return string representation of network address or hostname
+   */
+  String getAddress();
   
   /**
-   * {@inheritDoc}
+   * Gets the network port of the targeted agent.
+   * @return network port number
    */
-  @Override
-  public String getName() {
-    return PROVIDER_NAME;
-  }
-
+  int getPort();
+  
   /**
-   * {@inheritDoc}
+   * Gets a map of provider-specific properties for the target.
+   * @return target properties
    */
-  @Override
-  public SnmpContext newContext(SnmpTarget target, SnmpConfiguration config, 
-      Mib mib) {
-    return Snmp4jContextFactory.newContext(target, config, mib);
-  }
-
+  Map<String, Object> getProperties();
+  
 }

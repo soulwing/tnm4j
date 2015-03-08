@@ -15,38 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.soulwing.snmp.provider.snmp4j;
-
-import org.soulwing.snmp.Mib;
-import org.soulwing.snmp.SnmpConfiguration;
-import org.soulwing.snmp.SnmpContext;
-import org.soulwing.snmp.SnmpTarget;
-import org.soulwing.snmp.provider.SnmpProvider;
+package org.soulwing.snmp;
 
 /**
- * An {@link SnmpProvider} based on SNMP4j.
+ * An SNMPv2c {@link SnmpTarget}.
  *
  * @author Carl Harris
  */
-public class Snmp4jProvider implements SnmpProvider {
+public interface SnmpV2cTarget extends SnmpTarget {
 
-  private static final String PROVIDER_NAME = "snmp4j";
+  /**
+   * Gets the SNMPv2c community string.
+   * @return community string
+   */
+  String getCommunity();
   
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public String getName() {
-    return PROVIDER_NAME;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public SnmpContext newContext(SnmpTarget target, SnmpConfiguration config, 
-      Mib mib) {
-    return Snmp4jContextFactory.newContext(target, config, mib);
-  }
-
 }

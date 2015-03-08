@@ -18,8 +18,6 @@
 package org.soulwing.snmp.provider.snmp4j;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -31,159 +29,52 @@ import java.util.regex.Pattern;
 import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.Target;
-import org.snmp4j.TransportMapping;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.smi.AbstractVariable;
-import org.snmp4j.smi.Address;
 import org.snmp4j.smi.Counter64;
-import org.snmp4j.smi.GenericAddress;
 import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.UnsignedInteger32;
 import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
-import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.soulwing.snmp.Formatter;
 import org.soulwing.snmp.IndexExtractor;
-import org.soulwing.snmp.MIB;
-import org.soulwing.snmp.SNMPContext;
+import org.soulwing.snmp.Mib;
+import org.soulwing.snmp.SnmpConfiguration;
+import org.soulwing.snmp.SnmpContext;
+import org.soulwing.snmp.SnmpTarget;
 import org.soulwing.snmp.TimeoutException;
 import org.soulwing.snmp.TruncatedResponseException;
 import org.soulwing.snmp.Varbind;
 
-abstract class Snmp4jContext implements SNMPContext, VarbindFactory {
-
-  private static final int DEFAULT_PORT = 161;
-  
-  public static final int DEFAULT_MAX_REPETITIONS = 50;
+class Snmp4jContext implements SnmpContext, VarbindFactory {
 
   private static final Pattern OID_PATTERN = Pattern.compile("^[0-9.]*$");
   
-  private final MIB mib;
-  private String address;
-  private int port = -1;
-  private int retries = 3;
-  private long timeout = 10000;
-  
-  private Snmp snmp;
-  private Target target;
-  private boolean reconfigure = true;
-  private TransportMapping transportMapping;
+  private final SnmpTarget target;
+  private final SnmpConfiguration config;
+  private final Mib mib;
+  private final Snmp snmp;
+  private final Target snmp4jTarget;
+  private final PduFactory pduFactory;
 
-  private int walkMaxRepetitions = DEFAULT_MAX_REPETITIONS;
-  private boolean walkAllowsTruncatedRepetition;
   
-  public Snmp4jContext(MIB mib) {
+  public Snmp4jContext(SnmpTarget target, SnmpConfiguration config,
+      Mib mib, Snmp snmp, Target snmp4jTarget, PduFactory pduFactory) {
+    this.target = target;
+    this.config = config;
     this.mib = mib;
+    this.snmp = snmp;
+    this.snmp4jTarget = snmp4jTarget;
+    this.pduFactory = pduFactory;
   }
   
   /**
    * {@inheritDoc}
    */
   @Override
-  public String getAddress() {
-    return address;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void setAddress(String address) throws UnknownHostException {
-    InetAddress.getByName(address);
-    this.address = address;
-    reconfigure();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public int getPort() {
-    return port;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void setPort(int port) {
-    this.port = port;
-    reconfigure();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public int getRetries() {
-    return retries;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void setRetries(int retries) {
-    this.retries = retries;
-    reconfigure();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public long getTimeout() {
-    return timeout;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void setTimeout(long timeout) {
-    this.timeout = timeout;
-    reconfigure();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public int getWalkMaxRepetitions() {
-    return walkMaxRepetitions;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void setWalkMaxRepetitions(int value) {
-    this.walkMaxRepetitions = value;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public boolean isWalkAllowsTruncatedRepetition() {
-    return walkAllowsTruncatedRepetition;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void setWalkAllowsTruncatedRepetition(boolean state) {
-    this.walkAllowsTruncatedRepetition = state;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public MIB getMib() {
+  public Mib getMib() {
     return mib;
   }
 
@@ -191,55 +82,19 @@ abstract class Snmp4jContext implements SNMPContext, VarbindFactory {
    * {@inheritDoc}
    */
   @Override
-  public void dispose() {
-    try {
-      if (transportMapping != null) {
-        transportMapping.close();
-      }
-    }
-    catch (IOException ex) {
-      throw new RuntimeException(ex);
-    }
+  public SnmpTarget getTarget() {
+    return target;
   }
 
   /**
-   * Notifies the receiver that the context has been reconfigured.  The actual
-   * reconfiguration may be deferred until the next SNMP operation.
+   * {@inheritDoc}
    */
-  protected void reconfigure() {
-    this.reconfigure = true;
-  }
-  
-  private void configure() throws IOException {
-    if (!this.reconfigure) return;
-    
-    if (transportMapping == null) {
-      transportMapping = new DefaultUdpTransportMapping();
-      transportMapping.listen();
-    }
-
-    assertNotNull(getAddress(), "address is required");
-    StringBuilder sb = new StringBuilder();
-    sb.append("udp:");
-    sb.append(getAddress());
-    if (getPort() > 0) {
-      sb.append("/").append(getPort());
-    }
-    else {
-      sb.append("/").append(DEFAULT_PORT);
-    }
-    
-    Address targetAddress = GenericAddress.parse(sb.toString());
-    this.snmp = new Snmp(transportMapping);
-    this.target = createTarget();
-    this.target.setAddress(targetAddress);
-    this.target.setRetries(getRetries());
-    this.target.setTimeout(getTimeout());
-    this.reconfigure = false;
+  @Override
+  public void dispose() {
+    Snmp4jContextFactory.dispose(this);
   }
 
-  protected abstract Target createTarget();
-  
+    
   @Override
   public Varbind newVarbind(String oid, Object value) {
     OID resolvedOid = resolveOid(oid);
@@ -375,18 +230,16 @@ abstract class Snmp4jContext implements SNMPContext, VarbindFactory {
   }
 
   private PDU doGet(OID... oids) throws IOException {
-    configure();
     PDU request = createRequest(oids);
-    ResponseEvent event = snmp.get(request, target);
+    ResponseEvent event = snmp.get(request, snmp4jTarget);
     PDU response = event.getResponse();
     validateResponse(response);
     return response;
   }
   
   private PDU doGetNext(OID... oids) throws IOException {
-    configure();
     PDU request = createRequest(oids);
-    ResponseEvent event = snmp.getNext(request, target);
+    ResponseEvent event = snmp.getNext(request, snmp4jTarget);
     PDU response = event.getResponse();
     validateResponse(response);
     return response;
@@ -394,11 +247,10 @@ abstract class Snmp4jContext implements SNMPContext, VarbindFactory {
 
   private PDU doGetBulk(int nonRepeaters, int maxRepetitions, OID... oids)
       throws IOException {
-    configure();
     PDU request = createRequest(oids);
     request.setNonRepeaters(nonRepeaters);
     request.setMaxRepetitions(maxRepetitions);
-    ResponseEvent event = snmp.getBulk(request, target);
+    ResponseEvent event = snmp.getBulk(request, snmp4jTarget);
     PDU response = event.getResponse();
     validateResponse(response);
     return response;
@@ -417,7 +269,6 @@ abstract class Snmp4jContext implements SNMPContext, VarbindFactory {
   
   private List<Map<String, Varbind>> doBulkWalk(final int nonRepeaters, OID... oids) 
       throws IOException {
-    configure();
     OID[] nextOids = Arrays.copyOf(oids, oids.length);
     List<Map<String, Varbind>> results = new LinkedList<Map<String, Varbind>>();
 
@@ -430,7 +281,8 @@ abstract class Snmp4jContext implements SNMPContext, VarbindFactory {
   
     walk:
     while (true) {
-      PDU response = doGetBulk(nonRepeaters, getWalkMaxRepetitions(), nextOids);
+      PDU response = doGetBulk(nonRepeaters, config.getWalkMaxRepetitions(), 
+          nextOids);
       final int responseSize = response.size();
       
       if (responseSize <= nonRepeaters) {
@@ -439,7 +291,7 @@ abstract class Snmp4jContext implements SNMPContext, VarbindFactory {
       }
       
       if (nonRepeaters + repeaters >= responseSize) {
-        if (isWalkAllowsTruncatedRepetition()) {
+        if (config.isWalkAllowsTruncatedRepetition()) {
           repeaters = responseSize - nonRepeaters;
         }
         else {
@@ -494,14 +346,12 @@ abstract class Snmp4jContext implements SNMPContext, VarbindFactory {
   }
   
   private PDU createRequest(OID... oids) {
-    PDU pdu = createPDU();
+    PDU pdu = pduFactory.newPDU();
     for (OID oid : oids) {
       pdu.add(new VariableBinding(oid));
     }
     return pdu;
   }
-
-  protected abstract PDU createPDU();
 
   private OID[] resolveOids(List<String> oids) {
     OID[] resolvedOids = new OID[oids.size()];
@@ -580,12 +430,6 @@ abstract class Snmp4jContext implements SNMPContext, VarbindFactory {
     }
     catch (IllegalArgumentException ex) {
       return null;
-    }
-  }
-  
-  protected void assertNotNull(Object value, String message) {
-    if (value == null) {
-      throw new NullPointerException(message);
     }
   }
 
