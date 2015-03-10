@@ -17,7 +17,6 @@
  */
 package org.soulwing.snmp;
 
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,9 +28,9 @@ public class SnmpV2cDemo {
       Pattern.compile("Software \\(([^)]+)\\).*Version  *([^ ,]+) *");
   
   public static void main(String[] args) throws Exception {    
-    final String deviceName = "Foo";
-    final String ipAddress = "10.0.0.1";
-    final String community = "public";
+    final String deviceName = System.getProperty("agent.name", "foo");
+    final String ipAddress = System.getProperty("agent.ip", "10.0.0.1");
+    final String community = System.getProperty("agent.community", "public");
 
     SimpleSnmpV2cTarget target = new SimpleSnmpV2cTarget();
     target.setAddress(ipAddress);
@@ -42,21 +41,27 @@ public class SnmpV2cDemo {
     
     
     SnmpContext snmp = SnmpFactory.getInstance().newContext(target, mib);
+    SnmpCompletionService<VarbindCollection> completionService = 
+        new BlockingQueueSnmpCompletionService<VarbindCollection>();
     
-    List<Varbind> varbinds = snmp.getNext("sysDescr", "sysUpTime");
-    String sysDescr = varbinds.get(0).toString();
-    String sysUpTime = varbinds.get(1).toString();
-
-    Matcher matcher = CISCOIOS_PATTERN.matcher(sysDescr);
-    boolean found = matcher.find();
-    String software = found ? matcher.group(1) : NOT_AVAILABLE;
-    String version = found ? matcher.group(2) : NOT_AVAILABLE;
-    
-    System.out.format("%-12s %-15s %-24s %-24s %s\n", 
-        "Device Name", "IP Address", "Software", "Version" , "Up Time");
-    
-    System.out.format("%-12s %-15s %-24s %-24s %s\n", 
-        deviceName, ipAddress, software, version, sysUpTime);
+    completionService.submit(snmp.asyncGetNext("sysDescr", "sysUpTime"));
+    while (!completionService.isIdle()) {
+      SnmpEvent<VarbindCollection> event = completionService.take();
+      System.out.println(event.getContext().getTarget().getAddress());
+      VarbindCollection varbinds = event.getResponse().get();
+      String sysDescr = varbinds.get("sysDescr").toString();
+      String sysUpTime = varbinds.get("sysUpTime").toString();
+      Matcher matcher = CISCOIOS_PATTERN.matcher(sysDescr);
+      boolean found = matcher.find();
+      String software = found ? matcher.group(1) : NOT_AVAILABLE;
+      String version = found ? matcher.group(2) : NOT_AVAILABLE;
+      
+      System.out.format("%-12s %-15s %-24s %-24s %s\n", 
+          "Device Name", "IP Address", "Software", "Version" , "Up Time");
+      
+      System.out.format("%-12s %-15s %-24s %-24s %s\n", 
+          deviceName, ipAddress, software, version, sysUpTime);
+    }
   }
   
 }

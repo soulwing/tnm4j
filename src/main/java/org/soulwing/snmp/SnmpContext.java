@@ -31,7 +31,7 @@ package org.soulwing.snmp;
  *
  * @author Carl Harris
  */
-public interface SnmpContext extends SnmpOperations {
+public interface SnmpContext extends SnmpOperations, SnmpAsyncOperations {
 
   /**
    * Gets the target of this context.

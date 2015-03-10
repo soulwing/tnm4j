@@ -42,6 +42,7 @@ import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.MutableVarbindCollection;
 import org.soulwing.snmp.SnmpConfiguration;
 import org.soulwing.snmp.SnmpContext;
+import org.soulwing.snmp.SnmpOperation;
 import org.soulwing.snmp.SnmpTarget;
 import org.soulwing.snmp.TimeoutException;
 import org.soulwing.snmp.TruncatedResponseException;
@@ -84,6 +85,30 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
   @Override
   public SnmpTarget getTarget() {
     return target;
+  }
+
+  /**
+   * Gets the {@code snmp} property.
+   * @return property value
+   */
+  public Snmp getSnmp() {
+    return snmp;
+  }
+
+  /**
+   * Gets the {@code snmp4jTarget} property.
+   * @return property value
+   */
+  public Target getSnmp4jTarget() {
+    return snmp4jTarget;
+  }
+
+  /**
+   * Gets the {@code pduFactory} property.
+   * @return property value
+   */
+  public PduFactory getPduFactory() {
+    return pduFactory;
   }
 
   /**
@@ -137,8 +162,7 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    */
   @Override
   public VarbindCollection get(List<String> oids) throws IOException {
-    PDU response = doGet(resolveOids(oids));
-    return createList(response, oids);
+    return new GetOperation(this, resolveOids(oids)).invoke().get();
   }
 
   /**
@@ -156,8 +180,7 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
   @Override
   public VarbindCollection getNext(List<String> oids)
       throws IOException {
-    PDU response = doGetNext(resolveOids(oids));
-    return createList(response, oids);
+    return new GetNextOperation(this, resolveOids(oids)).invoke().get();
   }
 
   /**
@@ -175,9 +198,8 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
   @Override
   public VarbindCollection getBulk(int nonRepeaters, int maxRepetitions,
       List<String> oids) throws IOException {
-    PDU response = doGetBulk(nonRepeaters, maxRepetitions, 
-        resolveOids(oids));
-    return createList(response, oids);
+    return new GetBulkOperation(this, resolveOids(oids), nonRepeaters, 
+        maxRepetitions).invoke().get();
   }
 
   /**
@@ -238,22 +260,6 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
     return doBulkWalk(0, resolveOids(Arrays.asList(repeaters)));
   }
 
-  private PDU doGet(OID... oids) throws IOException {
-    PDU request = createRequest(oids);
-    ResponseEvent event = snmp.get(request, snmp4jTarget);
-    PDU response = event.getResponse();
-    validateResponse(response);
-    return response;
-  }
-  
-  private PDU doGetNext(OID... oids) throws IOException {
-    PDU request = createRequest(oids);
-    ResponseEvent event = snmp.getNext(request, snmp4jTarget);
-    PDU response = event.getResponse();
-    validateResponse(response);
-    return response;
-  }
-
   private PDU doGetBulk(int nonRepeaters, int maxRepetitions, OID... oids)
       throws IOException {
     PDU request = createRequest(oids);
@@ -263,6 +269,105 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
     PDU response = event.getResponse();
     validateResponse(response);
     return response;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public SnmpOperation<VarbindCollection> asyncGet(List<String> oids) {
+    return new GetOperation(this, resolveOids(oids));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public SnmpOperation<VarbindCollection> asyncGet(String... oids) {
+    return asyncGet(Arrays.asList(oids));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public SnmpOperation<VarbindCollection> asyncGetNext(List<String> oids) {
+    return new GetNextOperation(this, resolveOids(oids));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public SnmpOperation<VarbindCollection> asyncGetNext(String... oids) {
+    return asyncGetNext(Arrays.asList(oids));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public SnmpOperation<VarbindCollection> asyncGetBulk(int nonRepeaters, 
+      int maxRepetitions, List<String> oids) {
+    return new GetBulkOperation(this, resolveOids(oids), nonRepeaters, 
+        maxRepetitions);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public SnmpOperation<VarbindCollection> asyncGetBulk(int nonRepeaters,
+      int maxRepetitions, String... oids) {
+    return asyncGetBulk(nonRepeaters, maxRepetitions, Arrays.asList(oids));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public SnmpOperation<List<VarbindCollection>> asyncWalk(int nonRepeaters,
+      List<String> oids) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public SnmpOperation<List<VarbindCollection>> asyncWalk(int nonRepeaters,
+      String... oids) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public SnmpOperation<List<VarbindCollection>> asyncWalk(List<String> nonRepeaters,
+      List<String> repeaters) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public SnmpOperation<List<VarbindCollection>> asyncWalk(List<String> repeaters) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public SnmpOperation<List<VarbindCollection>> asyncWalk(String... repeaters) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
   private void validateResponse(PDU response) {
@@ -283,8 +388,7 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
 
     int repeaters = oids.length - nonRepeaters;
     if (repeaters == 0) {
-      PDU response = doGetNext(nextOids);
-      results.add(createRow(oids, response, nonRepeaters, 0, 0));
+      results.add(new GetNextOperation(this, oids).invoke().get());
       return results;
     }
   
@@ -354,7 +458,7 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
     return true;
   }
   
-  private PDU createRequest(OID... oids) {
+  protected PDU createRequest(OID... oids) {
     PDU pdu = pduFactory.newPDU();
     for (OID oid : oids) {
       pdu.add(new VariableBinding(oid));
@@ -362,7 +466,7 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
     return pdu;
   }
 
-  private OID[] resolveOids(List<String> oids) {
+  protected OID[] resolveOids(List<String> oids) {
     OID[] resolvedOids = new OID[oids.size()];
     for (int i = 0; i < oids.size(); i++) {
       resolvedOids[i] = resolveOid(oids.get(i));
@@ -370,21 +474,13 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
     return resolvedOids;
   }
 
-  private OID resolveOid(String oid) {
+  protected OID resolveOid(String oid) {
     if (!OID_PATTERN.matcher(oid).matches() && mib != null) {
       oid = mib.nameToOid(oid);
     }
     return new OID(oid);
   }
 
-  private VarbindCollection createList(PDU response, List<String> oids) {
-    MutableVarbindCollection results = new MutableVarbindCollection();
-    for (int i = 0; i < response.size(); i++) {
-      Varbind varbind = newVarbind(response.get(i));
-      results.add(i, objectNameToKey(varbind), varbind);
-    }
-    return results.immutableCopy();
-  }
 
   private VarbindCollection createRow(OID[] oids, PDU response, 
       int nonRepeaters, int repeaters, int offset) {
@@ -415,7 +511,7 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
         row.add(count + i, objectNameToKey(indexes[i]), indexes[i]);
       }            
     }
-    return row;
+    return row.immutableCopy();
   }
 
   private String objectNameToKey(Varbind v) {
