@@ -20,7 +20,7 @@ package org.soulwing.snmp;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SnmpV2cDemo {
+public class SnmpV2cAsyncDemo {
 
   private static final String NOT_AVAILABLE = "N/A";
   
@@ -38,22 +38,31 @@ public class SnmpV2cDemo {
     
     Mib mib = MibFactory.getInstance().newMIB();
     mib.load("RFC1213-MIB");
-        
+    
+    
     SnmpContext snmp = SnmpFactory.getInstance().newContext(target, mib);
-
-    VarbindCollection varbinds = snmp.getNext("sysDescr", "sysUpTime");
-    String sysDescr = varbinds.get("sysDescr").toString();
-    String sysUpTime = varbinds.get("sysUpTime").toString();
-    Matcher matcher = CISCOIOS_PATTERN.matcher(sysDescr);
-    boolean found = matcher.find();
-    String software = found ? matcher.group(1) : NOT_AVAILABLE;
-    String version = found ? matcher.group(2) : NOT_AVAILABLE;
     
-    System.out.format("%-12s %-15s %-24s %-24s %s\n", 
-        "Device Name", "IP Address", "Software", "Version" , "Up Time");
+    SnmpCompletionService<VarbindCollection> completionService = 
+        new BlockingQueueSnmpCompletionService<VarbindCollection>();
     
-    System.out.format("%-12s %-15s %-24s %-24s %s\n", 
-        deviceName, ipAddress, software, version, sysUpTime);
+    completionService.submit(snmp.asyncGetNext("sysDescr", "sysUpTime"));
+    while (!completionService.isIdle()) {
+      SnmpEvent<VarbindCollection> event = completionService.take();
+      System.out.println(event.getContext().getTarget().getAddress());
+      VarbindCollection varbinds = event.getResponse().get();
+      String sysDescr = varbinds.get("sysDescr").toString();
+      String sysUpTime = varbinds.get("sysUpTime").toString();
+      Matcher matcher = CISCOIOS_PATTERN.matcher(sysDescr);
+      boolean found = matcher.find();
+      String software = found ? matcher.group(1) : NOT_AVAILABLE;
+      String version = found ? matcher.group(2) : NOT_AVAILABLE;
+      
+      System.out.format("%-12s %-15s %-24s %-24s %s\n", 
+          "Device Name", "IP Address", "Software", "Version" , "Up Time");
+      
+      System.out.format("%-12s %-15s %-24s %-24s %s\n", 
+          deviceName, ipAddress, software, version, sysUpTime);
+    }
   }
   
 }
