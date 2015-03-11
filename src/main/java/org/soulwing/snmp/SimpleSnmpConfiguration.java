@@ -17,6 +17,9 @@
  */
 package org.soulwing.snmp;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * An {@link SnmpConfiguration} implemented as a simple configurable 
  * bean.
@@ -34,6 +37,8 @@ public class SimpleSnmpConfiguration implements SnmpConfiguration {
   private int walkMaxRepetitions = DEFAULT_WALK_MAX_REPETITIONS;
   
   private boolean walkAllowsTruncatedRepetition;
+  
+  private ExecutorService executorService = Executors.newCachedThreadPool();
   
   /**
    * {@inheritDoc}
@@ -98,6 +103,22 @@ public class SimpleSnmpConfiguration implements SnmpConfiguration {
   public void setWalkAllowsTruncatedRepetition(
       boolean walkAllowsTruncatedRepetition) {
     this.walkAllowsTruncatedRepetition = walkAllowsTruncatedRepetition;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public ExecutorService getExecutorService() {
+    return executorService;
+  }
+
+  /**
+   * Sets the {@code executorService} property.
+   * @param executorService the value to set
+   */
+  public void setExecutorService(ExecutorService executorService) {
+    this.executorService = executorService;
   }
 
   /**

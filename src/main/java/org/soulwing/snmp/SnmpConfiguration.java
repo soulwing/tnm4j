@@ -17,6 +17,8 @@
  */
 package org.soulwing.snmp;
 
+import java.util.concurrent.ExecutorService;
+
 /**
  * A configuration for an {@link SnmpContext}.
  *
@@ -72,6 +74,13 @@ public interface SnmpConfiguration extends Cloneable {
    * @return flag state
    */
   boolean isWalkAllowsTruncatedRepetition();
+  
+  /**
+   * Gets an {@link ExecutorService} that will be used to run asynchronous
+   * tasks for contexts associated with this configuration.
+   * @return executor service
+   */
+  ExecutorService getExecutorService();
   
   /**
    * Creates a clone of this configuration.

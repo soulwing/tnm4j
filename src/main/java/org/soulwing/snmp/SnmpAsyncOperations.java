@@ -18,7 +18,6 @@
 
 package org.soulwing.snmp;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -29,39 +28,39 @@ import java.util.List;
 public interface SnmpAsyncOperations {
 
   /**
-   * Performs an SNMP GET operation.
+   * Creates an SNMP GET operation.
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch
-   * @return a future that can be used to obtain the retrieved varbinds
+   * @return an operation that can be invoked to obtain a response
    */
   SnmpOperation<VarbindCollection> asyncGet(List<String> oids);
 
   /**
-   * Performs an SNMP GET operation.
+   * Creates an SNMP GET operation.
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch
-   * @return a future that can be used to obtain the retrieved varbinds
+   * @return an operation that can be invoked to obtain a response
    */
   SnmpOperation<VarbindCollection> asyncGet(String... oids);
 
   /**
-   * Performs an SNMP GETNEXT operation.
+   * Creates an SNMP GETNEXT operation.
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch
-   * @return a future that can be used to obtain the retrieved varbinds
+   * @return an operation that can be invoked to obtain a response
    */
   SnmpOperation<VarbindCollection> asyncGetNext(List<String> oids);
 
   /**
-   * Performs an SNMP GETNEXT operation.
+   * Creates an SNMP GETNEXT operation.
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch
-   * @return a future that can be used to obtain the retrieved varbinds
+   * @return an operation that can be invoked to obtain a response
    */
   SnmpOperation<VarbindCollection> asyncGetNext(String... oids);
 
   /**
-   * Performs an SNMP GETBULK operation.
+   * Creates an SNMP GETBULK operation.
    * @param nonRepeaters number of non-repeating objects at the beginning of
    *    {@code oids}.
    * @param maxRepetitions maximum number of repetitions to retrieve for the
@@ -69,13 +68,13 @@ public interface SnmpAsyncOperations {
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch; the first {@code nonRepeaters} identifiers in the list
    *    are assumed to be non-repeating objects
-   * @return a future that can be used to obtain the retrieved varbinds
+   * @return an operation that can be invoked to obtain a response
    */
   SnmpOperation<VarbindCollection> asyncGetBulk(int nonRepeaters, int maxRepetitions, 
       List<String> oids);
 
   /**
-   * Performs an SNMP GETBULK operation.
+   * Create an SNMP GETBULK operation.
    * @param nonRepeaters number of non-repeating objects at the beginning of
    *   {@code oids}.
    * @param maxRepetitions maximum number of repetitions to retrieve for the
@@ -83,31 +82,26 @@ public interface SnmpAsyncOperations {
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch; the first {@code nonRepeaters} identifiers in the 
    *    list are assumed to be for non-repeating objects
-   * @return a future that can be used to obtain the retrieved varbinds
+   * @return an operation that can be invoked to obtain a response
    */
   SnmpOperation<VarbindCollection> asyncGetBulk(int nonRepeaters, int maxRepetitions, 
       String... oids);
 
   /**
-   * Performs a walk of a MIB conceptual table.
+   * Creates a walker for a conceptual table.
    * <p>
-   * This is a high level operation that can be used to retrieve all 
-   * rows of a conceptual table.
-   * @param nonRepeaters number of non-repeating objects at the beginning
    *   of {@code oids}
    * @param oids MIB names or dotted-decimal object identifiers; the first 
    *   {@code nonRepeaters} identifiers in the list are assumed to be for 
    *   non-repeating objects
-   * @return a future that can be used to obtain the list of table rows
+   * @return a walker that can be used to obtain rows from the table
    */
-  SnmpOperation<List<VarbindCollection>> asyncWalk(int nonRepeaters, 
+  SnmpAsyncWalker<VarbindCollection> asyncWalk(int nonRepeaters, 
       List<String> oids);
 
   /**
-   * Performs a walk of a MIB conceptual table.
+   * Creates a walker for a conceptual table.
    * <p>
-   * This is a high level operation that can be used to retrieve all 
-   * rows of a conceptual table.
    * @param nonRepeaters number of non-repeating objects at the beginning
    *   of {@code oids}
    * @param oids MIB names or dotted-decimal object identifiers; the first 
@@ -115,10 +109,10 @@ public interface SnmpAsyncOperations {
    *   non-repeating objects
    * @return a future that can be used to obtain the list of table rows
    */
-  SnmpOperation<List<VarbindCollection>> asyncWalk(int nonRepeaters, String... oids);
+  SnmpAsyncWalker<VarbindCollection> asyncWalk(int nonRepeaters, String... oids);
 
   /**
-   * Performs a walk of a MIB conceptual table.
+   * Creates a walker for a conceptual table.
    * <p>
    * This is a high level operation that can be used to retrieve all 
    * rows of a conceptual table.
@@ -128,30 +122,29 @@ public interface SnmpAsyncOperations {
    *   for the table column elements to retrieve
    * @return a future that can be used to obtain the list of table rows
    */
-  SnmpOperation<List<VarbindCollection>> asyncWalk(List<String> nonRepeaters, 
+  SnmpAsyncWalker<VarbindCollection> asyncWalk(List<String> nonRepeaters, 
       List<String> repeaters);
 
   /**
-   * Performs a walk of a MIB conceptual table.
+   * Creates a walker for a conceptual table.
    * <p>
    * This is a high level operation that can be used to retrieve all 
    * rows of a conceptual table.
    * @param repeaters MIB names or dotted-decimal object identifiers 
    *   for the table column elements to retrieve
-   * @return a future that can be used to obtain the list of table rows
-   * @throws IOException
+   * @return a walker that can be used to obtain rows from the table
    */
-  SnmpOperation<List<VarbindCollection>> asyncWalk(List<String> repeaters);
+  SnmpAsyncWalker<VarbindCollection> asyncWalk(List<String> repeaters);
 
   /**
-   * Performs a walk of a MIB conceptual table.
+   * Creates a walker for a conceptual table.
    * <p>
    * This is a high level operation that can be used to retrieve all 
    * rows of a conceptual table.
    * @param repeaters MIB names or dotted-decimal object identifiers 
    *   for the table column elements to retrieve
-   * @return a future that can be used to obtain the list of table rows
+   * @return a walker that can be used to obtain rows from the table
    */
-  SnmpOperation<List<VarbindCollection>> asyncWalk(String... repeaters);
+  SnmpAsyncWalker<VarbindCollection> asyncWalk(String... repeaters);
 
 }

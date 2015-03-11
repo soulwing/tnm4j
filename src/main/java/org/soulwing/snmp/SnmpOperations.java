@@ -113,7 +113,7 @@ public interface SnmpOperations {
    *    same order and with the same keys as the requested objects)
    * @throws IOException
    */
-  List<VarbindCollection> walk(int nonRepeaters, List<String> oids)
+  SnmpWalker<VarbindCollection> walk(int nonRepeaters, List<String> oids)
       throws IOException;
 
   /**
@@ -130,7 +130,7 @@ public interface SnmpOperations {
    *    same order and with the same keys as the requested objects)
    * @throws IOException
    */
-  List<VarbindCollection> walk(int nonRepeaters, String... oids)
+  SnmpWalker<VarbindCollection> walk(int nonRepeaters, String... oids)
       throws IOException;
 
   /**
@@ -146,7 +146,7 @@ public interface SnmpOperations {
    *    same order and with the same keys as the requested objects)
    * @throws IOException
    */
-  List<VarbindCollection> walk(List<String> nonRepeaters, 
+  SnmpWalker<VarbindCollection> walk(List<String> nonRepeaters, 
       List<String> repeaters) throws IOException;
 
   /**
@@ -160,7 +160,8 @@ public interface SnmpOperations {
    *    same order and with the same keys as the requested objects)
    * @throws IOException
    */
-  List<VarbindCollection> walk(List<String> repeaters) throws IOException;
+  SnmpWalker<VarbindCollection> walk(List<String> repeaters) 
+      throws IOException;
 
   /**
    * Performs a walk of a MIB conceptual table.
@@ -173,6 +174,6 @@ public interface SnmpOperations {
    *    same order and with the same keys as the requested objects)
    * @throws IOException
    */
-  List<VarbindCollection> walk(String... repeaters) throws IOException;
+  SnmpWalker<VarbindCollection> walk(String... repeaters) throws IOException;
 
 }

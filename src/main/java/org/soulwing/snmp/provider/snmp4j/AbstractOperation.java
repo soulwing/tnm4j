@@ -42,7 +42,7 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
     ResponseListener {
 
   protected final Snmp4jContext context;
-  private final OID[] oids;  
+  protected final OID[] oids;  
     
   /**
    * Constructs a new instance.
@@ -123,7 +123,7 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
     return pdu;
   }
 
-  private void validateResponse(PDU response) {
+  protected void validateResponse(PDU response) {
     if (response == null) {
       throw new TimeoutException();
     }
