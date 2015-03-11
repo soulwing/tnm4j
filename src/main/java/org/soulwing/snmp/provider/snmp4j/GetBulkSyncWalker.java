@@ -20,11 +20,12 @@ package org.soulwing.snmp.provider.snmp4j;
 
 import org.snmp4j.smi.OID;
 import org.soulwing.snmp.SnmpResponse;
+import org.soulwing.snmp.SnmpWalker;
 import org.soulwing.snmp.VarbindCollection;
 import org.soulwing.snmp.WouldBlockException;
 
 /**
- * DESCRIBE THE TYPE HERE.
+ * An {@link SnmpWalker} implemented using an SNMP GETBULK operation.
  *
  * @author Carl Harris
  */
@@ -42,6 +43,9 @@ class GetBulkSyncWalker extends GetBulkAsyncWalker {
     super(context, oids, nonRepeaters, maxRepetitions);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public SnmpResponse<VarbindCollection> next() {
     try {

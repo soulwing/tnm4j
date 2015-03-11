@@ -34,7 +34,7 @@ import org.soulwing.snmp.TruncatedResponseException;
 import org.soulwing.snmp.WouldBlockException;
 
 /**
- * An {@link SnmpAsyncWalker} implementation for the SNMP4j provider.
+ * An abstract base {@link SnmpAsyncWalker} implementations.
  *
  * @author Carl Harris
  */

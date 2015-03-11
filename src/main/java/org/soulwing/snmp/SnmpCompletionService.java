@@ -27,23 +27,23 @@ package org.soulwing.snmp;
 public interface SnmpCompletionService<V> {
 
   /**
-   * Tests whether this completion service has a remaining response that has 
+   * Tests whether this completion service has a remaining event that has 
    * not yet been retrieved.
-   * @return {@code true} if an incomplete response remains
+   * @return {@code true} if an incomplete response event remains
    */
   boolean isIdle();
   
   /**
-   * Gets a completed response if one is available.
-   * @return completed response or {@code null} if none is available
+   * Gets an event representing a completed response if one is available.
+   * @return completed response event or {@code null} if none is available
    */
   SnmpEvent<V> poll();
   
   /**
-   * Gets a completed response waiting as long as the specified duration for
+   * Gets a response event waiting as long as the specified duration for
    * one to become available.
    * @param timeout timeout in milliseconds
-   * @return completed response or {@code null} if one did not become available
+   * @return response event or {@code null} if one did not become available
    *    within the specified time interval
    * @throws InterruptedException if the calling thread is interrupted 
    *    while waiting

@@ -24,11 +24,12 @@ import org.snmp4j.PDU;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.smi.OID;
 import org.soulwing.snmp.MutableVarbindCollection;
+import org.soulwing.snmp.SnmpAsyncWalker;
 import org.soulwing.snmp.Varbind;
 import org.soulwing.snmp.VarbindCollection;
 
 /**
- * DESCRIBE THE TYPE HERE.
+ * An {@link SnmpAsyncWalker} implemented using an SNMP GETBULK operation.
  *
  * @author Carl Harris
  */
