@@ -17,14 +17,13 @@
  */
 package org.soulwing.snmp;
 
-import java.util.concurrent.ExecutorService;
 
 /**
  * A configuration for an {@link SnmpContext}.
  *
  * @author Carl Harris
  */
-public interface SnmpConfiguration extends Cloneable {
+public interface SnmpTargetConfig extends Cloneable {
 
   /**
    * Gets the number of retries for an SNMP operation when no response
@@ -76,16 +75,9 @@ public interface SnmpConfiguration extends Cloneable {
   boolean isWalkAllowsTruncatedRepetition();
   
   /**
-   * Gets an {@link ExecutorService} that will be used to run asynchronous
-   * tasks for contexts associated with this configuration.
-   * @return executor service
-   */
-  ExecutorService getExecutorService();
-  
-  /**
    * Creates a clone of this configuration.
    * @return configuration clone
    */
-  SnmpConfiguration clone();
+  SnmpTargetConfig clone();
   
 }

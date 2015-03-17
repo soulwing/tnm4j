@@ -17,6 +17,10 @@
  */
 package org.soulwing.snmp;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 
 public class SnmpV2cAsyncWalkDemo {
 
@@ -33,19 +37,29 @@ public class SnmpV2cAsyncWalkDemo {
     mib.load("RFC1213-MIB");
     mib.load("IF-MIB");
         
-    SnmpContext snmp = SnmpFactory.getInstance().newContext(target, mib);
+    SnmpFactory factory = SnmpFactory.getInstance();
+    SnmpContext snmp = factory.newContext(target, mib);
 
     SnmpAsyncWalker<VarbindCollection> walker = snmp.asyncWalk(
-        1, "sysUpTime", "ifIndex", "ifName", "ifInOctets", "ifHCInOctets");
+        1, "sysUpTime", "ifIndex", "ifName", "ifOperStatus", "ifAdminStatus",
+        "ifHCInOctets", "ifHCOutOctets");
     
     WalkCallback callback = new WalkCallback();
     walker.invoke(callback);
-    Thread.sleep(Long.MAX_VALUE);
+    callback.awaitShutdown();
+    System.out.println("done");
+    snmp.close();
+    factory.close();
   }
 
   static class WalkCallback implements
       SnmpCallback<SnmpAsyncWalker<VarbindCollection>> {
 
+    private final Lock lock = new ReentrantLock();
+    private final Condition shutdownCondition = lock.newCondition();
+    
+    private boolean shutdown;
+    
     /**
      * {@inheritDoc}
      */
@@ -56,18 +70,45 @@ public class SnmpV2cAsyncWalkDemo {
       try {
         VarbindCollection row = walker.next().get();
         while (row != null) { 
-          System.out.format("%s %d %s %s %s\n", 
+          System.out.format("%s %d %s %s %s %s %s\n", 
               row.get("sysUpTime"), 
               row.get("ifIndex").toInt(), 
               row.get("ifName"),
-              row.get("ifInOctets"), 
-              row.get("ifHCInOctets"));
+              row.get("ifAdminStatus"),
+              row.get("ifOperStatus"),
+              row.get("ifHCInOctets").toLong(), 
+              row.get("ifHCOutOctets").toLong());
           row = walker.next().get();
         }
-        return;
+        signalShutdown();
       }
       catch (WouldBlockException ex) {
         walker.invoke(this);
+      }
+    }
+
+    private void signalShutdown() {
+      lock.lock();
+      try {
+        System.out.println("shut down");
+        shutdown = true;
+        shutdownCondition.signalAll();
+      }
+      finally {
+        lock.unlock();
+      }
+    }
+    
+    public void awaitShutdown() throws InterruptedException {
+      lock.lock();
+      try {
+        while (!shutdown) {
+          shutdownCondition.await();
+        } 
+        System.out.println("shutdown signaled");
+      }
+      finally {
+        lock.unlock();
       }
     }
     

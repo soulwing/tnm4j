@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.snmp4j.SNMP4JSettings;
 import org.snmp4j.Snmp;
 import org.snmp4j.Target;
 import org.snmp4j.TransportMapping;
@@ -30,8 +31,9 @@ import org.snmp4j.smi.Address;
 import org.snmp4j.smi.GenericAddress;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.soulwing.snmp.Mib;
-import org.soulwing.snmp.SnmpConfiguration;
+import org.soulwing.snmp.SnmpTargetConfig;
 import org.soulwing.snmp.SnmpContext;
+import org.soulwing.snmp.SnmpFactory;
 import org.soulwing.snmp.SnmpTarget;
 
 /**
@@ -57,6 +59,15 @@ class Snmp4jContextFactory {
   private static volatile Snmp snmp;
   private static volatile TransportMapping<?> transportMapping;
   
+  static {
+    SNMP4JSettings.setThreadFactory(
+        new Snmp4jThreadFactory(
+            SnmpFactory.getInstance().getThreadFactory()));
+    SNMP4JSettings.setTimerFactory(
+        new ScheduledExecutorServiceTimerFactory(
+            SnmpFactory.getInstance().getScheduledExecutorService()));
+  }
+  
   /**
    * Creates a new context for the given target, configuration, and MIB.
    * @param target target agent
@@ -65,7 +76,7 @@ class Snmp4jContextFactory {
    * @return new context 
    */
   public static Snmp4jContext newContext(SnmpTarget target, 
-      SnmpConfiguration config, Mib mib) {
+      SnmpTargetConfig config, Mib mib) {
     try {
       Target snmp4jTarget = createTarget(target);
       PduFactory pduFactory = createPduFactory(target);
@@ -86,7 +97,7 @@ class Snmp4jContextFactory {
       lock.lock();
       try {
         if (snmp == null) {         
-          snmp = new Snmp(getTransportMapping());
+          snmp = new Snmp(getTransportMapping());        
         }
       }
       finally {

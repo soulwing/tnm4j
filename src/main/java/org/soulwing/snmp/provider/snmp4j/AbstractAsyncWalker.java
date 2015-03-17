@@ -28,6 +28,7 @@ import org.soulwing.snmp.SnmpAsyncWalker;
 import org.soulwing.snmp.SnmpCallback;
 import org.soulwing.snmp.SnmpEvent;
 import org.soulwing.snmp.SnmpException;
+import org.soulwing.snmp.SnmpFactory;
 import org.soulwing.snmp.SnmpResponse;
 import org.soulwing.snmp.TimeoutException;
 import org.soulwing.snmp.TruncatedResponseException;
@@ -75,18 +76,19 @@ abstract class AbstractAsyncWalker<V>
   public void onResponse(ResponseEvent event) {
     final SnmpCallback<SnmpAsyncWalker<V>> callback = 
         (SnmpCallback<SnmpAsyncWalker<V>>) event.getUserObject();
-    this.response = event.getResponse();
+
     this.offset = 0;
 
     try {
-      validateResponse(this.response);
+      validateResponse(event);
+      this.response = event.getResponse();
     }
     catch (RuntimeException ex) {
       callback.onSnmpResponse(new SnmpEvent<SnmpAsyncWalker<V>>(context,
           new ExceptionResponse<SnmpAsyncWalker<V>>(ex)));
     }
 
-    context.getConfig().getExecutorService().execute(new Runnable() {
+    SnmpFactory.getInstance().getScheduledExecutorService().execute(new Runnable() {
       @Override
       public void run() {
         callback.onSnmpResponse(new SnmpEvent<SnmpAsyncWalker<V>>(context,
@@ -104,9 +106,8 @@ abstract class AbstractAsyncWalker<V>
     PDU request = createRequest(oids);
     try {
       ResponseEvent event = doInvoke(request);
-      PDU response = event.getResponse();
-      validateResponse(response);
-      this.response = response;
+      validateResponse(event);
+      this.response = event.getResponse();
       this.offset = 0;
       return new SuccessResponse<SnmpAsyncWalker<V>>(this);
     }
@@ -122,8 +123,17 @@ abstract class AbstractAsyncWalker<V>
    * {@inheritDoc}
    */
   @Override
-  protected void validateResponse(PDU response) {
-    super.validateResponse(response);
+  public void invoke(SnmpCallback<SnmpAsyncWalker<V>> callback) {
+    super.invoke(callback);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  protected void validateResponse(ResponseEvent event) {
+    super.validateResponse(event);
+    PDU response = event.getResponse();
     final int responseSize = response.size();
     
     if (responseSize <= nonRepeaters) {

@@ -17,6 +17,8 @@
  */
 package org.soulwing.snmp;
 
+import java.io.Closeable;
+
 
 /**
  * A context for performing SNMP operations with an SNMP agent.
@@ -26,12 +28,13 @@ package org.soulwing.snmp;
  * provider object is shared by many context objects.
  * <p>
  * A context is obtained from an {@link SnmpFactory}.  When the context
- * is no longer used, the {@link SnmpContext#dispose()} method should be
+ * is no longer used, the {@link SnmpContext#close()} method should be
  * called to release any provider resources associated with the context.
  *
  * @author Carl Harris
  */
-public interface SnmpContext extends SnmpOperations, SnmpAsyncOperations {
+public interface SnmpContext extends SnmpOperations, SnmpAsyncOperations,
+    Closeable {
 
   /**
    * Gets the target of this context.
@@ -46,10 +49,10 @@ public interface SnmpContext extends SnmpOperations, SnmpAsyncOperations {
   Mib getMib();
 
   /**
-   * Disposes of this context, releasing any provider resources associated
+   * Closes this context, releasing any provider resources associated
    * with it.
    */
-  void dispose();
+  void close();
   
   /**
    * Constructs a new {@link Varbind} suitable for use in operations

@@ -17,28 +17,24 @@
  */
 package org.soulwing.snmp;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
- * An {@link SnmpConfiguration} implemented as a simple configurable 
+ * An {@link SnmpTargetConfig} implemented as a simple configurable 
  * bean.
  *
  * @author Carl Harris
  */
-public class SimpleSnmpConfiguration implements SnmpConfiguration {
+public class SimpleSnmpTargetConfig implements SnmpTargetConfig {
 
   public static final int DEFAULT_RETRIES = 3;
   public static final long DEFAULT_TIMEOUT = 10000L;
-  public static final int DEFAULT_WALK_MAX_REPETITIONS = 50;
+  public static final int DEFAULT_WALK_MAX_REPETITIONS = 20;
   
   private int retries = DEFAULT_RETRIES;
   private long timeout = DEFAULT_TIMEOUT;
   private int walkMaxRepetitions = DEFAULT_WALK_MAX_REPETITIONS;
   
   private boolean walkAllowsTruncatedRepetition;
-  
-  private ExecutorService executorService = Executors.newCachedThreadPool();
   
   /**
    * {@inheritDoc}
@@ -109,25 +105,9 @@ public class SimpleSnmpConfiguration implements SnmpConfiguration {
    * {@inheritDoc}
    */
   @Override
-  public ExecutorService getExecutorService() {
-    return executorService;
-  }
-
-  /**
-   * Sets the {@code executorService} property.
-   * @param executorService the value to set
-   */
-  public void setExecutorService(ExecutorService executorService) {
-    this.executorService = executorService;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public SnmpConfiguration clone() {
+  public SnmpTargetConfig clone() {
     try {
-      return (SnmpConfiguration) super.clone();
+      return (SnmpTargetConfig) super.clone();
     }
     catch (CloneNotSupportedException ex) {
       throw new RuntimeException(ex);

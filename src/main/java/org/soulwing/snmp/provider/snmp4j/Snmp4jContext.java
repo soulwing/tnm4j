@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import org.snmp4j.Snmp;
@@ -37,10 +38,10 @@ import org.soulwing.snmp.Formatter;
 import org.soulwing.snmp.IndexExtractor;
 import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.SnmpAsyncWalker;
-import org.soulwing.snmp.SnmpConfiguration;
 import org.soulwing.snmp.SnmpContext;
 import org.soulwing.snmp.SnmpOperation;
 import org.soulwing.snmp.SnmpTarget;
+import org.soulwing.snmp.SnmpTargetConfig;
 import org.soulwing.snmp.SnmpWalker;
 import org.soulwing.snmp.Varbind;
 import org.soulwing.snmp.VarbindCollection;
@@ -48,16 +49,18 @@ import org.soulwing.snmp.VarbindCollection;
 class Snmp4jContext implements SnmpContext, VarbindFactory {
 
   private static final Pattern OID_PATTERN = Pattern.compile("^[0-9.]*$");
-  
+
+  private final AtomicBoolean closed = new AtomicBoolean();
+
   private final SnmpTarget target;
-  private final SnmpConfiguration config;
+  private final SnmpTargetConfig config;
   private final Mib mib;
   private final Snmp snmp;
   private final Target snmp4jTarget;
   private final PduFactory pduFactory;
 
   
-  public Snmp4jContext(SnmpTarget target, SnmpConfiguration config,
+  public Snmp4jContext(SnmpTarget target, SnmpTargetConfig config,
       Mib mib, Snmp snmp, Target snmp4jTarget, PduFactory pduFactory) {
     this.target = target;
     this.config = config;
@@ -111,7 +114,7 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    * Gets the {@code config} property.
    * @return property value
    */
-  public SnmpConfiguration getConfig() {
+  public SnmpTargetConfig getConfig() {
     return config;
   }
 
@@ -119,8 +122,18 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    * {@inheritDoc}
    */
   @Override
-  public void dispose() {
+  public void close() {
+    if (!closed.compareAndSet(false, true)) return;
     Snmp4jContextFactory.dispose(this);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  protected void finalize() throws Throwable {
+    close();
+    super.finalize();
   }
 
   /**

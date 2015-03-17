@@ -19,6 +19,14 @@ package org.soulwing.snmp;
 
 import java.util.Iterator;
 import java.util.ServiceLoader;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.soulwing.snmp.provider.SnmpProvider;
 
@@ -29,15 +37,27 @@ import org.soulwing.snmp.provider.SnmpProvider;
  */
 public class SnmpFactory {
 
+  private static volatile SnmpFactory instance;
+
   private final ServiceLoader<SnmpProvider> loader = 
       ServiceLoader.load(SnmpProvider.class);
   
-  private SimpleSnmpConfiguration defaultConfiguration = 
-      new SimpleSnmpConfiguration();
+  private final AtomicBoolean closed = new AtomicBoolean();
   
-  private static volatile SnmpFactory instance;
+  private final ExecutorService executorService;
+  private final ScheduledExecutorService scheduledExecutorService;
+  private final ThreadFactory threadFactory;
+
+  private SimpleSnmpTargetConfig defaultTargetConfig = 
+      new SimpleSnmpTargetConfig();
   
-  private SnmpFactory() {    
+
+  private SnmpFactory(ExecutorService executorService,
+      ScheduledExecutorService scheduledExecutorService,
+      ThreadFactory threadFactory) {
+    this.executorService = executorService;
+    this.scheduledExecutorService = scheduledExecutorService;
+    this.threadFactory = threadFactory;
   }
   
   /**
@@ -45,32 +65,131 @@ public class SnmpFactory {
    * @return factory object
    */
   public static SnmpFactory getInstance() {
+    return getInstance(
+        new SnmpFactoryConfig(), new TrivialThreadFactory());
+  }
+
+  /**
+   * Gets the singleton factory instance.
+   * @param threadFactory thread factory that will be used to create threads
+   *    as needed for components produced by this factory
+   * @return factory object
+   */
+  public static SnmpFactory getInstance(ThreadFactory threadFactory) {
+    return getInstance(
+        new SnmpFactoryConfig(), new TrivialThreadFactory());
+  }
+  
+  /**
+   * Gets the singleton factory instance.
+   * @param config factory configuration
+   * @param threadFactory thread factory that will be used to create threads
+   *    as needed for components produced by this factory
+   * @return factory object
+   */
+  public static SnmpFactory getInstance(SnmpFactoryConfig config, 
+      ThreadFactory threadFactory) {
     if (instance == null) {
       synchronized (SnmpFactory.class) {
         if (instance == null) {
-          instance= new SnmpFactory();
+          ExecutorService executorService = new ThreadPoolExecutor(
+              config.getWorkerPoolSize(), config.getWorkerPoolSize(), 0L,
+              TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
+              threadFactory);
+          ScheduledExecutorService scheduledExecutorService =
+              new ScheduledThreadPoolExecutor(
+                  config.getScheduledWorkerPoolSize(), threadFactory);
+          instance = new SnmpFactory(executorService, scheduledExecutorService,
+              threadFactory);
         }
       }
     }
     return instance;
   }
+
+  private static class TrivialThreadFactory implements ThreadFactory {    
+    public Thread newThread(Runnable r) {
+      return new Thread(r);
+    }
+  }
   
+  /**
+   * Gets the executor service that should be used for short-lived tasks.
+   * @return executor service
+   */
+  public ExecutorService getExecutorService() {
+    assertNotClosed();
+    return executorService;
+  }
+
+  /**
+   * Gets the executor service that should be used for scheduled tasks.
+   * @return executor service
+   */
+  public ScheduledExecutorService getScheduledExecutorService() {
+    assertNotClosed();
+    return scheduledExecutorService;
+  }
+  
+  /**
+   * Gets the thread factory that should be used to create threads for long
+   * running tasks.
+   * @return thread factory
+   */
+  public ThreadFactory getThreadFactory() {
+    assertNotClosed();
+    return threadFactory;
+  }
+
+  /**
+   * Closes this factory, releasing any resources it might be holding.
+   * @throws InterruptedException
+   */
+  public void close() throws InterruptedException {
+    if (!closed.compareAndSet(false, true)) return;
+    shutDownExecutor(executorService);
+    shutDownExecutor(scheduledExecutorService);
+    if (Thread.interrupted()) {
+      throw new InterruptedException();
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  protected void finalize() throws Throwable {
+    close();
+    super.finalize();
+  }
+
+  private void shutDownExecutor(ExecutorService executorService) {
+    try {
+      executorService.shutdownNow();
+      executorService.awaitTermination(defaultTargetConfig.getTimeout(),
+          TimeUnit.MILLISECONDS);
+    }
+    catch (InterruptedException ex) {
+      Thread.currentThread().interrupt();
+    }
+  }
+
   /**
    * Gets the default configuration that will be used for new context
    * instances created by this factory.
    * @return configuration
    */
-  public SimpleSnmpConfiguration getDefaultConfiguration() {
-    return defaultConfiguration;
+  public SimpleSnmpTargetConfig getDefaultTargetConfig() {
+    return defaultTargetConfig;
   }
 
   /**
    * Sets the default configuration that will be used for new context
    * instances created by this factory.
-   * @param defaultConfiguration the value to set
+   * @param defaultTargetConfig the value to set
    */
-  public void setDefaultConfiguration(SimpleSnmpConfiguration config) {
-    this.defaultConfiguration = config;
+  public void setDefaultTargetConfig(SimpleSnmpTargetConfig config) {
+    this.defaultTargetConfig = config;
   }
 
   /**
@@ -81,7 +200,7 @@ public class SnmpFactory {
    */
   public SnmpContext newContext(SnmpTarget target) {
     return newContext(target, MibFactory.getInstance().newMIB(), 
-        defaultConfiguration, null);
+        defaultTargetConfig, null);
   }
 
   /**
@@ -92,7 +211,7 @@ public class SnmpFactory {
    * @return SNMP context object
    */
   public SnmpContext newContext(SnmpTarget target, Mib mib) {
-    return newContext(target, mib, defaultConfiguration, null);
+    return newContext(target, mib, defaultTargetConfig, null);
   }
 
   /**
@@ -103,7 +222,7 @@ public class SnmpFactory {
    * @return SNMP context object
    */
   public SnmpContext newContext(SnmpTarget target, 
-      SnmpConfiguration config) {
+      SnmpTargetConfig config) {
     return newContext(target, MibFactory.getInstance().newMIB(), config, null);
   }
 
@@ -118,7 +237,8 @@ public class SnmpFactory {
    *    found on the class path
    */
   public SnmpContext newContext(SnmpTarget target, Mib mib,
-      SnmpConfiguration config, String providerName) {
+      SnmpTargetConfig config, String providerName) {
+    assertNotClosed();
     return findProvider(providerName).newContext(target, config.clone(), mib);
   }
 
@@ -141,6 +261,12 @@ public class SnmpFactory {
       }
     }
     throw new ProviderNotFoundException(providerName);
+  }
+
+  private void assertNotClosed() {
+    if (closed.get()) {
+      throw new IllegalStateException("factory has been closed");
+    }
   }
 
 }

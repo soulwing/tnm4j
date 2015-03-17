@@ -60,11 +60,10 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
   @Override
   @SuppressWarnings("unchecked")
   public void onResponse(ResponseEvent event) {
-    PDU response = event.getResponse();
     SnmpCallback<V> callback = (SnmpCallback<V>) event.getUserObject();
     try {
-      validateResponse(response);
-      V result = createResult(response);
+      validateResponse(event);
+      V result = createResult(event.getResponse());
       callback.onSnmpResponse(new SnmpEvent<V>(context, 
           new SuccessResponse<V>(result)));
     }
@@ -82,9 +81,8 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
     PDU request = createRequest(oids);
     try {
       ResponseEvent event = doInvoke(request);
-      PDU response = event.getResponse();
-      validateResponse(response);
-      V result = createResult(response);
+      validateResponse(event);
+      V result = createResult(event.getResponse());
       return new SuccessResponse<V>(result);
     }
     catch (RuntimeException ex) {
@@ -123,7 +121,11 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
     return pdu;
   }
 
-  protected void validateResponse(PDU response) {
+  protected void validateResponse(ResponseEvent event) {
+    if (event.getError() != null) {
+      throw new RuntimeException(event.getError());
+    }
+    PDU response = event.getResponse();
     if (response == null) {
       throw new TimeoutException();
     }

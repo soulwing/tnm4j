@@ -18,7 +18,7 @@
 package org.soulwing.snmp.provider.snmp4j;
 
 import org.soulwing.snmp.Mib;
-import org.soulwing.snmp.SnmpConfiguration;
+import org.soulwing.snmp.SnmpTargetConfig;
 import org.soulwing.snmp.SnmpContext;
 import org.soulwing.snmp.SnmpTarget;
 import org.soulwing.snmp.provider.SnmpProvider;
@@ -44,7 +44,7 @@ public class Snmp4jProvider implements SnmpProvider {
    * {@inheritDoc}
    */
   @Override
-  public SnmpContext newContext(SnmpTarget target, SnmpConfiguration config, 
+  public SnmpContext newContext(SnmpTarget target, SnmpTargetConfig config, 
       Mib mib) {
     return Snmp4jContextFactory.newContext(target, config, mib);
   }

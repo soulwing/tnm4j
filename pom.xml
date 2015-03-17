@@ -25,12 +25,11 @@
     <url>git@github.com:soulwing/${project.artifactId}.git</url>
     <tag>HEAD</tag>
   </scm>
-
   <dependencies>
     <dependency>
       <groupId>org.snmp4j</groupId>
       <artifactId>snmp4j</artifactId>
-      <version>2.1.0</version>
+      <version>2.3.3</version>
     </dependency>
     <dependency>
       <groupId>net.percederberg</groupId>
@@ -43,5 +42,13 @@
       <version>2.9.3</version>
       <scope>runtime</scope>
     </dependency>
-  </dependencies>
+  </dependencies>  
+  <repositories>
+    <repository>
+      <id>oosnmp</id>
+      <name>SNMP4j Respository</name>
+      <url>https://oosnmp.net/dist/release</url>
+      <releases><enabled>true</enabled></releases>
+    </repository>
+  </repositories>
 </project>

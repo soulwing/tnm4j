@@ -18,7 +18,7 @@
 package org.soulwing.snmp.provider;
 
 import org.soulwing.snmp.Mib;
-import org.soulwing.snmp.SnmpConfiguration;
+import org.soulwing.snmp.SnmpTargetConfig;
 import org.soulwing.snmp.SnmpContext;
 import org.soulwing.snmp.SnmpTarget;
 
@@ -44,7 +44,7 @@ public interface SnmpProvider {
    * @param mib MIB provider
    * @return SNMP context
    */
-  SnmpContext newContext(SnmpTarget target, SnmpConfiguration config, 
+  SnmpContext newContext(SnmpTarget target, SnmpTargetConfig config, 
       Mib mib);
-
+  
 }
