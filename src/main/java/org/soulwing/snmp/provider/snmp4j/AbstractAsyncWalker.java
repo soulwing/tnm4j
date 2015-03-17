@@ -88,9 +88,14 @@ abstract class AbstractAsyncWalker<V>
           new ExceptionResponse<SnmpAsyncWalker<V>>(ex)));
     }
 
-    SnmpFactory.getInstance().getScheduledExecutorService().execute(new Runnable() {
+    /*
+     * Since we're in a response handler, we need to dispatch the callback
+     * on another thread, so that it can invoke another request if needed.
+     */
+    SnmpFactory.getInstance().getExecutorService().execute(new Runnable() {
       @Override
       public void run() {
+        // FIXME -- if an exception is thrown here we should stop the walk
         callback.onSnmpResponse(new SnmpEvent<SnmpAsyncWalker<V>>(context,
             new SuccessResponse<SnmpAsyncWalker<V>>(AbstractAsyncWalker.this)));
       } 
