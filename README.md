@@ -49,11 +49,12 @@ Simplified Access to Conceptual Tables
 --------------------------------------
 
 The MIB integration also plays a pivotal role in interpreting the index
-objects for conceptual tables in the MIB.  [SNMPv2] 
-(https://www.ietf.org/rfc/rfc2578.txt) table row indexes are not accessible.  
-An application that wishes to query table information from an SNMP agent must 
-reconstruct the index object values from the object identifier of another 
-(accessible) object in the table.  This restriction makes the agent 
+objects for conceptual tables in the MIB.  
+
+[SNMPv2] (https://www.ietf.org/rfc/rfc2578.txt) table row indexes are not 
+accessible.  An application that wishes to query table information from an SNMP 
+agent must reconstruct the index object values from the object identifier of 
+another (accessible) object in the table.  This restriction makes the agent 
 implementation more efficient, but greatly complicates the work of the network 
 management application.  Tnm4j completely encapsulates this unpleasant truth of 
 SNMPv2 tables, as illustrated in the following example.  
