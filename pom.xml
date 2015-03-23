@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.soulwing</groupId>
     <artifactId>soulwing-parent</artifactId>
-    <version>4</version>
+    <version>5-SNAPSHOT</version>
   </parent>
   <groupId>org.soulwing.snmp</groupId>
   <artifactId>tnm4j</artifactId>
@@ -30,6 +30,12 @@
       <groupId>org.snmp4j</groupId>
       <artifactId>snmp4j</artifactId>
       <version>2.3.3</version>
+      <exclusions>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>net.percederberg</groupId>
@@ -40,6 +46,11 @@
       <groupId>net.percederberg</groupId>
       <artifactId>mibble-mibs</artifactId>
       <version>2.9.3</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
       <scope>runtime</scope>
     </dependency>
   </dependencies>  
