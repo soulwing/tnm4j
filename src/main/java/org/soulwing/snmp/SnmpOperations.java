@@ -17,7 +17,6 @@
  */
 package org.soulwing.snmp;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -31,41 +30,37 @@ public interface SnmpOperations {
    * Performs an SNMP GET operation.
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch
-   * @return retrieved varbinds in the same order and with the same keys
-   *   as the requested objects
-   * @throws IOException
+   * @return a response containing the retrieved varbinds in the same order 
+   *    and with the same keys as the requested objects
    */
-  VarbindCollection get(List<String> oids) throws IOException;
+  SnmpResponse<VarbindCollection> get(List<String> oids);
 
   /**
    * Performs an SNMP GET operation.
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch
-   * @return list of retrieved varbinds in the same order as the requested
-   *    objects
-   * @throws IOException
+   * @return a response containing the retrieved varbinds in the same order 
+   *    and with the same keys as the requested objects
    */
-  VarbindCollection get(String... oids) throws IOException;
+  SnmpResponse<VarbindCollection> get(String... oids);
 
   /**
    * Performs an SNMP GETNEXT operation.
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch
-   * @return retrieved varbinds in the same order and with the same keys
-   *   as the requested objects
-   * @throws IOException
+   * @return a response containing the retrieved varbinds in the same order 
+   *    and with the same keys as the requested objects
    */
-  VarbindCollection getNext(List<String> oids) throws IOException;
+  SnmpResponse<VarbindCollection> getNext(List<String> oids);
 
   /**
    * Performs an SNMP GETNEXT operation.
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch
-   * @return retrieved varbinds in the same order and with the same keys
-   *   as the requested objects
-   * @throws IOException
+   * @return a response containing the retrieved varbinds in the same order 
+   *    and with the same keys as the requested objects
    */
-  VarbindCollection getNext(String... oids) throws IOException;
+  SnmpResponse<VarbindCollection> getNext(String... oids);
 
   /**
    * Performs an SNMP GETBULK operation.
@@ -76,12 +71,11 @@ public interface SnmpOperations {
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch; the first {@code nonRepeaters} identifiers in the list
    *    are assumed to be non-repeating objects
-   * @return retrieved varbinds in the same order and with the same keys
-   *   as the requested objects
-   * @throws IOException
+   * @return a response containing the retrieved varbinds in the same order 
+   *    and with the same keys as the requested objects
    */
-  VarbindCollection getBulk(int nonRepeaters, int maxRepetitions, 
-      List<String> oids) throws IOException;
+  SnmpResponse<VarbindCollection> getBulk(int nonRepeaters, 
+      int maxRepetitions, List<String> oids);
 
   /**
    * Performs an SNMP GETBULK operation.
@@ -92,12 +86,11 @@ public interface SnmpOperations {
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch; the first {@code nonRepeaters} identifiers in the 
    *    list are assumed to be for non-repeating objects
-   * @return retrieved varbinds in the same order and with the same keys
-   *   as the requested objects
-   * @throws IOException
+   * @return a response containing the retrieved varbinds in the same order 
+   *    and with the same keys as the requested objects
    */
-  VarbindCollection getBulk(int nonRepeaters, int maxRepetitions, 
-      String... oids) throws IOException;
+  SnmpResponse<VarbindCollection> getBulk(int nonRepeaters, int maxRepetitions, 
+      String... oids);
 
   /**
    * Performs a walk of a MIB conceptual table.
@@ -109,12 +102,10 @@ public interface SnmpOperations {
    * @param oids MIB names or dotted-decimal object identifiers; the first 
    *   {@code nonRepeaters} identifiers in the list are assumed to be for 
    *   non-repeating objects
-   * @return list of table rows (each row is a varbind collection in the
-   *    same order and with the same keys as the requested objects)
-   * @throws IOException
+   * @return a response containing the retrieved varbinds in the same order 
+   *    and with the same keys as the requested objects
    */
-  SnmpWalker<VarbindCollection> walk(int nonRepeaters, List<String> oids)
-      throws IOException;
+  SnmpWalker<VarbindCollection> walk(int nonRepeaters, List<String> oids);
 
   /**
    * Performs a walk of a MIB conceptual table.
@@ -126,12 +117,9 @@ public interface SnmpOperations {
    * @param oids MIB names or dotted-decimal object identifiers; the first 
    *   {@code nonRepeaters} identifiers in the list are assumed to be for 
    *   non-repeating objects
-   * @return list of table rows (each row is a varbind collection in the
-   *    same order and with the same keys as the requested objects)
-   * @throws IOException
+   * @return table row walker
    */
-  SnmpWalker<VarbindCollection> walk(int nonRepeaters, String... oids)
-      throws IOException;
+  SnmpWalker<VarbindCollection> walk(int nonRepeaters, String... oids);
 
   /**
    * Performs a walk of a MIB conceptual table.
@@ -142,12 +130,10 @@ public interface SnmpOperations {
    *   for the non-repeating elements to retrieve
    * @param repeaters MIB names or dotted-decimal object identifiers 
    *   for the table column elements to retrieve
-   * @return list of table rows (each row is a varbind collection in the
-   *    same order and with the same keys as the requested objects)
-   * @throws IOException
+   * @return table row walker
    */
   SnmpWalker<VarbindCollection> walk(List<String> nonRepeaters, 
-      List<String> repeaters) throws IOException;
+      List<String> repeaters);
 
   /**
    * Performs a walk of a MIB conceptual table.
@@ -156,12 +142,9 @@ public interface SnmpOperations {
    * rows of a conceptual table.
    * @param repeaters MIB names or dotted-decimal object identifiers 
    *   for the table column elements to retrieve
-   * @return list of table rows (each row is a varbind collection in the
-   *    same order and with the same keys as the requested objects)
-   * @throws IOException
+   * @return table row walker
    */
-  SnmpWalker<VarbindCollection> walk(List<String> repeaters) 
-      throws IOException;
+  SnmpWalker<VarbindCollection> walk(List<String> repeaters);
 
   /**
    * Performs a walk of a MIB conceptual table.
@@ -170,10 +153,8 @@ public interface SnmpOperations {
    * rows of a conceptual table.
    * @param repeaters MIB names or dotted-decimal object identifiers 
    *   for the table column elements to retrieve
-   * @return list of table rows (each row is a varbind collection in the
-   *    same order and with the same keys as the requested objects)
-   * @throws IOException
+   * @return table row walker
    */
-  SnmpWalker<VarbindCollection> walk(String... repeaters) throws IOException;
+  SnmpWalker<VarbindCollection> walk(String... repeaters);
 
 }

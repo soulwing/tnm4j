@@ -26,7 +26,7 @@ SnmpV2cContext snmp = SnmpFactory.getInstance().newSnmpV2cContext(mib);
 snmp.setAddress("10.0.0.1");
 snmp.setCommunity("public");
 
-VarbindCollection varbinds = snmp.getNext("sysName", "sysDescr", "sysUpTime");
+VarbindCollection varbinds = snmp.getNext("sysName", "sysDescr", "sysUpTime").get();
 for (Varbind varbind : varbinds) {
   System.out.format("%s=%s\n", varbind.getName(), varbind.toString());
 }

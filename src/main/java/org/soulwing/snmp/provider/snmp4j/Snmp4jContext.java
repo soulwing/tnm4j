@@ -17,7 +17,6 @@
  */
 package org.soulwing.snmp.provider.snmp4j;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,6 +39,7 @@ import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.SnmpAsyncWalker;
 import org.soulwing.snmp.SnmpContext;
 import org.soulwing.snmp.SnmpOperation;
+import org.soulwing.snmp.SnmpResponse;
 import org.soulwing.snmp.SnmpTarget;
 import org.soulwing.snmp.SnmpTargetConfig;
 import org.soulwing.snmp.SnmpWalker;
@@ -180,16 +180,15 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    * {@inheritDoc}
    */
   @Override
-  public VarbindCollection get(List<String> oids) throws IOException {
-    return new GetOperation(this, resolveOids(oids)).invoke().get();
+  public SnmpResponse<VarbindCollection> get(List<String> oids) {
+    return new GetOperation(this, resolveOids(oids)).invoke();
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public VarbindCollection get(String... oids) 
-      throws IOException {
+  public SnmpResponse<VarbindCollection> get(String... oids) {
     return get(Arrays.asList(oids));
   }
 
@@ -197,17 +196,15 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    * {@inheritDoc}
    */
   @Override
-  public VarbindCollection getNext(List<String> oids)
-      throws IOException {
-    return new GetNextOperation(this, resolveOids(oids)).invoke().get();
+  public SnmpResponse<VarbindCollection> getNext(List<String> oids) {
+    return new GetNextOperation(this, resolveOids(oids)).invoke();
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public VarbindCollection getNext(String... oids)
-      throws IOException {
+  public SnmpResponse<VarbindCollection> getNext(String... oids) {
     return getNext(Arrays.asList(oids));
   }
 
@@ -215,18 +212,18 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    * {@inheritDoc}
    */
   @Override
-  public VarbindCollection getBulk(int nonRepeaters, int maxRepetitions,
-      List<String> oids) throws IOException {
+  public SnmpResponse<VarbindCollection> getBulk(int nonRepeaters, 
+      int maxRepetitions, List<String> oids) {
     return new GetBulkOperation(this, resolveOids(oids), nonRepeaters, 
-        maxRepetitions).invoke().get();
+        maxRepetitions).invoke();
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public VarbindCollection getBulk(int nonRepeaters, int maxRepetitions,
-      String... oids) throws IOException {
+  public SnmpResponse<VarbindCollection> getBulk(int nonRepeaters, 
+      int maxRepetitions, String... oids) {
     return getBulk(nonRepeaters, maxRepetitions, Arrays.asList(oids));
   }
 
@@ -234,8 +231,8 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    * {@inheritDoc}
    */
   @Override
-  public SnmpWalker<VarbindCollection> walk(int nonRepeaters, List<String> oids) 
-      throws IOException {
+  public SnmpWalker<VarbindCollection> walk(int nonRepeaters, 
+      List<String> oids) {
     return new GetBulkSyncWalker(this, resolveOids(oids), nonRepeaters, 
         config.getWalkMaxRepetitions());
   }
@@ -244,8 +241,7 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    * {@inheritDoc}
    */
   @Override
-  public SnmpWalker<VarbindCollection> walk(int nonRepeaters, String... oids) 
-      throws IOException {
+  public SnmpWalker<VarbindCollection> walk(int nonRepeaters, String... oids) {
     return walk(nonRepeaters, Arrays.asList(oids));
   }
 
@@ -254,7 +250,7 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    */
   @Override
   public SnmpWalker<VarbindCollection> walk(List<String> nonRepeaters,
-      List<String> repeaters) throws IOException {
+      List<String> repeaters) {
     final int size = nonRepeaters.size() + repeaters.size();
     List<String> oids = new ArrayList<String>(size);
     oids.addAll(nonRepeaters);
@@ -266,8 +262,7 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    * {@inheritDoc}
    */
   @Override
-  public SnmpWalker<VarbindCollection> walk(List<String> repeaters)
-      throws IOException {
+  public SnmpWalker<VarbindCollection> walk(List<String> repeaters) {
     return walk(0, repeaters);
   }
 
@@ -275,8 +270,7 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    * {@inheritDoc}
    */
   @Override
-  public SnmpWalker<VarbindCollection> walk(String... repeaters)
-      throws IOException {
+  public SnmpWalker<VarbindCollection> walk(String... repeaters) {
     return walk(0, Arrays.asList(repeaters));
   }
 
