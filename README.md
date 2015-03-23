@@ -1,6 +1,8 @@
 tnm4j
 =====
 
+[![Build Status](https://travis-ci.org/soulwing/tnm4j.svg?branch=master)](https://travis-ci.org/soulwing/tnm4j)
+
 A simplified SNMP API for Java, inspired by Jürgen Schönwälder's Tnm
 extension for Tcl.  
 
@@ -24,7 +26,7 @@ SnmpV2cContext snmp = SnmpFactory.getInstance().newSnmpV2cContext(mib);
 snmp.setAddress("10.0.0.1");
 snmp.setCommunity("public");
 
-List<Varbind> varbinds = snmp.getNext("sysName", "sysDescr", "sysUpTime");
+VarbindCollection varbinds = snmp.getNext("sysName", "sysDescr", "sysUpTime");
 for (Varbind varbind : varbinds) {
   System.out.format("%s=%s\n", varbind.getName(), varbind.toString());
 }
@@ -75,13 +77,15 @@ SnmpV2cContext snmp = SnmpFactory.getInstance().newSnmpV2cContext(mib);
 snmp.setAddress("10.0.0.1");
 snmp.setCommunity("public");
 
-List<Map<String, Varbind>> varbinds = snmp.walk("ipv6AddrPfxLength", 
+SnmpWalker<VarbindCollection> walker = snmp.walk("ipv6AddrPfxLength", 
     "ipv6AddrType", "ipv6AddrAnycastFlag", "ipv6AddrStatus");
-for (Map<String, Varbind> varbind : varbinds) {
+VarbindCollection row = walker.next().get();
+while (row != null) {
   System.out.format("%d %s %d %s %s %s\n", 
     varbind.get("ipv6IfIndex").toInt(), varbind.get("ipv6AddrAddress"),
     varbind.get("ipv6AddrPfxLength").toInt(), varbind.get("ipv6AddrType"),
     varbind.get("ipv6AddrAnycastFlag"), varbind.get("ipv6AddrStatus"));
+  row = walker.next().get();
 }
 
 snmp.dispose();
