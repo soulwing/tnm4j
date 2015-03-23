@@ -50,5 +50,11 @@
       <url>https://oosnmp.net/dist/release</url>
       <releases><enabled>true</enabled></releases>
     </repository>
+    <repository>
+      <id>mibble</id>
+      <name>Mibble Respository</name>
+      <url>https://nexus.cns.vt.edu/nexus/content/groups/public/</url>
+      <releases><enabled>true</enabled></releases>
+    </repository>
   </repositories>
 </project>
