@@ -12,6 +12,8 @@ DerivedData
 .metadata
 .tern-project
 *.jsfdia
+.idea
+*.iml
 
 *.class
 *.o
