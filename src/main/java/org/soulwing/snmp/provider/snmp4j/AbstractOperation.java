@@ -70,8 +70,18 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
     try {
       validateResponse(event);
       V result = createResult(event.getResponse());
-      callback.onSnmpResponse(new SnmpEvent<V>(context, 
-          new SuccessResponse<V>(result)));
+      try {
+        callback.onSnmpResponse(new SnmpEvent<V>(context,
+            new SuccessResponse<V>(result)));
+      }
+      catch (RuntimeException ex) {
+        if (logger.isDebugEnabled()) {
+          logger.error("callback threw an exception: " + ex, ex);
+        }
+        else {
+          logger.warn("callback threw an exception: " + ex);
+        }
+      }
     }
     catch (RuntimeException ex) {
       callback.onSnmpResponse(new SnmpEvent<V>(context, 
