@@ -29,6 +29,7 @@ import org.snmp4j.smi.VariableBinding;
 import org.soulwing.snmp.Formatter;
 import org.soulwing.snmp.IndexDescriptor;
 import org.soulwing.snmp.IndexExtractor;
+import org.soulwing.snmp.SnmpException;
 import org.soulwing.snmp.Varbind;
 
 class Snmp4jVarbind implements Varbind {
@@ -66,28 +67,39 @@ class Snmp4jVarbind implements Varbind {
 
   @Override
   public int toInt() {
-    if (delegate.getVariable() == null) {
+    Variable variable = getVariable();
+    if (variable == null) {
       return 0;
     }
-    return delegate.getVariable().toInt();
+    return variable.toInt();
   }
 
   @Override
   public long toLong() {
-    if (delegate.getVariable() == null) {
+    Variable variable = getVariable();
+    if (variable == null) {
       return 0;
     }
-    return delegate.getVariable().toLong();
+    return variable.toLong();
   }
 
   @Override
   public Object toObject() {
-    return toObject(delegate.getVariable());
+    return toObject(getVariable());
   }
 
   @Override
   public String toString() {
-    return formatter.format(toObject(delegate.getVariable()));
+    return formatter.format(toObject(getVariable()));
+  }
+
+  private Variable getVariable() throws SnmpException {
+    Variable variable = delegate.getVariable();
+    if (variable.isException()) {
+      throw new SnmpException(String.format("%s %s: %s",
+          getName(), getOid(), variable.toString()));
+    }
+    return variable;
   }
 
   private static Object toObject(Variable variable) {
