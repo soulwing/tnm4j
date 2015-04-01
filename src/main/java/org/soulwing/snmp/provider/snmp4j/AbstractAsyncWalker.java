@@ -18,11 +18,16 @@
 
 package org.soulwing.snmp.provider.snmp4j;
 
+import static org.soulwing.snmp.provider.snmp4j.Snmp4jLogger.logger;
+
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.snmp4j.PDU;
 import org.snmp4j.event.ResponseEvent;
+import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.OID;
 import org.soulwing.snmp.SnmpAsyncWalker;
 import org.soulwing.snmp.SnmpCallback;
@@ -43,6 +48,8 @@ abstract class AbstractAsyncWalker<V>
     extends AbstractOperation<SnmpAsyncWalker<V>>
     implements SnmpAsyncWalker<V> {
 
+  private final Lock lock = new ReentrantLock();
+  
   protected final int nonRepeaters;
   protected final int maxRepetitions;
   protected final OID[] requestedOids;
@@ -50,6 +57,7 @@ abstract class AbstractAsyncWalker<V>
   private int repeaters;
   private PDU response;
   private int offset;
+  private volatile Integer32 requestId;
   
   
   /**
@@ -76,30 +84,44 @@ abstract class AbstractAsyncWalker<V>
   public void onResponse(ResponseEvent event) {
     final SnmpCallback<SnmpAsyncWalker<V>> callback = 
         (SnmpCallback<SnmpAsyncWalker<V>>) event.getUserObject();
-
-    this.offset = 0;
-
+    Integer32 requestId = event.getRequest().getRequestID();
+    if (requestId.equals(this.requestId)) {
+      logger.debug("already received response {}", requestId);
+      return;
+    }
+    else if (logger.isDebugEnabled()) {
+      logger.debug("received response {}", requestId);
+    }
+    
+    lock.lock();
     try {
-      validateResponse(event);
-      this.response = event.getResponse();
-    }
-    catch (RuntimeException ex) {
-      callback.onSnmpResponse(new SnmpEvent<SnmpAsyncWalker<V>>(context,
-          new ExceptionResponse<SnmpAsyncWalker<V>>(ex)));
-    }
-
-    /*
-     * Since we're in a response handler, we need to dispatch the callback
-     * on another thread, so that it can invoke another request if needed.
-     */
-    SnmpFactory.getInstance().getExecutorService().execute(new Runnable() {
-      @Override
-      public void run() {
-        // FIXME -- if an exception is thrown here we should stop the walk
+      this.requestId = requestId;
+      this.offset = 0;
+      try {
+        validateResponse(event);        
+        response = event.getResponse();
+      }
+      catch (RuntimeException ex) {
         callback.onSnmpResponse(new SnmpEvent<SnmpAsyncWalker<V>>(context,
-            new SuccessResponse<SnmpAsyncWalker<V>>(AbstractAsyncWalker.this)));
-      } 
-    });
+            new ExceptionResponse<SnmpAsyncWalker<V>>(ex)));
+      }
+  
+      /*
+       * Since we're in a response handler, we need to dispatch the callback
+       * on another thread, so that it can invoke another request if needed.
+       */
+      SnmpFactory.getInstance().getExecutorService().execute(new Runnable() {
+        @Override
+        public void run() {
+          // FIXME -- if an exception is thrown here we should stop the walk
+          callback.onSnmpResponse(new SnmpEvent<SnmpAsyncWalker<V>>(context,
+              new SuccessResponse<SnmpAsyncWalker<V>>(AbstractAsyncWalker.this)));
+        } 
+      });
+    }
+    finally {
+      lock.unlock();
+    }
   }
 
   /**
@@ -129,7 +151,13 @@ abstract class AbstractAsyncWalker<V>
    */
   @Override
   public void invoke(SnmpCallback<SnmpAsyncWalker<V>> callback) {
-    super.invoke(callback);
+    lock.lock();
+    try {
+      super.invoke(callback);
+    }
+    finally {
+      lock.unlock();
+    }
   }
 
   /**
@@ -184,19 +212,24 @@ abstract class AbstractAsyncWalker<V>
    */
   @Override
   public SnmpResponse<V> next() throws WouldBlockException {
-    
-    int offset = this.offset == 0 ? nonRepeaters : this.offset;
-
-    if (endOfTable(offset)) {
-      return new SuccessResponse<V>(null);
+    lock.lock();
+    try {
+      int offset = this.offset == 0 ? nonRepeaters : this.offset;
+  
+      if (endOfTable(offset)) {
+        return new SuccessResponse<V>(null);
+      }
+  
+      SnmpResponse<V> response = new SuccessResponse<V>(
+          createRow(this.response, nonRepeaters, repeaters, offset));
+     
+      this.offset = offset + repeaters;
+     
+      return response;
     }
-
-    SnmpResponse<V> response = new SuccessResponse<V>(
-        createRow(this.response, nonRepeaters, repeaters, offset));
-   
-    this.offset = offset + repeaters;
-   
-    return response;
+    finally {
+      lock.unlock();
+    }
   }
 
   private boolean endOfTable(int offset) {

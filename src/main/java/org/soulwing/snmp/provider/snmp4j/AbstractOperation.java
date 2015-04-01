@@ -18,6 +18,8 @@
 
 package org.soulwing.snmp.provider.snmp4j;
 
+import static org.soulwing.snmp.provider.snmp4j.Snmp4jLogger.logger;
+
 import java.io.IOException;
 
 import org.snmp4j.PDU;
@@ -60,6 +62,10 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
   @Override
   @SuppressWarnings("unchecked")
   public void onResponse(ResponseEvent event) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("received response {}", event.getRequest().getRequestID());
+    }
+
     SnmpCallback<V> callback = (SnmpCallback<V>) event.getUserObject();
     try {
       validateResponse(event);
@@ -101,6 +107,9 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
     PDU request = createRequest(oids);
     try {
       doInvoke(request, callback);
+      if (logger.isDebugEnabled()) {
+        logger.debug("sent request {}", request.getRequestID());
+      }
     }
     catch (IOException ex) {
       callback.onSnmpResponse(new SnmpEvent<V>(context,
