@@ -17,6 +17,8 @@
  */
 package org.soulwing.snmp.provider.snmp4j;
 
+import static org.soulwing.snmp.provider.snmp4j.Snmp4jLogger.logger;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -85,6 +87,7 @@ class Snmp4jContextFactory {
       snmp4jTarget.setTimeout(config.getTimeout());
       Snmp4jContext context = new Snmp4jContext(target, config, mib, 
           getSnmp(target), snmp4jTarget, pduFactory);
+      targets.add(target);
       return context;
     }
     catch (IOException ex) {
@@ -96,7 +99,8 @@ class Snmp4jContextFactory {
     if (snmp == null) {
       lock.lock();
       try {
-        if (snmp == null) {         
+        if (snmp == null) {
+          logger.info("starting SNMP listener");
           snmp = new Snmp(getTransportMapping());        
         }
       }
@@ -154,6 +158,7 @@ class Snmp4jContextFactory {
     try {
       targets.remove(context.getTarget());
       if (!targets.isEmpty()) return;
+      logger.info("stopping SNMP listener");
       if (snmp != null) {
         try {
           snmp.close();
