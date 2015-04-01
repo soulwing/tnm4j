@@ -36,6 +36,6 @@ public interface MibProvider {
    * Gets a new instance of {@link Mib} from the receiver.
    * @return
    */
-  Mib newMIB();
+  Mib newMib();
   
 }

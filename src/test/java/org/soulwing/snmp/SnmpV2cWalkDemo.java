@@ -29,7 +29,7 @@ public class SnmpV2cWalkDemo {
     target.setAddress(ipAddress);
     target.setCommunity(community);
     
-    Mib mib = MibFactory.getInstance().newMIB();
+    Mib mib = MibFactory.getInstance().newMib();
     mib.load("RFC1213-MIB");
     mib.load("IF-MIB");
         

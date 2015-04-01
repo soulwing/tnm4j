@@ -199,7 +199,7 @@ public class SnmpFactory {
    * @return SNMP context object
    */
   public SnmpContext newContext(SnmpTarget target) {
-    return newContext(target, MibFactory.getInstance().newMIB(), 
+    return newContext(target, MibFactory.getInstance().newMib(),
         defaultTargetConfig, null);
   }
 
@@ -223,7 +223,7 @@ public class SnmpFactory {
    */
   public SnmpContext newContext(SnmpTarget target, 
       SnmpTargetConfig config) {
-    return newContext(target, MibFactory.getInstance().newMIB(), config, null);
+    return newContext(target, MibFactory.getInstance().newMib(), config, null);
   }
 
   /**

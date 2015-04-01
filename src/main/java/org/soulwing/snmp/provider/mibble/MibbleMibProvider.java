@@ -41,7 +41,7 @@ public class MibbleMibProvider implements MibProvider {
    * {@inheritDoc}
    */
   @Override
-  public Mib newMIB() {
+  public Mib newMib() {
     return new MibbleMib();
   }
 

@@ -58,8 +58,8 @@ public class MibFactory {
    * Creates a new MIB using the first available provider.
    * @return new MIB instance
    */
-  public Mib newMIB() {
-    return newMIB(null);
+  public Mib newMib() {
+    return newMib(null);
   }
   
   /**
@@ -69,8 +69,8 @@ public class MibFactory {
    * @throws ProviderNotFoundException if the named provider is not found
    *    by the {@link ServiceLoader}
    */
-  public Mib newMIB(String providerName) {
-    return findProvider(providerName).newMIB();
+  public Mib newMib(String providerName) {
+    return findProvider(providerName).newMib();
   }
   
   private MibProvider findProvider(String providerName) {
