@@ -20,11 +20,11 @@ package org.soulwing.snmp.provider.mibble;
 interface SnmpApplicationTypes {
 
   // application type sub-identifiers
-  public static final int IP_ADDRESS = 0;
-  public static final int COUNTER32 = 1;
-  public static final int GAUGE32 = 2;
-  public static final int TIME_TICKS = 3;
-  public static final int OPAQUE = 4;
-  public static final int COUNTER64 = 6;
+  int IP_ADDRESS = 0;
+  int COUNTER32 = 1;
+  int GAUGE32 = 2;
+  int TIME_TICKS = 3;
+  int OPAQUE = 4;
+  int COUNTER64 = 6;
 
 }
