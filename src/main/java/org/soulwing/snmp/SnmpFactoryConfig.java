@@ -23,7 +23,7 @@ package org.soulwing.snmp;
  *
  * @author Carl Harris
  */
-public class SnmpFactoryConfig implements Cloneable {
+public class SnmpFactoryConfig {
 
   /**
    * Default size of the worker pool.
@@ -89,17 +89,5 @@ public class SnmpFactoryConfig implements Cloneable {
     this.scheduledWorkerPoolSize = scheduledWorkerPoolSize;
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  protected SnmpFactoryConfig clone() {
-    try {
-      return (SnmpFactoryConfig) super.clone();
-    }
-    catch (CloneNotSupportedException ex) {
-      throw new RuntimeException(ex);
-    }
-  }
-  
 }
+
