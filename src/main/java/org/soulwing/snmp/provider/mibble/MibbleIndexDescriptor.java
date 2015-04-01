@@ -47,8 +47,7 @@ class MibbleIndexDescriptor implements IndexDescriptor {
   public int getSyntax() {
     int category = indexType.getTag().getCategory();
     int value = indexType.getTag().getValue();
-    int syntax = (category<<6) + value;
-    return syntax;
+    return (category<<6) + value;
   }
 
   @Override
