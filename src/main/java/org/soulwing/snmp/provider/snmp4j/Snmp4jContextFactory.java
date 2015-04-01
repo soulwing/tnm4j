@@ -73,7 +73,7 @@ class Snmp4jContextFactory {
   /**
    * Creates a new context for the given target, configuration, and MIB.
    * @param target target agent
-   * @param configuration SNMP configuration
+   * @param config SNMP configuration
    * @param mib MIB to associate with context
    * @return new context 
    */
@@ -87,7 +87,6 @@ class Snmp4jContextFactory {
       snmp4jTarget.setTimeout(config.getTimeout());
       Snmp4jContext context = new Snmp4jContext(target, config, mib, 
           getSnmp(target), snmp4jTarget, pduFactory);
-      targets.add(target);
       return context;
     }
     catch (IOException ex) {
@@ -108,6 +107,7 @@ class Snmp4jContextFactory {
         lock.unlock();
       }
     }
+    targets.add(target);
     return snmp;
   }
   
