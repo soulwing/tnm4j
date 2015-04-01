@@ -31,10 +31,10 @@ import org.snmp4j.smi.Address;
 import org.snmp4j.smi.GenericAddress;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.soulwing.snmp.Mib;
-import org.soulwing.snmp.SnmpTargetConfig;
 import org.soulwing.snmp.SnmpContext;
 import org.soulwing.snmp.SnmpFactory;
 import org.soulwing.snmp.SnmpTarget;
+import org.soulwing.snmp.SnmpTargetConfig;
 
 /**
  * A factory that produces {@link Snmp4jContext} objects.
