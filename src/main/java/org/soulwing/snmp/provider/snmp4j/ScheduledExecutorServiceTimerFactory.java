@@ -20,8 +20,8 @@ package org.soulwing.snmp.provider.snmp4j;
 
 import java.util.Date;
 import java.util.TimerTask;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.snmp4j.util.CommonTimer;
@@ -39,7 +39,8 @@ class ScheduledExecutorServiceTimerFactory implements TimerFactory {
   
   /**
    * Constructs a new instance.
-   * @param scheduledExecutorService
+   * @param scheduledExecutorService scheduled executor service that will be
+   *   used to schedule timers
    */
   public ScheduledExecutorServiceTimerFactory(
       ScheduledExecutorService scheduledExecutorService) {
@@ -51,44 +52,39 @@ class ScheduledExecutorServiceTimerFactory implements TimerFactory {
    */
   @Override
   public CommonTimer createTimer() {
-    return new DelegatingCommonTimer();
+    return new ScheduledCommonTimer();
   }
 
-  class DelegatingCommonTimer implements CommonTimer {
+  class ScheduledCommonTimer implements CommonTimer {
 
-    private FutureTask<Object> wrapper;
-    
-    @Override
-    public void cancel() {
-      if (wrapper == null) return;
-      wrapper.cancel(false);
-    }
-
-    @Override
-    public void schedule(TimerTask task, long initialDelay, long delay) {
-      if (wrapper != null) {
-        throw new IllegalStateException("already scheduled");
-      }
-      wrapper = new FutureTask<Object>(task, null);
-      executorService.scheduleWithFixedDelay(wrapper, initialDelay, 
-          delay, TimeUnit.MILLISECONDS);
-    }
-
-    @Override
-    public void schedule(TimerTask task, Date firstTime, long delay) {
-      long now = System.currentTimeMillis();
-      long then = firstTime.getTime();
-      long initialDelay = then - now;
-      if (initialDelay > 0) {
-        initialDelay = 0;
-      }
-      schedule(task, initialDelay, delay);
-    }
+    private ScheduledFuture<?> future;
 
     @Override
     public void schedule(TimerTask task, long delay) {
-      schedule(task, 0, delay);
+      if (future != null) throw new IllegalStateException();
+      future = executorService.schedule(task, delay, TimeUnit.MILLISECONDS);
     }
-    
+
+    @Override
+    public void schedule(TimerTask task, Date firstTime, long period) {
+      long now = System.currentTimeMillis();
+      long then = firstTime.getTime();
+      schedule(task, then - now, period);
+    }
+
+    @Override
+    public void schedule(TimerTask task, long delay, long period) {
+      if (future != null) throw new IllegalStateException();
+      future = executorService.scheduleAtFixedRate(task, delay, period,
+          TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public void cancel() {
+      if (future == null) return;
+      future.cancel(false);
+    }
+
   }
+
 }
