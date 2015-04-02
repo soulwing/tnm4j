@@ -26,7 +26,9 @@ package org.soulwing.snmp;
 public interface SnmpOperation<V> {
 
   /**
-   * Invoke the operation on the remote agent.
+   * Invoke the operation on the remote agent and wait for the response.
+   * <p>
+   * This method will block until a response becomes available.
    * @return response object
    */
   SnmpResponse<V> invoke();
