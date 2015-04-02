@@ -26,7 +26,7 @@ package org.soulwing.snmp;
  */
 public class SimpleSnmpTargetConfig implements SnmpTargetConfig {
 
-  public static final int DEFAULT_RETRIES = 3;
+  public static final int DEFAULT_RETRIES = 2;
   public static final long DEFAULT_TIMEOUT = 10000L;
   public static final int DEFAULT_WALK_MAX_REPETITIONS = 20;
   
