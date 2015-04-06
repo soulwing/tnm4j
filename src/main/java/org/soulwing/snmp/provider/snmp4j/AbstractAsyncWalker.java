@@ -50,9 +50,9 @@ abstract class AbstractAsyncWalker<V>
 
   private final Lock lock = new ReentrantLock();
   
-  protected final int nonRepeaters;
-  protected final int maxRepetitions;
-  protected final OID[] requestedOids;
+  final int nonRepeaters;
+  final int maxRepetitions;
+  final OID[] requestedOids;
   
   private int repeaters;
   private PDU response;

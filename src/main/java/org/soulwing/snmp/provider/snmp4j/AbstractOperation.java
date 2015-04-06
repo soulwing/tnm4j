@@ -43,15 +43,15 @@ import org.soulwing.snmp.Varbind;
 abstract class AbstractOperation<V> implements SnmpOperation<V>, 
     ResponseListener {
 
-  protected final Snmp4jContext context;
-  protected final OID[] oids;  
+  final Snmp4jContext context;
+  final OID[] oids;
     
   /**
    * Constructs a new instance.
    * @param context
    * @param oids
    */
-  public AbstractOperation(Snmp4jContext context, OID[] oids) {
+  AbstractOperation(Snmp4jContext context, OID[] oids) {
     this.oids = oids;
     this.context = context;
   }
@@ -141,8 +141,9 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
   }
 
   protected void validateResponse(ResponseEvent event) {
-    if (event.getError() != null) {
-      throw new RuntimeException(event.getError());
+    final Exception error = event.getError();
+    if (error != null) {
+      throw new RuntimeException(error);
     }
     PDU response = event.getResponse();
     if (response == null) {
@@ -153,7 +154,6 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
           + response.getErrorStatusText()
           + " at index " + response.getErrorIndex());
     }
-    // TODO handle noSuchInstance variable bindings
   }
 
   protected String objectNameToKey(Varbind v) {

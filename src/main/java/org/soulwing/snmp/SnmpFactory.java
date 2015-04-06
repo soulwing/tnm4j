@@ -107,7 +107,7 @@ public class SnmpFactory {
     return instance;
   }
 
-  private static class TrivialThreadFactory implements ThreadFactory {    
+  private static class TrivialThreadFactory implements ThreadFactory {
     public Thread newThread(Runnable r) {
       return new Thread(r);
     }
@@ -186,7 +186,7 @@ public class SnmpFactory {
   /**
    * Sets the default configuration that will be used for new context
    * instances created by this factory.
-   * @param defaultTargetConfig the value to set
+   * @param config the value to set
    */
   public void setDefaultTargetConfig(SimpleSnmpTargetConfig config) {
     this.defaultTargetConfig = config;
@@ -218,7 +218,6 @@ public class SnmpFactory {
    * Gets a new SNMPv2c context using the first available provider.
    * @param target target agent
    * @param config SNMP configuration for the context
-   * @param mib MIB that will be passed into the context
    * @return SNMP context object
    */
   public SnmpContext newContext(SnmpTarget target, 

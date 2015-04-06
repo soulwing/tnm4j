@@ -397,7 +397,7 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    */
   public Varbind newVarbind(VariableBinding vb) {
     String oid = vb.getOid().toString();
-    String name = mib.oidToInstanceName(oid.toString());
+    String name = mib.oidToInstanceName(oid);
     Formatter formatter = mib.newFormatter(oid);
     IndexExtractor indexExtractor = createIndexExtractor(oid);
     return new Snmp4jVarbind(name, vb, formatter, indexExtractor, this);
