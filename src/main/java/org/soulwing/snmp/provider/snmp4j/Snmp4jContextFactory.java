@@ -65,9 +65,9 @@ class Snmp4jContextFactory {
     SNMP4JSettings.setThreadFactory(
         new Snmp4jThreadFactory(
             SnmpFactory.getInstance().getThreadFactory()));
-    SNMP4JSettings.setTimerFactory(
-        new ScheduledExecutorServiceTimerFactory(
-            SnmpFactory.getInstance().getScheduledExecutorService()));
+//    SNMP4JSettings.setTimerFactory(
+//        new ScheduledExecutorServiceTimerFactory(
+//            SnmpFactory.getInstance().getScheduledExecutorService()));
   }
   
   /**
@@ -85,9 +85,8 @@ class Snmp4jContextFactory {
       snmp4jTarget.setAddress(createAddress(target));
       snmp4jTarget.setRetries(config.getRetries());
       snmp4jTarget.setTimeout(config.getTimeout());
-      Snmp4jContext context = new Snmp4jContext(target, config, mib, 
+      return new Snmp4jContext(target, config, mib,
           getSnmp(target), snmp4jTarget, pduFactory);
-      return context;
     }
     catch (IOException ex) {
       throw new RuntimeException("failed to create context", ex);
@@ -141,8 +140,7 @@ class Snmp4jContextFactory {
     sb.append("udp:");
     sb.append(target.getAddress());
     sb.append("/").append(target.getPort());
-    
-    return GenericAddress.parse(sb.toString());    
+    return GenericAddress.parse(sb.toString());
   }
 
   private static PduFactory createPduFactory(SnmpTarget target) {
