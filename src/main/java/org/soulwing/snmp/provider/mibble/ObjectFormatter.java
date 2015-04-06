@@ -90,7 +90,7 @@ class ObjectFormatter implements Formatter {
       return new IntegerFormatter(INTEGER_HINT);
     }
     else if (syntax instanceof ChoiceType) {
-      if (syntax.getReferenceSymbol() instanceof MibTypeSymbol) {
+      if (syntax.getReferenceSymbol() != null) {
         if (syntax.getReferenceSymbol().getName().equals(NETWORK_ADDRESS_TYPE)) {
           return new OctetStringFormatter(IP_ADDRESS_HINT);
         }
@@ -106,7 +106,7 @@ class ObjectFormatter implements Formatter {
         return tc.getDisplayHint();
       }
     }
-    if (syntax.getReferenceSymbol() instanceof MibTypeSymbol) {
+    if (syntax.getReferenceSymbol() != null) {
       if (syntax.getReferenceSymbol().getName().equals(DISPLAY_STRING_TYPE)) {
         return DISPLAY_STRING_HINT;
       }

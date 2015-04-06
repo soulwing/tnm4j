@@ -20,11 +20,6 @@ package org.soulwing.snmp.provider.mibble;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 import net.percederberg.mibble.MibLoader;
 import net.percederberg.mibble.MibLoaderException;
@@ -32,7 +27,6 @@ import net.percederberg.mibble.MibType;
 import net.percederberg.mibble.MibValueSymbol;
 import net.percederberg.mibble.snmp.SnmpObjectType;
 import net.percederberg.mibble.value.ObjectIdentifierValue;
-
 import org.soulwing.snmp.Formatter;
 import org.soulwing.snmp.IndexExtractor;
 import org.soulwing.snmp.Mib;
@@ -40,28 +34,32 @@ import org.soulwing.snmp.ModuleParseException;
 
 class MibbleMib implements Mib {
 
-  private static final ToStringFormatter TO_STRING_FORMATTER = 
-      new ToStringFormatter();
-
   private final MibLoader loader = new MibLoader();
-  
-  private final List<String> mibNames = new LinkedList<String>();
-  
-  private final Map<String, net.percederberg.mibble.Mib> mibMap = 
-      new LinkedHashMap<String, net.percederberg.mibble.Mib>();
-  
-  private final Map<MibValueSymbol, Formatter> formatterCache = 
-      new HashMap<MibValueSymbol, Formatter>();
-  
-  private final Map<MibValueSymbol, IndexExtractor> indexExtractorCache =
-      new HashMap<MibValueSymbol, IndexExtractor>();
- 
+
+  private final MibRepository repository;
+
+  private final FormatterFactory formatterFactory;
+
+  private final IndexExtractorFactory indexExtractorFactory;
+
+  public MibbleMib() {
+    this(new CachingMibRepository(), new CachingFormatterFactory(),
+        new CachingIndexExtractorFactory());
+  }
+
+  MibbleMib(MibRepository repository, FormatterFactory formatterFactory,
+      IndexExtractorFactory indexExtractorFactory) {
+    this.repository = repository;
+    this.formatterFactory = formatterFactory;
+    this.indexExtractorFactory = indexExtractorFactory;
+  }
+
   @Override
   public String oidToInstanceName(String oid) {
     MibValueSymbol symbol = getSymbolByOid(oid);
     if (symbol == null) return oid;
     String name = oid;
-    String baseOid = ((ObjectIdentifierValue) symbol.getValue()).toString();      
+    String baseOid = symbol.getValue().toString();
     name = name.replaceFirst("^" + baseOid, symbol.getName());
     return name;
   }
@@ -101,6 +99,9 @@ class MibbleMib implements Mib {
   @Override
   public int syntaxForObject(String oid) {
     MibValueSymbol symbol = getSymbolByOid(oid);
+    if (symbol == null) {
+      throw new IllegalArgumentException("unrecognized object identifier");
+    }
     if (!(symbol.getType() instanceof SnmpObjectType)) {
       throw new IllegalArgumentException("not an OBJECT-TYPE object");
     }
@@ -111,9 +112,9 @@ class MibbleMib implements Mib {
     return (category<<6) + value;
   }
 
-  private MibValueSymbol getSymbolByOid(String oid) {
+  MibValueSymbol getSymbolByOid(String oid) {
     MibValueSymbol symbol = null;
-    for (String scope : mibNames) {
+    for (String scope : repository.names()) {
       symbol = getSymbolByOid(scope, oid);
       if (symbol != null) break;
     }
@@ -121,13 +122,14 @@ class MibbleMib implements Mib {
   }
 
   private MibValueSymbol getSymbolByOid(String scope, String oid) {
-    if (!mibMap.containsKey(scope)) return null;
-    return mibMap.get(scope).getSymbolByOid(oid);
+    final net.percederberg.mibble.Mib mib = repository.get(scope);
+    if (mib == null) return null;
+    return mib.getSymbolByOid(oid);
   }
   
   private ObjectIdentifierValue getSymbol(String name) {
     ObjectIdentifierValue oid = null;
-    for (String scope : mibNames) {
+    for (String scope : repository.names()) {
       oid = getSymbol(scope, name);
       if (oid != null) break;
     }
@@ -135,8 +137,8 @@ class MibbleMib implements Mib {
   }
   
   private ObjectIdentifierValue getSymbol(String scope, String name) {
-    if (!mibMap.containsKey(scope)) return null;
-    net.percederberg.mibble.Mib mib = mibMap.get(scope);
+    final net.percederberg.mibble.Mib mib = repository.get(scope);
+    if (mib == null) return null;
     MibValueSymbol symbol = (MibValueSymbol) mib.getSymbol(name);  
     if (symbol == null) return null;
     return (ObjectIdentifierValue) symbol.getValue();
@@ -144,43 +146,18 @@ class MibbleMib implements Mib {
   
   @Override
   public Formatter newFormatter(String oid) {
-    MibValueSymbol symbol = getSymbolByOid(oid);
-    if (symbol == null) {
-      return TO_STRING_FORMATTER;
-    }
-    if (!formatterCache.containsKey(symbol)) {
-      formatterCache.put(symbol, new ObjectFormatter(symbol));
-      return new ObjectFormatter(symbol);
-    }
-    return formatterCache.get(symbol);
+    return formatterFactory.getFormatter(getSymbolByOid(oid));
   }
 
   @Override
-  public IndexExtractor newIndexExtractor(String oidString) {
-    MibValueSymbol symbol = getSymbolByOid(oidString);
-    if (symbol == null) {
-      return null;
-    }
-    if (!symbol.isTableColumn()) {
-      throw new IllegalArgumentException(oidString + ": not a table column");
-    }
-    
-    if (!indexExtractorCache.containsKey(symbol)) {
-      indexExtractorCache.put(symbol, 
-          new MibbleIndexExtractor(this, symbol));
-    }
-    return indexExtractorCache.get(symbol);
-  }
-
-  public Object findSymbolByOid(String oid) {
-    return getSymbolByOid(oid);
+  public IndexExtractor newIndexExtractor(String oid) {
+    return indexExtractorFactory.getIndexExtractor(getSymbolByOid(oid));
   }
 
   @Override
   public void load(String name) throws ModuleParseException, IOException {
-    if (mibMap.containsKey(name)) return;
     try {
-      installMib(loader.load(name));
+      repository.load(name);
     }
     catch (MibLoaderException ex) {
       throw new ModuleParseException(ex.getMessage(), ex);
@@ -190,7 +167,7 @@ class MibbleMib implements Mib {
   @Override
   public void load(File file) throws ModuleParseException, IOException {
     try {
-      installMib(loader.load(file));
+      repository.load(file);
     }
     catch (MibLoaderException ex) {
       throw new ModuleParseException(ex.getMessage(), ex);
@@ -198,18 +175,13 @@ class MibbleMib implements Mib {
   }
   
   @Override
-  public void load(URL url) throws IOException {
+  public void load(URL url) throws ModuleParseException, IOException {
     try {
-      installMib(loader.load(url));
+      repository.load(url);
     }
     catch (MibLoaderException ex) {
       throw new ModuleParseException(ex.getMessage(), ex);
     }
-  }
-
-  private void installMib(net.percederberg.mibble.Mib mib) {
-    mibNames.add(0, mib.getName());
-    mibMap.put(mib.getName(), mib);
   }
 
 }

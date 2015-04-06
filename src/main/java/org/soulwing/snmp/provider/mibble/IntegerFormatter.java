@@ -40,7 +40,7 @@ class IntegerFormatter implements Formatter {
         int decimalPosition = -Integer.parseInt(hint.substring(1));
         BigDecimal d = BigDecimal.valueOf(i);
         while (decimalPosition-- > 0) {
-          d = d.divide(BigDecimal.valueOf(10));
+          d = d.divide(BigDecimal.valueOf(10), BigDecimal.ROUND_UNNECESSARY);
         }
         return d.toString();
       }

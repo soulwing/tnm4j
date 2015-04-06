@@ -113,7 +113,7 @@ class OctetStringFormatter implements Formatter {
 
     public int format(byte[] octets, int offset, StringBuilder sb) {
       if (isRepeatIndicator()) {
-        repeatCount = (int) (octets[offset++] & 0xff);
+        repeatCount = octets[offset++] & 0xff;
       }
       int startingOffset = offset;
       for (int i = 0; i < repeatCount && offset < octets.length; i++) {

@@ -17,13 +17,9 @@
  */
 package org.soulwing.snmp.provider.mibble;
 
-import java.util.Arrays;
 import java.util.List;
 
-import org.soulwing.snmp.IndexDescriptor;
-import org.soulwing.snmp.IndexExtractor;
-import org.soulwing.snmp.Mib;
-
+import net.percederberg.mibble.Mib;
 import net.percederberg.mibble.MibType;
 import net.percederberg.mibble.MibTypeTag;
 import net.percederberg.mibble.MibValue;
@@ -33,20 +29,20 @@ import net.percederberg.mibble.snmp.SnmpObjectType;
 import net.percederberg.mibble.type.SizeConstraint;
 import net.percederberg.mibble.type.StringType;
 import net.percederberg.mibble.type.ValueConstraint;
+import org.soulwing.snmp.IndexDescriptor;
+import org.soulwing.snmp.IndexExtractor;
 
 class MibbleIndexExtractor implements IndexExtractor {
 
-  private final MibbleMib mib;
   private final MibValueSymbol symbol;
   private final SnmpIndex[] indexes;
 
-  public MibbleIndexExtractor(MibbleMib mib, MibValueSymbol symbol) {
+  public MibbleIndexExtractor(MibValueSymbol symbol) {
     if (!symbol.isTableColumn()) {
       throw new IllegalArgumentException("symbol is not a table column: " 
           + symbol.getName());
     }
     
-    this.mib = mib;
     this.symbol = symbol;
     MibValueSymbol rowSymbol = symbol.getParent();
     SnmpObjectType rowType = (SnmpObjectType) rowSymbol.getType();
@@ -72,8 +68,8 @@ class MibbleIndexExtractor implements IndexExtractor {
     IndexDescriptor[] descriptors = new IndexDescriptor[indexes.length];
     for (int i = 0; i < indexes.length; i++) {
       SnmpIndex index = indexes[i];
-      MibValueSymbol indexSymbol = (MibValueSymbol) 
-          mib.findSymbolByOid(index.getValue().toString());     
+      MibValueSymbol indexSymbol =
+          symbol.getMib().getSymbolByOid(index.getValue().toString());
       MibType indexType = ((SnmpObjectType) indexSymbol.getType()).getSyntax();
       int length = fixedLength(indexType);
       boolean implied = length != -1 || index.isImplied();
@@ -130,21 +126,4 @@ class MibbleIndexExtractor implements IndexExtractor {
     throw new IllegalStateException("cannot determine index length");
   }
 
-  public static void main(String[] args) throws Exception {
-    Mib mib = new MibbleMib();
-    mib.load("BRIDGE-MIB");
-    mib.load("IPV6-MIB");
-
-    String oid1 = mib.nameToOid("dot1dTpFdbPort") + ".0.0.12.26.43.60";
-    //2001:468:C80:2100
-    String oid2 = mib.nameToOid("ipv6AddrPrefixOnLinkFlag") + ".3.8.32.1.4.104.12.128.33.0.64";
-    String[] oids = { oid1, oid2 };
-    for (String oid : oids) {
-      IndexExtractor extractor = mib.newIndexExtractor(oid);
-      for (IndexDescriptor descriptor : extractor.extractIndexes(oid)) {
-        System.out.format("%s=%s\n", descriptor.getOid(),
-            Arrays.asList(descriptor.getEncoded()));
-      }
-    }
-  }
 }
