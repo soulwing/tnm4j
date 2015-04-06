@@ -75,13 +75,15 @@ class ScheduledExecutorServiceTimerFactory implements TimerFactory {
     @Override
     public void schedule(TimerTask task, long delay, long period) {
       if (future != null) throw new IllegalStateException();
-      future = executorService.scheduleAtFixedRate(task, delay, period,
+      future = executorService.scheduleWithFixedDelay(task, delay, period,
           TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void cancel() {
+      Snmp4jLogger.logger.info("canceling timer");
       if (future == null) return;
+
       future.cancel(false);
     }
 
