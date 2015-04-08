@@ -18,6 +18,8 @@
 
 package org.soulwing.snmp.provider.snmp4j;
 
+import static org.soulwing.snmp.provider.snmp4j.Snmp4jLogger.logger;
+
 import java.util.Date;
 import java.util.TimerTask;
 import java.util.concurrent.ScheduledExecutorService;
@@ -58,11 +60,17 @@ class ScheduledExecutorServiceTimerFactory implements TimerFactory {
   class ScheduledCommonTimer implements CommonTimer {
 
     private ScheduledFuture<?> future;
+    private TimerTaskWrapper wrapper;
 
     @Override
     public void schedule(TimerTask task, long delay) {
-      if (future != null) throw new IllegalStateException();
-      future = executorService.schedule(task, delay, TimeUnit.MILLISECONDS);
+      if (future != null) {
+        cancel();
+      }
+      wrapper = new TimerTaskWrapper(task);
+      future = executorService.schedule(wrapper, delay, TimeUnit.MILLISECONDS);
+      wrapper.setFuture(future);
+      logger.debug("scheduled task {} with delay {}", task, delay);
     }
 
     @Override
@@ -74,17 +82,74 @@ class ScheduledExecutorServiceTimerFactory implements TimerFactory {
 
     @Override
     public void schedule(TimerTask task, long delay, long period) {
-      if (future != null) throw new IllegalStateException();
-      future = executorService.scheduleWithFixedDelay(task, delay, period,
-          TimeUnit.MILLISECONDS);
+      if (future != null) {
+        cancel();
+      }
+      wrapper = new TimerTaskWrapper(task);
+      future = executorService.scheduleWithFixedDelay(
+          wrapper, delay, period, TimeUnit.MILLISECONDS);
+      wrapper.setFuture(future);
+      logger.debug("scheduled task {} with delay {} and period {}", task, delay,
+          period);
     }
 
     @Override
     public void cancel() {
       if (future == null) return;
       future.cancel(false);
+      logger.debug("canceled timer for task {}", wrapper);
     }
 
+  }
+
+  private static class TimerTaskWrapper extends TimerTask {
+
+    private final TimerTask delegate;
+    private ScheduledFuture<?> future;
+
+    public TimerTaskWrapper(TimerTask delegate) {
+      this.delegate = delegate;
+    }
+
+    public ScheduledFuture<?> getFuture() {
+      return future;
+    }
+
+    public void setFuture(ScheduledFuture<?> future) {
+      this.future = future;
+    }
+
+    @Override
+    public void run() {
+      logger.debug("running timer task {}", this);
+      delegate.run();
+    }
+
+    @Override
+    public int hashCode() {
+      return delegate.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      return delegate.equals(obj);
+    }
+
+    @Override
+    public String toString() {
+      return delegate.toString();
+    }
+
+    @Override
+    public boolean cancel() {
+      logger.debug("canceling timer task {}", this);
+      return future.cancel(false);
+    }
+
+    @Override
+    public long scheduledExecutionTime() {
+      return delegate.scheduledExecutionTime();
+    }
   }
 
 }
