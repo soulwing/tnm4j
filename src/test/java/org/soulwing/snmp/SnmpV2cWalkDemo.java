@@ -48,6 +48,9 @@ public class SnmpV2cWalkDemo {
           row.get("ifHCInOctets"));
       row = walker.next().get();
     }
+
+    snmp.close();
+    SnmpFactory.getInstance().close();
   }
 
 }

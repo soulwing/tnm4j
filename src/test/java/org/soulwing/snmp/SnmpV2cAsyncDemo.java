@@ -38,13 +38,12 @@ public class SnmpV2cAsyncDemo {
     
     Mib mib = MibFactory.getInstance().newMib();
     mib.load("RFC1213-MIB");
-    
-    
+
     SnmpContext snmp = SnmpFactory.getInstance().newContext(target, mib);
-    
-    SnmpCompletionService<VarbindCollection> completionService = 
+
+    SnmpCompletionService<VarbindCollection> completionService =
         new BlockingQueueSnmpCompletionService<VarbindCollection>();
-    
+
     completionService.submit(snmp.asyncGetNext("sysDescr", "sysUpTime"));
     while (!completionService.isIdle()) {
       SnmpEvent<VarbindCollection> event = completionService.take();
@@ -56,13 +55,16 @@ public class SnmpV2cAsyncDemo {
       boolean found = matcher.find();
       String software = found ? matcher.group(1) : NOT_AVAILABLE;
       String version = found ? matcher.group(2) : NOT_AVAILABLE;
-      
-      System.out.format("%-12s %-15s %-24s %-24s %s\n", 
+
+      System.out.format("%-12s %-15s %-24s %-24s %s\n",
           "Device Name", "IP Address", "Software", "Version" , "Up Time");
-      
-      System.out.format("%-12s %-15s %-24s %-24s %s\n", 
+
+      System.out.format("%-12s %-15s %-24s %-24s %s\n",
           deviceName, ipAddress, software, version, sysUpTime);
     }
+
+    snmp.close();
+    SnmpFactory.getInstance().close();
   }
   
 }
