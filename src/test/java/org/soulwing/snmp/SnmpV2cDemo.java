@@ -52,10 +52,9 @@ public class SnmpV2cDemo {
     System.out.format("%-12s %-15s %-24s %-24s %s\n", 
         "Device Name", "IP Address", "Software", "Version" , "Up Time");
     
-    System.out.format("%-12s %-15s %-24s %-24s %s\n", 
+    System.out.format("%-12s %-15s %-24s %-24s %s\n",
         deviceName, ipAddress, software, version, sysUpTime);
 
-    snmp.close();
     SnmpFactory.getInstance().close();
   }
   

@@ -48,7 +48,6 @@ public class SnmpV2cAsyncWalkDemo {
     walker.invoke(callback);
     callback.awaitShutdown();
     System.out.println("done");
-    snmp.close();
     factory.close();
   }
 

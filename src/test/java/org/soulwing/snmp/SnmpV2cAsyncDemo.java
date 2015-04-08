@@ -63,7 +63,6 @@ public class SnmpV2cAsyncDemo {
           deviceName, ipAddress, software, version, sysUpTime);
     }
 
-    snmp.close();
     SnmpFactory.getInstance().close();
   }
   
