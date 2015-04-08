@@ -172,6 +172,9 @@ public class SnmpFactory {
     catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
     }
+    catch (IllegalStateException ex) {
+      assert true;  // it's okay -- probably a ManagedExecutorService
+    }
   }
 
   /**
