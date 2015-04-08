@@ -151,38 +151,54 @@ class Snmp4jContextFactory {
     throw new RuntimeException("unsupported target type");
   }
 
-  public static void dispose(SnmpContext context) {
+  public static void close() {
     lock.lock();
     try {
-      targets.remove(context.getTarget());
-      if (!targets.isEmpty()) return;
-      logger.info("stopping SNMP listener");
-      if (snmp != null) {
-        try {
-          snmp.close();
-        }
-        catch (IOException ex) {
-          ex.printStackTrace(System.err);
-        }
-        finally {
-          snmp = null;
-        }
-      }
-      if (transportMapping != null) {
-        try {
-          transportMapping.close();
-        }
-        catch (IOException ex) {
-          ex.printStackTrace(System.err);
-        }
-        finally {
-          transportMapping = null;
-        }
-      }
+      targets.clear();
+      shutdown();
     }
     finally {
       lock.unlock();
     }
   }
-  
+
+  public static void dispose(SnmpContext context) {
+    lock.lock();
+    try {
+      targets.remove(context.getTarget());
+      if (!targets.isEmpty()) return;
+      shutdown();
+    }
+    finally {
+      lock.unlock();
+    }
+  }
+
+  private static void shutdown() {
+    logger.info("stopping SNMP listener");
+    if (snmp != null) {
+      try {
+        snmp.close();
+      }
+      catch (IOException ex) {
+        ex.printStackTrace(System.err);
+      }
+      finally {
+        snmp = null;
+      }
+    }
+    if (transportMapping != null) {
+      try {
+        transportMapping.close();
+      }
+      catch (IOException ex) {
+        ex.printStackTrace(System.err);
+      }
+      finally {
+        transportMapping = null;
+      }
+    }
+  }
+
+
 }

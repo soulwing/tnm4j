@@ -18,7 +18,10 @@
 package org.soulwing.snmp;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,6 +30,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.soulwing.snmp.provider.SnmpProvider;
 
@@ -39,11 +44,16 @@ public class SnmpFactory {
 
   private static volatile SnmpFactory instance;
 
+  private final Lock lock = new ReentrantLock();
+
   private final ServiceLoader<SnmpProvider> loader = 
       ServiceLoader.load(SnmpProvider.class);
   
   private final AtomicBoolean closed = new AtomicBoolean();
-  
+
+  private final ConcurrentMap<String, SnmpProvider> providerMap =
+      new ConcurrentHashMap<>();
+
   private final ExecutorService executorService;
   private final ScheduledExecutorService scheduledExecutorService;
   private final ThreadFactory threadFactory;
@@ -147,6 +157,7 @@ public class SnmpFactory {
    */
   public void close() throws InterruptedException {
     if (!closed.compareAndSet(false, true)) return;
+    shutDownProviders();
     shutDownExecutor(executorService);
     shutDownExecutor(scheduledExecutorService);
     if (Thread.interrupted()) {
@@ -154,13 +165,11 @@ public class SnmpFactory {
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  protected void finalize() throws Throwable {
-    close();
-    super.finalize();
+  private void shutDownProviders() {
+    for (SnmpProvider provider : providerMap.values()) {
+      provider.close();
+    }
+    providerMap.clear();
   }
 
   private void shutDownExecutor(ExecutorService executorService) {
@@ -241,7 +250,35 @@ public class SnmpFactory {
   public SnmpContext newContext(SnmpTarget target, Mib mib,
       SnmpTargetConfig config, String providerName) {
     assertNotClosed();
-    return findProvider(providerName).newContext(target, config.clone(), mib);
+    return getProvider(providerName).newContext(target, config.clone(), mib);
+  }
+
+  /**
+   * Gets a named provider instance (which may have been previously cached)
+   * @param providerName provider name or {@code null} to find the first
+   *    available provider
+   * @return provider object
+   * @throws ProviderNotFoundException if the named provider cannot be
+   *    found by the {@link ServiceLoader} (or if no provider can be found
+   *    when the specified name is {@code null})
+   */
+  private SnmpProvider getProvider(String providerName) {
+    SnmpProvider provider = null;
+    if (!providerMap.isEmpty()) {
+      provider = providerName != null ?
+          providerMap.get(providerName) : providerMap.values().iterator().next();
+    }
+    if (provider == null) {
+      lock.lock();
+      try {
+        provider = findProvider(providerName);
+        providerMap.put(provider.getName(), provider);
+      }
+      finally {
+        lock.unlock();
+      }
+    }
+    return provider;
   }
 
   /**

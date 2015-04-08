@@ -49,4 +49,9 @@ public class Snmp4jProvider implements SnmpProvider {
     return Snmp4jContextFactory.newContext(target, config, mib);
   }
 
+  @Override
+  public void close() {
+    Snmp4jContextFactory.close();
+  }
+
 }

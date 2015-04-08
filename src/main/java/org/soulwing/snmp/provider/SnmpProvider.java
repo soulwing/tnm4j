@@ -18,9 +18,9 @@
 package org.soulwing.snmp.provider;
 
 import org.soulwing.snmp.Mib;
-import org.soulwing.snmp.SnmpTargetConfig;
 import org.soulwing.snmp.SnmpContext;
 import org.soulwing.snmp.SnmpTarget;
+import org.soulwing.snmp.SnmpTargetConfig;
 
 /**
  * A provider of {@link SnmpContext} objects.
@@ -46,5 +46,14 @@ public interface SnmpProvider {
    */
   SnmpContext newContext(SnmpTarget target, SnmpTargetConfig config, 
       Mib mib);
-  
+
+  /**
+   * Notifies the recipient that the {@link org.soulwing.snmp.SnmpFactory}
+   * has been closed.
+   * <p>
+   * The provider should release any resources such as threads, locks, open
+   * files/sockets, etc when this method is invoked.
+   */
+  void close();
+
 }
