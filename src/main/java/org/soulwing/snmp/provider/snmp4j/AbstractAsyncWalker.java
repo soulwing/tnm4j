@@ -26,6 +26,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.snmp4j.PDU;
+import org.snmp4j.Snmp;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.OID;
@@ -57,8 +58,7 @@ abstract class AbstractAsyncWalker<V>
   private int repeaters;
   private PDU response;
   private int offset;
-  private volatile Integer32 requestId;
-  
+
   
   /**
    * Constructs a new instance.
@@ -82,20 +82,12 @@ abstract class AbstractAsyncWalker<V>
   @Override
   @SuppressWarnings("unchecked")
   public void onResponse(ResponseEvent event) {
-    final SnmpCallback<SnmpAsyncWalker<V>> callback = 
+    ((Snmp) event.getSource()).cancel(event.getRequest(), this);
+    final SnmpCallback<SnmpAsyncWalker<V>> callback =
         (SnmpCallback<SnmpAsyncWalker<V>>) event.getUserObject();
-    Integer32 requestId = event.getRequest().getRequestID();
-    if (requestId.equals(this.requestId)) {
-      logger.debug("already received response {}", requestId);
-      return;
-    }
-    else if (logger.isDebugEnabled()) {
-      logger.debug("received response {}", requestId);
-    }
-    
+
     lock.lock();
     try {
-      this.requestId = requestId;
       this.offset = 0;
       try {
         validateResponse(event);        

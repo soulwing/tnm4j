@@ -23,8 +23,10 @@ import static org.soulwing.snmp.provider.snmp4j.Snmp4jLogger.logger;
 import java.io.IOException;
 
 import org.snmp4j.PDU;
+import org.snmp4j.Snmp;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.event.ResponseListener;
+import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.VariableBinding;
 import org.soulwing.snmp.SnmpCallback;
@@ -45,7 +47,7 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
 
   final Snmp4jContext context;
   final OID[] oids;
-    
+
   /**
    * Constructs a new instance.
    * @param context
@@ -62,10 +64,7 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
   @Override
   @SuppressWarnings("unchecked")
   public void onResponse(ResponseEvent event) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("received response {}", event.getRequest().getRequestID());
-    }
-
+    ((Snmp) event.getSource()).cancel(event.getRequest(), this);
     SnmpCallback<V> callback = (SnmpCallback<V>) event.getUserObject();
     try {
       validateResponse(event);
