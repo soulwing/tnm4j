@@ -81,9 +81,7 @@ class ScheduledExecutorServiceTimerFactory implements TimerFactory {
 
     @Override
     public void cancel() {
-      Snmp4jLogger.logger.info("canceling timer");
       if (future == null) return;
-
       future.cancel(false);
     }
 
