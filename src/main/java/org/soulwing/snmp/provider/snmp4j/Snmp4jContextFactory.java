@@ -65,9 +65,9 @@ class Snmp4jContextFactory {
     SNMP4JSettings.setThreadFactory(
         new Snmp4jThreadFactory(
             SnmpFactory.getInstance().getThreadFactory()));
-    SNMP4JSettings.setTimerFactory(
-        new ScheduledExecutorServiceTimerFactory(
-            SnmpFactory.getInstance().getScheduledExecutorService()));
+//    SNMP4JSettings.setTimerFactory(
+//        new ScheduledExecutorServiceTimerFactory(
+//            SnmpFactory.getInstance().getScheduledExecutorService()));
   }
   
   /**
