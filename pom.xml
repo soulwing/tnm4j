@@ -7,7 +7,7 @@
   </parent>
   <groupId>org.soulwing.snmp</groupId>
   <artifactId>tnm4j</artifactId>
-  <version>1.0.3-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
   <name>${project.artifactId}</name>
   <description>A simplified SNMP API for Java, inspired by Jürgen Schönwälder's Tnm extension for Tcl.</description>
   <inceptionYear>2012</inceptionYear>
