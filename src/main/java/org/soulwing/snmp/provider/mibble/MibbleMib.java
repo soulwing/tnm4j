@@ -30,9 +30,11 @@ import net.percederberg.mibble.value.ObjectIdentifierValue;
 import org.soulwing.snmp.Formatter;
 import org.soulwing.snmp.IndexExtractor;
 import org.soulwing.snmp.Mib;
+import org.soulwing.snmp.MibException;
+import org.soulwing.snmp.MibTrapV1Support;
 import org.soulwing.snmp.ModuleParseException;
 
-class MibbleMib implements Mib {
+class MibbleMib implements Mib, MibTrapV1Support {
 
   private final MibLoader loader = new MibLoader();
 
@@ -155,6 +157,19 @@ class MibbleMib implements Mib {
   }
 
   @Override
+  public MibTrapV1Support getV1TrapSupport() throws MibException {
+    try {
+      return MibbleTrapV1Support.getInstance();
+    }
+    catch (MibLoaderException ex) {
+      throw new MibException(ex);
+    }
+    catch (IOException ex) {
+      throw new MibException(ex);
+    }
+  }
+
+  @Override
   public void load(String name) throws ModuleParseException, IOException {
     try {
       repository.load(name);
@@ -184,4 +199,18 @@ class MibbleMib implements Mib {
     }
   }
 
+  @Override
+  public Formatter getGenericTrapFormatter() {
+    return null;
+  }
+
+  @Override
+  public Formatter getSpecificTrapFormatter() {
+    return new IntegerFormatter("d");
+  }
+
+  @Override
+  public Formatter getTimestampFormatter() {
+    return new TimeTicksFormatter(null);
+  }
 }

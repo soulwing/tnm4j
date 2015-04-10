@@ -110,6 +110,13 @@ public interface Mib {
   IndexExtractor newIndexExtractor(String oid);
 
   /**
+   * Gets the SNMPv1 TRAP support provider.
+   * @return trap support provider
+   * @throws MibException
+   */
+  MibTrapV1Support getV1TrapSupport() throws MibException;
+
+  /**
    * Loads a named MIB module.
    * <p>
    * @param moduleName name of the MIB module to load
@@ -135,5 +142,5 @@ public interface Mib {
    * @throws IOException
    */
   void load(File file) throws ModuleParseException, IOException;
-  
+
 }
