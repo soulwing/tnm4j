@@ -60,7 +60,7 @@ class Snmp4jV1Trap extends Snmp4jNotification implements SnmpV1Trap {
   }
 
   @Override
-  public ObjectValue getGenericType() {
+  public ObjectValue getGenericTrap() {
     return genericType;
   }
 
@@ -69,7 +69,7 @@ class Snmp4jV1Trap extends Snmp4jNotification implements SnmpV1Trap {
   }
 
   @Override
-  public ObjectValue getSpecificType() {
+  public ObjectValue getSpecificTrap() {
     return specificType;
   }
 

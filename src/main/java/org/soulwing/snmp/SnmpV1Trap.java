@@ -45,13 +45,13 @@ public interface SnmpV1Trap extends SnmpNotification {
    * Gets the generic trap type.
    * @return trap type
    */
-  ObjectValue getGenericType();
+  ObjectValue getGenericTrap();
 
   /**
    * Gets the specific trap type.
    * @return trap type
    */
-  ObjectValue getSpecificType();
+  ObjectValue getSpecificTrap();
 
   /**
    * Gets the timestamp reported in the trap.
