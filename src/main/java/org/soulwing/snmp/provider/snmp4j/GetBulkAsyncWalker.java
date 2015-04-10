@@ -66,7 +66,7 @@ class GetBulkAsyncWalker
     MutableVarbindCollection row = new MutableVarbindCollection();
     for (int i = 0; i < nonRepeaters; i++) {
       if (i < responseSize && response.get(i).getOid().startsWith(oids[i])) {
-        Varbind v = context.newVarbind(response.get(i));
+        Varbind v = context.getVarbindFactory().newVarbind(response.get(i));
         row.add(i, objectNameToKey(v), v);
       }
     }
@@ -77,7 +77,8 @@ class GetBulkAsyncWalker
         if (i + offset < response.size()) {
           OID oid = response.get(i + offset).getOid();
           if (oid.startsWith(requestedOids[i + nonRepeaters])) {
-            Varbind v = context.newVarbind(response.get(i + offset));
+            Varbind v = context.getVarbindFactory()
+                .newVarbind(response.get(i + offset));
             row.add(i, objectNameToKey(v), v);
             count++;
             if (indexes == null) {

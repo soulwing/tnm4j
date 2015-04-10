@@ -46,7 +46,7 @@ import org.soulwing.snmp.SnmpWalker;
 import org.soulwing.snmp.Varbind;
 import org.soulwing.snmp.VarbindCollection;
 
-class Snmp4jContext implements SnmpContext, VarbindFactory {
+class Snmp4jContext implements SnmpContext {
 
   private static final Pattern OID_PATTERN = Pattern.compile("^[0-9.]*$");
 
@@ -58,18 +58,20 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
   private final Snmp snmp;
   private final Target snmp4jTarget;
   private final PduFactory pduFactory;
+  private final VarbindFactory varbindFactory;
   private final DisposeListener disposeListener;
 
   
   public Snmp4jContext(SnmpTarget target, SnmpTargetConfig config,
       Mib mib, Snmp snmp, Target snmp4jTarget, PduFactory pduFactory,
-      DisposeListener disposeListener) {
+      VarbindFactory varbindFactory, DisposeListener disposeListener) {
     this.target = target;
     this.config = config;
     this.mib = mib;
     this.snmp = snmp;
     this.snmp4jTarget = snmp4jTarget;
     this.pduFactory = pduFactory;
+    this.varbindFactory = varbindFactory;
     this.disposeListener = disposeListener;
   }
   
@@ -111,6 +113,14 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    */
   public PduFactory getPduFactory() {
     return pduFactory;
+  }
+
+  /**
+   * Gets the varbind factory associated with this context.
+   * @return varbind factory
+   */
+  public VarbindFactory getVarbindFactory() {
+    return varbindFactory;
   }
 
   /**
@@ -175,8 +185,8 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
     else {
       throw new IllegalStateException("unrecognized type");
     }
-    VariableBinding vb = new VariableBinding(resolvedOid, variable);
-    return newVarbind(vb);
+
+    return varbindFactory.newVarbind(new VariableBinding(resolvedOid, variable));
   }
 
   /**
@@ -393,26 +403,6 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
       oid = resolvedOid;
     }
     return new OID(oid);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public Varbind newVarbind(VariableBinding vb) {
-    String oid = vb.getOid().toString();
-    String name = this.mib.oidToInstanceName(oid);
-    Formatter formatter = this.mib.newFormatter(oid);
-    IndexExtractor indexExtractor = createIndexExtractor(oid);
-    return new Snmp4jVarbind(name, vb, formatter, indexExtractor, this);
-  }
-
-  private IndexExtractor createIndexExtractor(String oid) {
-    try {
-      return mib.newIndexExtractor(oid);
-    }
-    catch (IllegalArgumentException ex) {
-      return null;
-    }
   }
 
 }
