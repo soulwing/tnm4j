@@ -22,12 +22,23 @@ package org.soulwing.snmp;
  * A component that listens for SNMP notifications (traps, informs) and
  * makes them available to registered handlers.
  * <p>
- * The listener maintains an ordered collection of handlers, based on a priority
+ * Conceptually, a listener represents a provider component that listens for
+ * incoming SNMP notifications at the transport layer of the network.  Typically,
+ * an implementation binds a socket to an IP address and port and receives all
+ * incoming SNMP notifications received on that socket.
+ * <p>
+ * A listener maintains an ordered collection of handlers, based on a priority
  * specified when each handler is registered.  When an SNMP notification is
  * received, registered handlers are invoked in priority order.  When a handler
  * indicates that it handled the event (via the return value of
  * {@link SnmpNotificationHandler#handleNotification(SnmpNotificationEvent)}),
  * handlers of lower priority are not invoked.
+ * <p>
+ * The listener can be used to implement a strategy for handling different types
+ * of notifications, where a given handler supports one notification type (or
+ * perhaps a set of closely related types).  For each received notification,
+ * the listener will ask each registered handler (in priority order) to handle
+ * the notification, stopping with the first handler that claims to have done so.
  *
  * @author Carl Harris
  */
