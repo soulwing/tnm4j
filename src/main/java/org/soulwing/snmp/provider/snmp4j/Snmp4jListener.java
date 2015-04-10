@@ -148,7 +148,10 @@ class Snmp4jListener implements SnmpListener, CommandResponder {
             this, event);
       }
       for (PrioritizedHandler wrapper : handlers) {
-        if (wrapper.handler.handleNotification(event)) {
+        // we use a wrapper type here to allow for scripting languages that
+        // don't require methods to return a value
+        Boolean handled = wrapper.handler.handleNotification(event);
+        if (handled != null && handled) {
           if (logger.isDebugEnabled()) {
             logger.debug("event was handled by {}", wrapper.handler);
           }

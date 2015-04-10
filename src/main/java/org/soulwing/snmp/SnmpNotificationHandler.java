@@ -34,6 +34,6 @@ public interface SnmpNotificationHandler {
    *    notification and that other handlers (of lower priority) not yet
    *    invoked should not be notified
    */
-  boolean handleNotification(SnmpNotificationEvent event);
+  Boolean handleNotification(SnmpNotificationEvent event);
 
 }
