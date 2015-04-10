@@ -20,8 +20,6 @@ package org.soulwing.snmp.provider.snmp4j;
 
 import org.snmp4j.PDU;
 import org.snmp4j.smi.OID;
-import org.soulwing.snmp.MutableVarbindCollection;
-import org.soulwing.snmp.Varbind;
 import org.soulwing.snmp.VarbindCollection;
 
 /**
@@ -47,12 +45,7 @@ abstract class VarbindCollectionOperation
    */
   @Override
   protected VarbindCollection createResult(PDU response) {
-    MutableVarbindCollection results = new MutableVarbindCollection();
-    for (int i = 0; i < response.size(); i++) {
-      Varbind varbind = context.newVarbind(response.get(i));
-      results.add(i, objectNameToKey(varbind), varbind);
-    }
-    return results.immutableCopy();
+    return context.getVarbindFactory().newVarbindCollection(response);
   }
 
 }

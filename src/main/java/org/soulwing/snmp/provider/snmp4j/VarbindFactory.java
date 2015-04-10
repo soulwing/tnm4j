@@ -17,11 +17,36 @@
  */
 package org.soulwing.snmp.provider.snmp4j;
 
+import org.snmp4j.PDU;
 import org.snmp4j.smi.VariableBinding;
+import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.Varbind;
+import org.soulwing.snmp.VarbindCollection;
 
+/**
+ * A factory that produces {@link Varbind} objects.
+ */
 interface VarbindFactory {
 
+  /**
+   * Gets the MIB associated with this factory.
+   * @return MIB
+   */
+  Mib getMib();
+
+  /**
+   * Creates a new varbind from an SNMP4j {@link VariableBinding}.
+   * @param vb the subject variable binding
+   * @return new varbind instance
+   */
   Varbind newVarbind(VariableBinding vb);
-  
+
+  /**
+   * Creates a new varbind collection from all of the variable bindings
+   * in the given SNMP4j {@link PDU}.
+   * @param pdu the subject PDU
+   * @return new populated varbind collection
+   */
+  VarbindCollection newVarbindCollection(PDU pdu);
+
 }
