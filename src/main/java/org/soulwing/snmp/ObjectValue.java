@@ -1,36 +1,30 @@
 /*
- * tnm4j - Simplified SNMP API for Java
- * Copyright (C) 2012 Carl Harris, Jr
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * File created on Apr 9, 2015
+ *
+ * Copyright (c) 2015 Carl Harris, Jr
+ * and others as noted
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.soulwing.snmp;
 
-public interface Varbind extends ObjectValue {
+/**
+ * A value associated with an SNMP managed object.
+ *
+ * @author Carl Harris
+ */
+public interface ObjectValue {
 
-  /**
-   * Gets the MIB name of the bound object.
-   * @return name
-   */
-  String getName();
-  
-  /**
-   * Gets the object identifier of the named object as a dotted decimal string.
-   * @return OID string
-   */
-  String getOid();
-  
   /**
    * Gets the MIB syntax type identifier of the object.
    * @return
@@ -42,7 +36,7 @@ public interface Varbind extends ObjectValue {
    * @return integer value of the bound object
    */
   int toInt();
-  
+
   /**
    * Coerces the value of the bound object to a (signed) long.
    * @return long value of the bound object
@@ -58,7 +52,7 @@ public interface Varbind extends ObjectValue {
    * @return string representation of the bound object
    */
   String toString();
-  
+
   /**
    * Gets the value of the object as one of the fundamental types of SMI.
    * <p>
@@ -77,13 +71,5 @@ public interface Varbind extends ObjectValue {
    * @return
    */
   Object toObject();
-  
-  /**
-   * Gets the bindings that represent the index values the bound value.
-   * @return if the bound value is a member of a conceptual table, the
-   *    variable bindings representing the object's table index are returned;
-   *    an empty array is returned for an object that is not a table member
-   */
-  Varbind[] getIndexes();
   
 }
