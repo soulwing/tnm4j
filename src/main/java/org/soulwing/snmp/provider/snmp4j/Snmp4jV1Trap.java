@@ -93,43 +93,4 @@ class Snmp4jV1Trap extends Snmp4jNotification implements SnmpV1Trap {
         specificType, timestamp, getVarbinds());
   }
 
-  static class Value implements ObjectValue {
-
-    private final int syntax;
-    private final Number value;
-    private final Formatter formatter;
-
-    Value(int syntax, Number value, Formatter formatter) {
-      this.syntax = syntax;
-      this.value = value;
-      this.formatter = formatter;
-    }
-
-    @Override
-    public int getSyntax() {
-      return syntax;
-    }
-
-    @Override
-    public int asInt() {
-      return value.intValue();
-    }
-
-    @Override
-    public long asLong() {
-      return value.longValue();
-    }
-
-    @Override
-    public Object toObject() {
-      return value;
-    }
-
-    @Override
-    public String asString() {
-      return formatter.format(value);
-    }
-
-  }
-
 }

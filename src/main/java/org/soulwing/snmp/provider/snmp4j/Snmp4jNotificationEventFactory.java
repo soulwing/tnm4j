@@ -68,11 +68,11 @@ class Snmp4jNotificationEventFactory implements SnmpNotificationEventFactory {
         trap.setAgentAddress(pdu.getAgentAddress().toString());
         MibTrapV1Support trapSupport = varbindFactory.getMib()
             .getV1TrapSupport();
-        trap.setGenericType(new Snmp4jV1Trap.Value(SMIConstants.SYNTAX_INTEGER,
+        trap.setGenericType(new ImmutableObjectValue(SMIConstants.SYNTAX_INTEGER,
             pdu.getGenericTrap(), trapSupport.getGenericTrapFormatter()));
-        trap.setSpecificType(new Snmp4jV1Trap.Value(SMIConstants.SYNTAX_INTEGER,
+        trap.setSpecificType(new ImmutableObjectValue(SMIConstants.SYNTAX_INTEGER,
             pdu.getSpecificTrap(), trapSupport.getSpecificTrapFormatter()));
-        trap.setTimestamp(new Snmp4jV1Trap.Value(SMIConstants.SYNTAX_TIMETICKS,
+        trap.setTimestamp(new ImmutableObjectValue(SMIConstants.SYNTAX_TIMETICKS,
             pdu.getTimestamp(), trapSupport.getTimestampFormatter()));
         return trap;
       case PDU.INFORM:
