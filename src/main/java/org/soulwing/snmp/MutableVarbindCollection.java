@@ -118,4 +118,18 @@ public class MutableVarbindCollection implements VarbindCollection {
     varbindMap.put(key, varbind);
   }
 
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("{ ");
+    for (Varbind varbind : varbinds) {
+      sb.append(varbind.getName())
+        .append('=')
+        .append(varbind.toString())
+        .append(" ");
+    }
+    sb.append("}");
+    return sb.toString();
+  }
+
 }
