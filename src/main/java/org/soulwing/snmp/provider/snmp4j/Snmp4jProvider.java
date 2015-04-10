@@ -86,7 +86,8 @@ public class Snmp4jProvider implements SnmpProvider, DisposeListener {
       snmp4jTarget.setRetries(config.getRetries());
       snmp4jTarget.setTimeout(config.getTimeout());
       Snmp4jContext context = new Snmp4jContext(target, config, mib,
-          getSnmp(), snmp4jTarget, pduFactory, this);
+          getSnmp(), snmp4jTarget, pduFactory,
+          new SimpleVarbindFactory(mib), this);
       refs.put(context, context);
       return context;
     }
@@ -101,7 +102,8 @@ public class Snmp4jProvider implements SnmpProvider, DisposeListener {
     try {
       Address listenAddress = createAddress(address, port);
       Snmp4jListener listener = new Snmp4jListener(getSnmp(),
-          listenAddress, new Snmp4jNotificationEventFactory(mib), this);
+          listenAddress, new Snmp4jNotificationEventFactory(
+          new SimpleVarbindFactory(mib)), this);
       listener.open();
       refs.put(listener, listener);
       return listener;
