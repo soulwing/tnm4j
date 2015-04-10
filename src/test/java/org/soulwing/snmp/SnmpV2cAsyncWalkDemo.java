@@ -71,12 +71,12 @@ public class SnmpV2cAsyncWalkDemo {
         while (row != null) { 
           System.out.format("%s %d %s %s %s %s %s\n", 
               row.get("sysUpTime"), 
-              row.get("ifIndex").toInt(), 
+              row.get("ifIndex").asInt(),
               row.get("ifName"),
               row.get("ifAdminStatus"),
               row.get("ifOperStatus"),
-              row.get("ifHCInOctets").toLong(), 
-              row.get("ifHCOutOctets").toLong());
+              row.get("ifHCInOctets").asLong(),
+              row.get("ifHCOutOctets").asLong());
           row = walker.next().get();
         }
         signalShutdown();

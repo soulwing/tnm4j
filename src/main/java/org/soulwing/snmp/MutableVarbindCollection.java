@@ -125,7 +125,7 @@ public class MutableVarbindCollection implements VarbindCollection {
     for (Varbind varbind : varbinds) {
       sb.append(varbind.getName())
         .append('=')
-        .append(varbind.toString())
+        .append(varbind.asString())
         .append(" ");
     }
     sb.append("}");

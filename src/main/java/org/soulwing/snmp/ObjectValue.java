@@ -35,13 +35,13 @@ public interface ObjectValue {
    * Coerces the value of the bound object to a (signed) integer.
    * @return integer value of the bound object
    */
-  int toInt();
+  int asInt();
 
   /**
    * Coerces the value of the bound object to a (signed) long.
    * @return long value of the bound object
    */
-  long toLong();
+  long asLong();
 
   /**
    * Coerces the value of the bound object to a display string.
@@ -51,7 +51,7 @@ public interface ObjectValue {
    * definition.
    * @return string representation of the bound object
    */
-  String toString();
+  String asString();
 
   /**
    * Gets the value of the object as one of the fundamental types of SMI.

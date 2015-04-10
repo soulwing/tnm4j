@@ -66,7 +66,7 @@ class Snmp4jVarbind implements Varbind {
   }
 
   @Override
-  public int toInt() {
+  public int asInt() {
     Variable variable = getVariable();
     if (variable == null) {
       return 0;
@@ -75,7 +75,7 @@ class Snmp4jVarbind implements Varbind {
   }
 
   @Override
-  public long toLong() {
+  public long asLong() {
     Variable variable = getVariable();
     if (variable == null) {
       return 0;
@@ -89,7 +89,7 @@ class Snmp4jVarbind implements Varbind {
   }
 
   @Override
-  public String toString() {
+  public String asString() {
     return formatter.format(toObject(getVariable()));
   }
 
@@ -120,17 +120,17 @@ class Snmp4jVarbind implements Varbind {
   @SuppressWarnings("unchecked")
   public <T> T asType(Class<T> targetClass) {
     if (Integer.class.isAssignableFrom(targetClass)) {
-      return (T) Integer.valueOf(toInt());
+      return (T) Integer.valueOf(asInt());
     }
     if (Number.class.isAssignableFrom(targetClass)) {
-      return (T) Long.valueOf(toLong());
+      return (T) Long.valueOf(asLong());
     }
     if (String.class.isAssignableFrom(targetClass)) {
-      return (T) toString();
+      return (T) asString();
     }
     if (InetAddress.class.isAssignableFrom(targetClass)) {
       try {
-        return (T) InetAddress.getByName(toString());
+        return (T) InetAddress.getByName(asString());
       }
       catch (UnknownHostException ex) {
         throw new IllegalArgumentException("object does not contain an IP address");
@@ -175,6 +175,11 @@ class Snmp4jVarbind implements Varbind {
   @Override
   public int hashCode() {
     return this.toObject().hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return asString();
   }
 
 }

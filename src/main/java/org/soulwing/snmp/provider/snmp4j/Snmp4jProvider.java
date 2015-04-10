@@ -24,7 +24,6 @@ import java.util.IdentityHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.sun.xml.internal.bind.v2.model.annotation.RuntimeInlineAnnotationReader;
 import org.snmp4j.Snmp;
 import org.snmp4j.Target;
 import org.snmp4j.smi.Address;

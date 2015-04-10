@@ -111,12 +111,12 @@ class Snmp4jV1Trap extends Snmp4jNotification implements SnmpV1Trap {
     }
 
     @Override
-    public int toInt() {
+    public int asInt() {
       return value.intValue();
     }
 
     @Override
-    public long toLong() {
+    public long asLong() {
       return value.longValue();
     }
 
@@ -126,7 +126,7 @@ class Snmp4jV1Trap extends Snmp4jNotification implements SnmpV1Trap {
     }
 
     @Override
-    public String toString() {
+    public String asString() {
       return formatter.format(value);
     }
 

@@ -42,7 +42,7 @@ public class SnmpV2cWalkDemo {
     while (row != null) { 
       System.out.format("%s %d %s %s %s\n", 
           row.get("sysUpTime"), 
-          row.get("ifIndex").toInt(), 
+          row.get("ifIndex").asInt(),
           row.get("ifName"),
           row.get("ifInOctets"), 
           row.get("ifHCInOctets"));

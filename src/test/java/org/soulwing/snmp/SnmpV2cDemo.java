@@ -42,8 +42,8 @@ public class SnmpV2cDemo {
     SnmpContext snmp = SnmpFactory.getInstance().newContext(target, mib);
 
     VarbindCollection varbinds = snmp.getNext("sysDescr", "sysUpTime").get();
-    String sysDescr = varbinds.get("sysDescr").toString();
-    String sysUpTime = varbinds.get("sysUpTime").toString();
+    String sysDescr = varbinds.get("sysDescr").asString();
+    String sysUpTime = varbinds.get("sysUpTime").asString();
     Matcher matcher = CISCOIOS_PATTERN.matcher(sysDescr);
     boolean found = matcher.find();
     String software = found ? matcher.group(1) : NOT_AVAILABLE;
