@@ -253,6 +253,16 @@ public class SnmpFactory {
     return getProvider(providerName).newContext(target, config.clone(), mib);
   }
 
+  public SnmpListener newListener(String address, int port, Mib mib) {
+    return newListener(address, port, mib, null);
+  }
+
+  public SnmpListener newListener(String address, int port, Mib mib,
+      String providerName) {
+    assertNotClosed();
+    return getProvider(providerName).newListener(address, port, mib);
+  }
+
   /**
    * Gets a named provider instance (which may have been previously cached)
    * @param providerName provider name or {@code null} to find the first

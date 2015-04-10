@@ -19,6 +19,7 @@ package org.soulwing.snmp.provider;
 
 import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.SnmpContext;
+import org.soulwing.snmp.SnmpListener;
 import org.soulwing.snmp.SnmpTarget;
 import org.soulwing.snmp.SnmpTargetConfig;
 
@@ -46,6 +47,16 @@ public interface SnmpProvider {
    */
   SnmpContext newContext(SnmpTarget target, SnmpTargetConfig config, 
       Mib mib);
+
+  /**
+   * Creates a new listener that will receive and distribute SNMP notifications
+   * (traps, informs).
+   * @param address address on which to listen ({@code null} to indicate ANY)
+   * @param port port on which to listen
+   * @param mib MIB provider
+   * @return listener object
+   */
+  SnmpListener newListener(String address, int port, Mib mib);
 
   /**
    * Notifies the recipient that the {@link org.soulwing.snmp.SnmpFactory}
