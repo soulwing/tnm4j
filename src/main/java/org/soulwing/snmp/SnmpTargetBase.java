@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * @author Carl Harris
  */
-abstract class SnmpTargetBase implements SnmpTarget {
+public abstract class SnmpTargetBase implements SnmpTarget {
 
   public static final int DEFAULT_PORT = 161;
   
