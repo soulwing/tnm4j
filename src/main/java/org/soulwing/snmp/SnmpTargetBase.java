@@ -81,4 +81,9 @@ public abstract class SnmpTargetBase implements SnmpTarget {
     this.properties = properties;
   }
 
+  @Override
+  public String toString() {
+    return String.format("%s/%d", address, port);
+  }
+
 }
