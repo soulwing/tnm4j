@@ -17,10 +17,25 @@
  */
 package org.soulwing.snmp.provider.snmp4j;
 
+import static org.soulwing.snmp.provider.snmp4j.Snmp4jLogger.logger;
+
+import java.io.IOException;
+import java.util.IdentityHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import com.sun.xml.internal.bind.v2.model.annotation.RuntimeInlineAnnotationReader;
+import org.snmp4j.Snmp;
+import org.snmp4j.Target;
+import org.snmp4j.smi.Address;
+import org.snmp4j.smi.GenericAddress;
+import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.soulwing.snmp.Mib;
-import org.soulwing.snmp.SnmpTargetConfig;
 import org.soulwing.snmp.SnmpContext;
+import org.soulwing.snmp.SnmpException;
+import org.soulwing.snmp.SnmpListener;
 import org.soulwing.snmp.SnmpTarget;
+import org.soulwing.snmp.SnmpTargetConfig;
 import org.soulwing.snmp.provider.SnmpProvider;
 
 /**
@@ -28,10 +43,27 @@ import org.soulwing.snmp.provider.SnmpProvider;
  *
  * @author Carl Harris
  */
-public class Snmp4jProvider implements SnmpProvider {
+public class Snmp4jProvider implements SnmpProvider, DisposeListener {
 
   private static final String PROVIDER_NAME = "snmp4j";
-  
+
+  private static final TargetStrategy[] targetStrategies = {
+      new CommunityTargetStrategy(),
+      new UserTargetStrategy()
+  };
+
+  private static final PduFactoryStrategy[] pduFactoryStrategies = {
+      new SnmpV2cPduFactoryStrategy(),
+      new SnmpV3PduFactoryStrategy()
+  };
+
+  private final Lock lock = new ReentrantLock();
+
+  private final IdentityHashMap<Object, Object> refs =
+      new IdentityHashMap<Object, Object>();
+
+  private volatile Snmp snmp;
+
   /**
    * {@inheritDoc}
    */
@@ -46,12 +78,115 @@ public class Snmp4jProvider implements SnmpProvider {
   @Override
   public SnmpContext newContext(SnmpTarget target, SnmpTargetConfig config, 
       Mib mib) {
-    return Snmp4jContextFactory.newContext(target, config, mib);
+    lock.lock();
+    try {
+      Target snmp4jTarget = createTarget(target);
+      PduFactory pduFactory = createPduFactory(target);
+      snmp4jTarget.setAddress(createAddress(target));
+      snmp4jTarget.setRetries(config.getRetries());
+      snmp4jTarget.setTimeout(config.getTimeout());
+      Snmp4jContext context = new Snmp4jContext(target, config, mib,
+          getSnmp(), snmp4jTarget, pduFactory, this);
+      refs.put(context, context);
+      return context;
+    }
+    finally {
+      lock.unlock();
+    }
+  }
+
+  @Override
+  public SnmpListener newListener(String address, int port, Mib mib) {
+    lock.lock();
+    try {
+      Address listenAddress = createAddress(address, port);
+      Snmp4jListener listener = new Snmp4jListener(getSnmp(),
+          listenAddress, new Snmp4jNotificationEventFactory(mib), this);
+      listener.open();
+      refs.put(listener, listener);
+      return listener;
+    }
+    finally {
+      lock.unlock();
+    }
+  }
+
+  private Snmp getSnmp() {
+    if (snmp == null) {
+      try {
+        logger.info("starting SNMP listener");
+        snmp = new Snmp(new DefaultUdpTransportMapping());
+        snmp.listen();
+      }
+      catch (IOException ex) {
+        throw new SnmpException("error creating SNMP session", ex);
+      }
+    }
+    return snmp;
   }
 
   @Override
   public void close() {
-    Snmp4jContextFactory.close();
+    lock.lock();
+    try {
+      refs.clear();
+      shutdown();
+    }
+    finally {
+      lock.unlock();
+    }
   }
+
+  @Override
+  public void onDispose(Object ref) {
+    lock.lock();
+    try {
+      refs.remove(ref);
+      if (!refs.isEmpty()) return;
+      shutdown();
+    }
+    finally {
+      lock.unlock();
+    }
+  }
+
+  private void shutdown() {
+    try {
+      snmp.close();
+    }
+    catch (IOException ex) {
+      Snmp4jLogger.logger.warn("while closing SNMP session: {}", ex.toString(), ex);
+    }
+  }
+
+  private static Target createTarget(SnmpTarget target) {
+    for (TargetStrategy strategy : targetStrategies) {
+      Target snmp4jTarget = strategy.newTarget(target);
+      if (snmp4jTarget != null) return snmp4jTarget;
+    }
+    throw new RuntimeException("unsupported target type");
+  }
+
+  private static Address createAddress(SnmpTarget target) {
+    return createAddress(target.getAddress(), target.getPort());
+  }
+
+  private static Address createAddress(String address, int port) {
+    Assert.notNull(address, "address is required");
+    StringBuilder sb = new StringBuilder();
+    sb.append("udp:");
+    sb.append(address);
+    sb.append("/").append(port);
+    return GenericAddress.parse(sb.toString());
+  }
+
+  private static PduFactory createPduFactory(SnmpTarget target) {
+    for (PduFactoryStrategy strategy : pduFactoryStrategies) {
+      PduFactory factory = strategy.newPduFactory(target);
+      if (factory != null) return factory;
+    }
+    throw new RuntimeException("unsupported target type");
+  }
+
 
 }

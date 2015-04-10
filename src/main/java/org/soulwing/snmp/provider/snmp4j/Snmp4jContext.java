@@ -58,16 +58,19 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
   private final Snmp snmp;
   private final Target snmp4jTarget;
   private final PduFactory pduFactory;
+  private final DisposeListener disposeListener;
 
   
   public Snmp4jContext(SnmpTarget target, SnmpTargetConfig config,
-      Mib mib, Snmp snmp, Target snmp4jTarget, PduFactory pduFactory) {
+      Mib mib, Snmp snmp, Target snmp4jTarget, PduFactory pduFactory,
+      DisposeListener disposeListener) {
     this.target = target;
     this.config = config;
     this.mib = mib;
     this.snmp = snmp;
     this.snmp4jTarget = snmp4jTarget;
     this.pduFactory = pduFactory;
+    this.disposeListener = disposeListener;
   }
   
   /**
@@ -124,7 +127,7 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
   @Override
   public void close() {
     if (!closed.compareAndSet(false, true)) return;
-    Snmp4jContextFactory.dispose(this);
+    disposeListener.onDispose(this);
   }
 
   /**
@@ -397,8 +400,8 @@ class Snmp4jContext implements SnmpContext, VarbindFactory {
    */
   public Varbind newVarbind(VariableBinding vb) {
     String oid = vb.getOid().toString();
-    String name = mib.oidToInstanceName(oid);
-    Formatter formatter = mib.newFormatter(oid);
+    String name = this.mib.oidToInstanceName(oid);
+    Formatter formatter = this.mib.newFormatter(oid);
     IndexExtractor indexExtractor = createIndexExtractor(oid);
     return new Snmp4jVarbind(name, vb, formatter, indexExtractor, this);
   }
