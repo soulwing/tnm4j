@@ -22,7 +22,7 @@ import org.soulwing.snmp.Formatter;
 class ObjectIdentifierFormatter implements Formatter {
 
   public String format(Object value) {
-    byte[] oid = (byte[]) value;
+    int[] oid = (int[]) value;
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < oid.length; i++) {
       sb.append(oid[i]);
