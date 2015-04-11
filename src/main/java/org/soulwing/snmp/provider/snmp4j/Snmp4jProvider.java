@@ -28,6 +28,9 @@ import org.snmp4j.Snmp;
 import org.snmp4j.Target;
 import org.snmp4j.smi.Address;
 import org.snmp4j.smi.GenericAddress;
+import org.snmp4j.smi.SMIAddress;
+import org.snmp4j.smi.SMIConstants;
+import org.snmp4j.smi.UdpAddress;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.SnmpContext;
@@ -99,7 +102,8 @@ public class Snmp4jProvider implements SnmpProvider, DisposeListener {
   public SnmpListener newListener(String address, int port, Mib mib) {
     lock.lock();
     try {
-      Address listenAddress = createAddress(address, port);
+      Address listenAddress = address == null ?
+          new UdpAddress(port) : createAddress(address, port);
       Snmp4jListener listener = new Snmp4jListener(getSnmp(),
           listenAddress, new Snmp4jNotificationEventFactory(
           new SimpleVarbindFactory(mib)), this);
