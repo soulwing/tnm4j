@@ -65,11 +65,12 @@ class SimpleVarbindFactory implements VarbindFactory {
   }
 
   protected String objectNameToKey(Varbind v) {
+    String oid = v.getOid();
     String name = v.getName();
+    if (name.equals(oid)) return oid;
     int index = name.indexOf('.');
     return index != -1 ? name.substring(0, index) : name;
   }
-
 
   private IndexExtractor createIndexExtractor(String oid) {
     try {
