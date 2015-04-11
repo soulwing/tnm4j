@@ -37,6 +37,14 @@ public interface SnmpOperations {
 
   /**
    * Performs an SNMP GET operation.
+   * @param varbinds a collection identifying the objects to fetch
+   * @return a response containing the retrieved varbinds in the same order
+   *    and with the same keys as the requested objects
+   */
+  SnmpResponse<VarbindCollection> get(VarbindCollection varbinds);
+
+  /**
+   * Performs an SNMP GET operation.
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch
    * @return a response containing the retrieved varbinds in the same order 
@@ -52,6 +60,14 @@ public interface SnmpOperations {
    *    and with the same keys as the requested objects
    */
   SnmpResponse<VarbindCollection> getNext(List<String> oids);
+
+  /**
+   * Performs an SNMP GETNEXT operation.
+   * @param varbinds a collection identifying the objects to fetch
+   * @return a response containing the retrieved varbinds in the same order
+   *    and with the same keys as the requested objects
+   */
+  SnmpResponse<VarbindCollection> getNext(VarbindCollection varbinds);
 
   /**
    * Performs an SNMP GETNEXT operation.
@@ -76,6 +92,20 @@ public interface SnmpOperations {
    */
   SnmpResponse<VarbindCollection> getBulk(int nonRepeaters, 
       int maxRepetitions, List<String> oids);
+
+  /**
+   * Performs an SNMP GETBULK operation.
+   * @param nonRepeaters number of non-repeating objects at the beginning of
+   *    {@code varbinds}.
+   * @param maxRepetitions maximum number of repetitions to retrieve for the
+   *    repeating objects in {@code varbinds}
+   * @param varbinds a collection identifying the objects to fetch
+   * @return a response containing the retrieved varbinds in the same order
+   *    and with the same keys as the requested objects
+   */
+  SnmpResponse<VarbindCollection> getBulk(int nonRepeaters,
+      int maxRepetitions, VarbindCollection varbinds);
+
 
   /**
    * Performs an SNMP GETBULK operation.

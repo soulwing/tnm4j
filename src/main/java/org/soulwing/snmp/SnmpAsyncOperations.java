@@ -37,6 +37,13 @@ public interface SnmpAsyncOperations {
 
   /**
    * Creates an SNMP GET operation.
+   * @param varbinds a collection identifying the objects to fetch
+   * @return an operation that can be invoked to obtain a response
+   */
+  SnmpOperation<VarbindCollection> asyncGet(VarbindCollection varbinds);
+
+  /**
+   * Creates an SNMP GET operation.
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch
    * @return an operation that can be invoked to obtain a response
@@ -50,6 +57,13 @@ public interface SnmpAsyncOperations {
    * @return an operation that can be invoked to obtain a response
    */
   SnmpOperation<VarbindCollection> asyncGetNext(List<String> oids);
+
+  /**
+   * Creates an SNMP GETNEXT operation.
+   * @param varbinds a collection identifying the objects to fetch
+   * @return an operation that can be invoked to obtain a response
+   */
+  SnmpOperation<VarbindCollection> asyncGetNext(VarbindCollection varbinds);
 
   /**
    * Creates an SNMP GETNEXT operation.
@@ -72,6 +86,18 @@ public interface SnmpAsyncOperations {
    */
   SnmpOperation<VarbindCollection> asyncGetBulk(int nonRepeaters, int maxRepetitions, 
       List<String> oids);
+
+  /**
+   * Creates an SNMP GETBULK operation.
+   * @param nonRepeaters number of non-repeating objects at the beginning of
+   *    {@code oids}.
+   * @param maxRepetitions maximum number of repetitions to retrieve for the
+   *    repeating objects in {@code oids}
+   * @param varbinds a collection identifying the objects to fetch
+   * @return an operation that can be invoked to obtain a response
+   */
+  SnmpOperation<VarbindCollection> asyncGetBulk(int nonRepeaters, int maxRepetitions,
+      VarbindCollection varbinds);
 
   /**
    * Create an SNMP GETBULK operation.

@@ -49,7 +49,11 @@ class Snmp4jVarbind implements Varbind {
     this.indexExtractor = indexExtractor;
     this.varbindFactory = varbindFactory;
   }
-  
+
+  public VariableBinding getDelegate() {
+    return delegate;
+  }
+
   @Override
   public String getName() {
     return name;
