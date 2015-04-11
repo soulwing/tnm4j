@@ -36,7 +36,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.soulwing.snmp.provider.SnmpProvider;
 
 /**
- * A factory that produces {@link SnmpContext} objects.
+ * A factory that produces contexts and listeners for SNMP.
  *
  * @author Carl Harris
  */
@@ -253,10 +253,39 @@ public class SnmpFactory {
     return getProvider(providerName).newContext(target, config.clone(), mib);
   }
 
+  /**
+   * Creates a new listener that listens on any local address using the
+   * first available provider.
+   * @param port port on which to listen
+   * @param mib MIB that will be passed into the listener
+   * @return SNMP notification listener
+   */
+  public SnmpListener newListener(int port, Mib mib) {
+    return newListener(null, port, mib, null);
+  }
+
+  /**
+   * Creates a new listener using the first available provider.
+   * @param address local address on which to listen or {@code null} to bind to
+   *    any local address
+   * @param port port on which to listen
+   * @param mib MIB that will be passed into the listener
+   * @return SNMP notification listener
+   */
   public SnmpListener newListener(String address, int port, Mib mib) {
     return newListener(address, port, mib, null);
   }
 
+  /**
+   * Creates a new listener using the named provider.
+   * @param address local address on which to listen or {@code null} to bind to
+   *    any local address
+   * @param port port on which to listen
+   * @param mib MIB that will be passed into the listener
+   * @param providerName name of the desired provider or {@code null} to
+   *    use first available provider
+   * @return SNMP notification listener
+   */
   public SnmpListener newListener(String address, int port, Mib mib,
       String providerName) {
     assertNotClosed();
