@@ -85,4 +85,16 @@ interface MibRepository {
    */
   Mib load(URL url) throws MibLoaderException, IOException;
 
+  /**
+   * Adds a directory to the MIB file search path.
+   * @param directory the directory to add
+   */
+  void addDirectory(File directory);
+
+  /**
+   * Removes a directory from the MIB file search path.
+   * @param directory the directory to remove
+   */
+  void removeDirectory(File directory);
+
 }

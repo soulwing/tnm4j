@@ -117,30 +117,47 @@ public interface Mib {
   MibTrapV1Support getV1TrapSupport() throws MibException;
 
   /**
+   * Adds a directory to the MIB file search path.
+   * @param directory the directory to add
+   * @return this MIB
+   */
+  Mib addDirectory(File directory);
+
+  /**
+   * Removes a directory from the MIB file search path.
+   * @param directory the directory to remove
+   * @return this MIB
+   */
+  Mib removeDirectory(File directory);
+
+  /**
    * Loads a named MIB module.
    * <p>
    * @param moduleName name of the MIB module to load
+   * @return this MIB
    * @throws ModuleParseException if the specified MIB module cannot be parsed
    * @throws IOException
    */
-  void load(String moduleName) throws ModuleParseException, IOException;
+  Mib load(String moduleName) throws ModuleParseException, IOException;
 
   /**
    * Loads a MIB module from given location.
    * @param location location of the MIB module
    * @throws ModuleParseException if the resource at {@code location} cannot
    *    be parsed as a MIB
+   * @return this MIB
+   * @throws ModuleParseException if the specified MIB module cannot be parsed
    * @throws IOException
    */
-  void load(URL location) throws ModuleParseException, IOException;
+  Mib load(URL location) throws ModuleParseException, IOException;
   
   /**
    * Loads a MIB module from given file.
    * @param file file to load
-   * @throws ModuleParseException if the resource at {@code location} cannot
-   *    be parsed as a MIB
+   * @return this MIB
+   * @throws ModuleParseException if the specified MIB module cannot be parsed
    * @throws IOException
    */
-  void load(File file) throws ModuleParseException, IOException;
-
+  Mib load(File file) throws ModuleParseException, IOException;
+  
 }

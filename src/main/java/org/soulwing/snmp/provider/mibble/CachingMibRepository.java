@@ -87,4 +87,14 @@ class CachingMibRepository implements MibRepository {
     return mib;
   }
 
+  @Override
+  public void addDirectory(File directory) {
+    loader.addDir(directory);
+  }
+
+  @Override
+  public void removeDirectory(File directory) {
+    loader.removeDir(directory);
+  }
+
 }

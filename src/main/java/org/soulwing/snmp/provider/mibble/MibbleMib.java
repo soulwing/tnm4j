@@ -36,8 +36,6 @@ import org.soulwing.snmp.ModuleParseException;
 
 class MibbleMib implements Mib, MibTrapV1Support {
 
-  private final MibLoader loader = new MibLoader();
-
   private final MibRepository repository;
 
   private final FormatterFactory formatterFactory;
@@ -170,9 +168,22 @@ class MibbleMib implements Mib, MibTrapV1Support {
   }
 
   @Override
-  public void load(String name) throws ModuleParseException, IOException {
+  public Mib addDirectory(File directory) {
+    repository.addDirectory(directory);
+    return this;
+  }
+
+  @Override
+  public Mib removeDirectory(File directory) {
+    repository.removeDirectory(directory);
+    return this;
+  }
+
+  @Override
+  public Mib load(String name) throws ModuleParseException, IOException {
     try {
       repository.load(name);
+      return this;
     }
     catch (MibLoaderException ex) {
       throw new ModuleParseException(ex.getMessage(), ex);
@@ -180,9 +191,10 @@ class MibbleMib implements Mib, MibTrapV1Support {
   }
 
   @Override
-  public void load(File file) throws ModuleParseException, IOException {
+  public Mib load(File file) throws ModuleParseException, IOException {
     try {
       repository.load(file);
+      return this;
     }
     catch (MibLoaderException ex) {
       throw new ModuleParseException(ex.getMessage(), ex);
@@ -190,9 +202,10 @@ class MibbleMib implements Mib, MibTrapV1Support {
   }
   
   @Override
-  public void load(URL url) throws ModuleParseException, IOException {
+  public Mib load(URL url) throws ModuleParseException, IOException {
     try {
       repository.load(url);
+      return this;
     }
     catch (MibLoaderException ex) {
       throw new ModuleParseException(ex.getMessage(), ex);
