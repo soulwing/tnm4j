@@ -19,6 +19,7 @@
 package org.soulwing.snmp;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -113,8 +114,34 @@ public class MutableVarbindCollection implements VarbindCollection {
     return Collections.unmodifiableMap(varbindMap);
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public List<String> nextIdentifiers(List<String> oids) {
+    List<String> list = new ArrayList<String>(
+        varbinds.size());
+    list.addAll(oids);
+    for (int i = oids.size(), max = varbinds.size(); i < max; i++) {
+      list.add(varbinds.get(i).getOid());
+    }
+    return list;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public List<String> nextIdentifiers(String... ids) {
+    return nextIdentifiers(Arrays.asList(ids));
+  }
+
   public void add(int index, String key, Varbind varbind) {
     varbinds.add(index, varbind);
+    varbindMap.put(key, varbind);
+  }
+
+  public void addIndex(String key, Varbind varbind) {
     varbindMap.put(key, varbind);
   }
 

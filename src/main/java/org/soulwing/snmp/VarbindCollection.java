@@ -76,4 +76,38 @@ public interface VarbindCollection extends Iterable<Varbind> {
    */
   Map<String, Varbind> asMap();
 
+  /**
+   * Creates a list of object identifiers for a GETNEXT or GETBULK operation.
+   * <p>
+   * The resulting list is a concatenation of the specified {@code oids} and
+   * the object identifiers associated with the varbinds in this collection,
+   * starting at {@code index=oids.size()}.  This method allows you to easily
+   * construct a list of object identifiers where non-repeating objects
+   * identifiers are specified in the given {@code oids} and repeating object
+   * identifiers are extracted from the previously retrieved varbinds.
+   *
+   * @param oids array of object identifiers to prepend to the resulting list
+   * @return list of object identifiers starting with {@code oids} followed by
+   *    the OIDS associated with the varbinds in this collection, starting
+   *    at {@code start}.
+   */
+  List<String> nextIdentifiers(List<String> oids);
+
+  /**
+   * Creates a list of object identifiers for a GETNEXT or GETBULK operation.
+   * <p>
+   * The resulting list is a concatenation of the specified {@code oids} and
+   * the object identifiers associated with the varbinds in this collection,
+   * starting at {@code index=oids.size()}.  This method allows you to easily
+   * construct a list of object identifiers where non-repeating objects
+   * identifiers are specified in the given {@code oids} and repeating object
+   * identifiers are extracted from the previously retrieved varbinds.
+   *
+   * @param oids array of object identifiers to prepend to the resulting list
+   * @return list of object identifiers starting with {@code oids} followed by
+   *    the OIDS associated with the varbinds in this collection, starting
+   *    at {@code start}.
+   */
+  List<String> nextIdentifiers(String... oids);
+
 }
