@@ -71,7 +71,7 @@ class GetBulkAsyncWalker
       }
     }
     if (repeaters > 0) {
-      Varbind[] indexes = null;
+      Varbind[] indexes = new Varbind[0];
       int count = 0;
       for (int i = 0; i < repeaters; i++) {
         if (i + offset < response.size()) {
@@ -79,18 +79,16 @@ class GetBulkAsyncWalker
           if (oid.startsWith(requestedOids[i + nonRepeaters])) {
             Varbind v = context.getVarbindFactory()
                 .newVarbind(response.get(i + offset));
-            row.add(i, objectNameToKey(v), v);
+            row.add(i + nonRepeaters, objectNameToKey(v), v);
             count++;
-            if (indexes == null) {
+            if (indexes.length == 0) {
               indexes = v.getIndexes();
             }
           }
         }
       }
-      if (indexes != null) {
-        for (int i = 0; i < indexes.length; i++) {
-          row.add(count + i, objectNameToKey(indexes[i]), indexes[i]);
-        }
+      for (Varbind index : indexes) {
+        row.addIndex(objectNameToKey(index), index);
       }
     }
     return row.immutableCopy();
