@@ -27,9 +27,13 @@ public interface SnmpWalker<V> {
 
   /**
    * Gets a response representing the next row in the table.
-   * @return response for next row or {@code null} if the table contains
-   *    no more rows
+   * <p>
+   * <strong>The return value here is never {@code null}</strong>.  Instead,
+   * the return value from {@link SnmpResponse#get()} will be {@code null} to
+   * indicate that the walk has visited all available table rows
+   *
+   * @return response for next row (never {@code null})
    */
   SnmpResponse<V> next();
-  
+
 }
