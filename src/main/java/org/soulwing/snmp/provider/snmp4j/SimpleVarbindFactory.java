@@ -57,9 +57,16 @@ class SimpleVarbindFactory implements VarbindFactory {
   @Override
   public VarbindCollection newVarbindCollection(PDU pdu) {
     MutableVarbindCollection results = new MutableVarbindCollection();
+    Varbind[] indexes = new Varbind[0];
     for (int i = 0; i < pdu.size(); i++) {
       Varbind varbind = newVarbind(pdu.get(i));
       results.add(i, objectNameToKey(varbind), varbind);
+      if (indexes.length == 0) {
+        indexes = varbind.getIndexes();
+      }
+    }
+    for (Varbind index : indexes) {
+      results.addIndex(objectNameToKey(index), index);
     }
     return results.immutableCopy();
   }

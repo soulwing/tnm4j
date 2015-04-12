@@ -146,7 +146,7 @@ class Snmp4jVarbind implements Varbind {
   @Override
   public Varbind[] getIndexes() {
     if (indexExtractor == null) {
-      throw new IllegalArgumentException("not an indexed object: " + getOid());
+      return new Varbind[0];
     }
     IndexDescriptor[] descriptors = indexExtractor.extractIndexes(getOid());
     Varbind[] varbinds = new Varbind[descriptors.length];
