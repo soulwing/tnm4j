@@ -87,10 +87,10 @@ public interface SnmpOperations {
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch; the first {@code nonRepeaters} identifiers in the list
    *    are assumed to be non-repeating objects
-   * @return a response containing the retrieved varbinds in the same order 
-   *    and with the same keys as the requested objects
+   * @return a response containing a list of varbind collections; the list size
+   *    is {@code maxRepetitions}.
    */
-  SnmpResponse<VarbindCollection> getBulk(int nonRepeaters, 
+  SnmpResponse<List<VarbindCollection>> getBulk(int nonRepeaters,
       int maxRepetitions, List<String> oids);
 
   /**
@@ -100,13 +100,11 @@ public interface SnmpOperations {
    * @param maxRepetitions maximum number of repetitions to retrieve for the
    *    repeating objects in {@code varbinds}
    * @param varbinds a collection identifying the objects to fetch
-   * @return a response containing the retrieved varbinds in the same order
-   *    and with the same keys as the requested objects
+   * @return a response containing a list of varbind collections; the list size
+   *    is {@code maxRepetitions}.
    */
-  SnmpResponse<VarbindCollection> getBulk(int nonRepeaters,
+  SnmpResponse<List<VarbindCollection>> getBulk(int nonRepeaters,
       int maxRepetitions, VarbindCollection varbinds);
-
-
   /**
    * Performs an SNMP GETBULK operation.
    * @param nonRepeaters number of non-repeating objects at the beginning of
@@ -116,11 +114,11 @@ public interface SnmpOperations {
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch; the first {@code nonRepeaters} identifiers in the 
    *    list are assumed to be for non-repeating objects
-   * @return a response containing the retrieved varbinds in the same order 
-   *    and with the same keys as the requested objects
+   * @return a response containing a list of varbind collections; the list size
+   *    is {@code maxRepetitions}.
    */
-  SnmpResponse<VarbindCollection> getBulk(int nonRepeaters, int maxRepetitions, 
-      String... oids);
+  SnmpResponse<List<VarbindCollection>> getBulk(int nonRepeaters,
+      int maxRepetitions, String... oids);
 
   /**
    * Performs a walk of a MIB conceptual table.

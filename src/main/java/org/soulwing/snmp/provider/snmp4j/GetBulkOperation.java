@@ -19,17 +19,22 @@
 package org.soulwing.snmp.provider.snmp4j;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.snmp4j.PDU;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.smi.OID;
+import org.soulwing.snmp.MutableVarbindCollection;
+import org.soulwing.snmp.Varbind;
+import org.soulwing.snmp.VarbindCollection;
 
 /**
  * An SNMP GETBULK operation.
  *
  * @author Carl Harris
  */
-class GetBulkOperation extends VarbindCollectionOperation {
+class GetBulkOperation extends AbstractOperation<List<VarbindCollection>> {
 
   private final int nonRepeaters;
   private final int maxRepetitions;
@@ -61,7 +66,7 @@ class GetBulkOperation extends VarbindCollectionOperation {
   @Override
   protected void doInvoke(PDU request, Object userObject) throws IOException {
     configureRequest(request);
-    context.getSnmp().getBulk(request, context.getSnmp4jTarget(), userObject, 
+    context.getSnmp().getBulk(request, context.getSnmp4jTarget(), userObject,
         this);
   }
 
@@ -69,5 +74,45 @@ class GetBulkOperation extends VarbindCollectionOperation {
     request.setNonRepeaters(nonRepeaters);
     request.setMaxRepetitions(maxRepetitions);
   }
-  
+
+  @Override
+  protected List<VarbindCollection> createResult(PDU response) {
+    final int repeaters = oids.length - nonRepeaters;
+    List<VarbindCollection> rows = new ArrayList<VarbindCollection>(maxRepetitions);
+    int offset = nonRepeaters;
+    while (offset < response.size()) {
+      rows.add(createRow(response, offset, repeaters));
+      offset += repeaters;
+    }
+    return rows;
+  }
+
+  private VarbindCollection createRow(PDU response, int offset, int repeaters) {
+    final int responseSize = response.size();
+    MutableVarbindCollection row = new MutableVarbindCollection();
+    for (int i = 0; i < nonRepeaters; i++) {
+      if (i < responseSize) {
+        Varbind v = context.getVarbindFactory().newVarbind(response.get(i));
+        row.add(i, objectNameToKey(v), v);
+      }
+    }
+    if (repeaters > 0) {
+      Varbind[] indexes = new Varbind[0];
+      for (int i = 0; i < repeaters; i++) {
+        if (offset + i >= response.size()) break;
+        OID oid = response.get(i + offset).getOid();
+        Varbind v = context.getVarbindFactory()
+            .newVarbind(response.get(i + offset));
+        row.add(i + nonRepeaters, objectNameToKey(v), v);
+        if (indexes.length == 0) {
+          indexes = v.getIndexes();
+        }
+      }
+      for (Varbind index : indexes) {
+        row.addIndex(objectNameToKey(index), index);
+      }
+    }
+    return row.immutableCopy();
+  }
+
 }

@@ -84,8 +84,8 @@ public interface SnmpAsyncOperations {
    *    are assumed to be non-repeating objects
    * @return an operation that can be invoked to obtain a response
    */
-  SnmpOperation<VarbindCollection> asyncGetBulk(int nonRepeaters, int maxRepetitions, 
-      List<String> oids);
+  SnmpOperation<List<VarbindCollection>> asyncGetBulk(int nonRepeaters,
+      int maxRepetitions, List<String> oids);
 
   /**
    * Creates an SNMP GETBULK operation.
@@ -96,8 +96,8 @@ public interface SnmpAsyncOperations {
    * @param varbinds a collection identifying the objects to fetch
    * @return an operation that can be invoked to obtain a response
    */
-  SnmpOperation<VarbindCollection> asyncGetBulk(int nonRepeaters, int maxRepetitions,
-      VarbindCollection varbinds);
+  SnmpOperation<List<VarbindCollection>> asyncGetBulk(int nonRepeaters,
+      int maxRepetitions, VarbindCollection varbinds);
 
   /**
    * Create an SNMP GETBULK operation.
@@ -110,8 +110,8 @@ public interface SnmpAsyncOperations {
    *    list are assumed to be for non-repeating objects
    * @return an operation that can be invoked to obtain a response
    */
-  SnmpOperation<VarbindCollection> asyncGetBulk(int nonRepeaters, int maxRepetitions, 
-      String... oids);
+  SnmpOperation<List<VarbindCollection>> asyncGetBulk(int nonRepeaters,
+      int maxRepetitions, String... oids);
 
   /**
    * Creates a walker for a conceptual table.
