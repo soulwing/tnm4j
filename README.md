@@ -103,11 +103,11 @@ finally {
 
 As shown in the preceding snippet, a context must (eventually) be closed, in 
 order to avoid a resource leak.  Contexts are, however, **lightweight objects** 
-and it is quite reasonable to create the and retain them for a long as you need
-to continue communicating with a given SNMP agent.  Depending on the needs of 
-your application, this could be as short as the time needed to perform a few 
-SNMP operations, or perhaps for as long as the remote agent exists and your
-application continues running.  Tnm4j is used in applications that retain
+and it is quite reasonable to create and retain a context for as long as you 
+need to continue communicating with the target SNMP agent.  Depending on the 
+needs of your application, this could be as short as the time needed to perform 
+a few SNMP operations, or perhaps for as long as the remote agent exists and 
+your application continues running.  Tnm4j is used in applications that retain
 thousands of context objects on the heap.
 
 If you neglect to close a context, it will eventually be closed when your code
@@ -144,10 +144,10 @@ methods include variants which take a variable number of arguments or a
 > If you're wondering why we're using numeric OIDs here instead of names,
 > just hang on... we'll get there shortly!
 
-In addition to the `get` method, there the context provides methods to
-support all of the fundamental SNMP operations: GET, GETNEXT, GETBULK, and SET.
-Moreover, it provides methods to support easy and efficient SNMP table walks,
-which we'll cover later. See the [javadoc] for the full details.
+In addition to the `get` method, the context provides methods to support all of 
+the fundamental SNMP operations: GET, GETNEXT, GETBULK, and SET.  Moreover, it 
+provides methods to support easy and efficient SNMP table walks, which we'll 
+cover later. See the [javadoc] for the full details.
 
 You might have noticed there are quite a few *gets* in those two lines of code
 inside of the *try* block.  The snippet is written in the idiomatic style
@@ -583,8 +583,8 @@ finally {
 
 As you can see, using `walk` is the easier than using either GETBULK or GETNEXT.
 We obtain an `SnmpWalker` object from the context, using the `walk` method with 
-a parameter list that is essentially the same as what we used for `getBulk`.  
-The walker has a `next` method that executes GETBULK operations with the remote
+a parameter list that is essentially the same as what we used for `getBulk`. The 
+walker has a `next` method that executes GETBULK operations with the remote 
 agent as needed to retrieve all of the rows from the table.  
 
 While not shown here, the return value from `next` is an `SnmpResponse`
@@ -671,9 +671,139 @@ indexes.
 Asynchronous Operations
 -----------------------
 
-TODO
+Tnm4j fully supports asynchronous SNMP operations.  When using asynchronous
+operations, your application does not block while waiting for a response from
+an SNMP agent.  Tnm4j's asynchronous operations support can support concurrent
+communication with hundreds or even thousands of SNMP agents using just a few
+service threads.  
 
+Asynchronous operations are a key ingredient for writing responsive SNMP network 
+management applications that scale to support real networks.  Communication with 
+SNMP agents can be handled in the background, while application users continue 
+to interact with the application's user interface.
 
+> Effective use of asynchronous SNMP operations in Tnm4j requires a solid 
+> understanding of Java's facilities supporting concurrency: threads, locks, 
+> conditions, and the like.
+
+The `SnmpContext` interface provides `async-` methods for each of the low level
+SNMP operations and the high-level walk operation: `asyncGet`, `asyncGetNext`,
+`asyncGetBulk`, `asyncSet`, and `asyncWalk`.
+
+### Example: An asynchronous GETNEXT operation.
+
+Let's look at example that uses an asynchronous GETNEXT operation to retrieve
+the *sysName* and *sysUpTime* objects from a target SNMP agent.  The setup
+looks very similar to our prior examples, with one salient difference:
+
+```
+Mib mib = MibFactory.getInstance().newMib();
+mib.load("SNMPv2-MIB");
+
+SimpleSnmpV2cTarget target = new SimpleSnmpV2cTarget();
+target.setAddress(System.getProperty("tnm4j.agent.address", "10.0.0.1"));
+target.setCommunity(System.getProperty("tnm4j.agent.community", "public"));
+
+SnmpContext context = SnmpFactory.getInstance().newContext(target, mib);
+
+SnmpCallback<VarbindCollection> callback = new ExampleCallback();
+context.asyncGetNext(callback, "sysName", "sysUpTime");
+
+// go do something else while waiting for the callback
+```
+
+When using an asynchronous SNMP operation, we must provide a callback that will
+be notified when a response is available from the remote SNMP agent.  In the
+example we construct an `ExampleCallback` (that we'll see in just a moment).  We
+invoke `asyncGetNext` on the context, passing a reference to our callback and
+the list of objects we wish to retrieve.  After we initiate the GETNEXT request 
+our application can go on to do some other work -- the callback will be invoked
+later (via a different thread) when a response is available.
+  
+The callback implements the `SnmpCallback<VarbindCollection>` interface.  In our 
+example implementation below, we simply print the objects received from the 
+remote agent.
+
+```
+class ExampleCallback implements SnmpCallback<VarbindCollection> {
+
+  @Override
+  public void onSnmpResponse(SnmpEvent<VarbindCollection> event) {
+    try {
+      VarbindCollection result = event.getResponse().get();
+      System.out.format("%s uptime %s\n",
+          result.get("sysName"),
+          result.get("sysUpTime"));
+    }
+    catch (SnmpException ex) {
+      ex.printStackTrace(System.err);
+    }
+    finally {
+      event.getContext().close();
+    }
+  }
+
+}
+```
+
+When we previously looked at the `get` method in detail, we observed that its
+return value is `SnmpResponse<VarbindCallback>` -- when an invoking a 
+synchronous SNMP operation, we get an `SnmpResponse` which contains a 
+`VarbindCollection` result.  In an asynchronous operation, the callback is
+provided an event object that contains an `SnmpResponse` (which in turn
+contains a `VarbindCollection`).  The event object also provides a reference
+to the same context object that was used to invoke the operation.
+
+As we noted previously, the response object is patterned after the JDK's 
+`Future` object.  When we invoke `get` the response object can block until a
+response is available.  However, when we invoke `get` on the response object
+inside of our callback, it will never block -- the callback is not invoked 
+until a response is available.
+
+If a timeout or other error occurs while executing the asynchronous operation
+the call to `get` next will throw an appropriate exception.  This allows our
+callback to handle the exception using an ordinary *try* block.
+
+In this example, the context object is closed before the callback returns.  As
+we discussed previously, context objects are lightweight, but should be closed
+when no longer needed.  In our example, we don't need the context any more so
+we close it.  In your design, you might choose to retain the context for 
+subsequent operations, and that's fine too -- you just need to close the context
+when it really is no longer needed.
+
+If you plop this example into a main method, as is, you'll probably find that
+it exits without printing anything.  Because our example doesn't really have 
+anything else to do, it terminates before the response is received from the
+remote agent.  In a real application, this won't be a problem -- you wouldn't
+use asynchronous operations if the application didn't have better things to do
+than hang around waiting for a response from the remote SNMP agent. 
+
+To make the example work, you could easily add a `Thread.sleep` after the call 
+to `asyncGetNext` to but the main thread to sleep for long enough for a response 
+to be received.  This is imprecise, but good enough for this silly example. In 
+the [example code] provided with Tnm4j, the callback is modified so that the 
+main method can block until a response is received. 
+
+### Using a Completion Service to Collect Results
+
+Often, in creating network management applications you will write code that 
+simply needs to collect and record information from many different SNMP agents.
+An `SnmpCompletionService` can be used to simplify this work.  The completion
+service provides provides a `submit` to which you can submit `SnmpOperation`
+object instances for asynchronous execution.  The service has a queue like
+interface that you can use to retrieve `SnmpEvent` objects for completed 
+operations, in either a blocking on non-blocking manner.
+
+In addition to the methods such as `getNext` and `asyncGetNext` that directly 
+execute SNMP operations, `SnmpContext` provides factory methods that create 
+`SnmpOperation` objects.  An operation object provides two overloads of its 
+`invoke` method, providing for either synchronous or asynchronous execution.  
+You can create operation objects for operations you wish to perform, and 
+delegate the handling of the callback.  `SnmpCompletionService` is designed 
+around this concept.
+
+Example: TODO
+ 
 Receiving SNMP Notifications (Traps, Informs)
 ---------------------------------------------
 
