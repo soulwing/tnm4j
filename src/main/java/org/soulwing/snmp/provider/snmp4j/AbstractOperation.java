@@ -120,6 +120,10 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
         logger.debug("sent request {}", request.getRequestID());
       }
     }
+    catch (RuntimeException ex) {
+      callback.onSnmpResponse(new SnmpEvent<V>(context,
+          new ExceptionResponse<V>(ex)));
+    }
     catch (IOException ex) {
       callback.onSnmpResponse(new SnmpEvent<V>(context,
           new ExceptionResponse<V>(ex)));
