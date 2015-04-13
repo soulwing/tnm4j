@@ -33,8 +33,8 @@ import java.io.Closeable;
  *
  * @author Carl Harris
  */
-public interface SnmpContext extends SnmpOperations, SnmpAsyncOperations,
-    Closeable {
+public interface SnmpContext extends SnmpOperationFactory,
+    SnmpOperations, SnmpAsyncOperations, Closeable {
 
   /**
    * Gets the target of this context.

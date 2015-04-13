@@ -28,53 +28,59 @@ import java.util.List;
 public interface SnmpAsyncOperations {
 
   /**
-   * Creates an SNMP GET operation.
+   * Invokes an asynchronous SNMP GET operation.
+   * @param callback callback to invoke when a response is available
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch
-   * @return an operation that can be invoked to obtain a response
    */
-  SnmpOperation<VarbindCollection> asyncGet(List<String> oids);
+  void asyncGet(SnmpCallback<VarbindCollection> callback, List<String> oids);
 
   /**
-   * Creates an SNMP GET operation.
+   * Invokes an asynchronous SNMP GET operation.
+   * @param callback callback to invoke when a response is available
    * @param varbinds a collection identifying the objects to fetch
-   * @return an operation that can be invoked to obtain a response
    */
-  SnmpOperation<VarbindCollection> asyncGet(VarbindCollection varbinds);
+  void asyncGet(SnmpCallback<VarbindCollection> callback,
+      VarbindCollection varbinds);
 
   /**
-   * Creates an SNMP GET operation.
+   * Invokes an asynchronous SNMP GET operation.
+   * @param callback callback to invoke when a response is available
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch
-   * @return an operation that can be invoked to obtain a response
    */
-  SnmpOperation<VarbindCollection> asyncGet(String... oids);
+  void asyncGet(SnmpCallback<VarbindCollection> callback,
+      String... oids);
 
   /**
-   * Creates an SNMP GETNEXT operation.
+   * Invokes an asynchronous SNMP GETNEXT operation.
+   * @param callback callback to invoke when a response is available
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch
-   * @return an operation that can be invoked to obtain a response
    */
-  SnmpOperation<VarbindCollection> asyncGetNext(List<String> oids);
+  void asyncGetNext(SnmpCallback<VarbindCollection> callback,
+      List<String> oids);
 
   /**
-   * Creates an SNMP GETNEXT operation.
+   * Invokes an asynchronous SNMP GETNEXT operation.
+   * @param callback callback to invoke when a response is available
    * @param varbinds a collection identifying the objects to fetch
-   * @return an operation that can be invoked to obtain a response
    */
-  SnmpOperation<VarbindCollection> asyncGetNext(VarbindCollection varbinds);
+  void asyncGetNext(SnmpCallback<VarbindCollection> callback,
+      VarbindCollection varbinds);
 
   /**
-   * Creates an SNMP GETNEXT operation.
+   * Invokes an asynchronous SNMP GETNEXT operation.
+   * @param callback callback to invoke when a response is available
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch
-   * @return an operation that can be invoked to obtain a response
    */
-  SnmpOperation<VarbindCollection> asyncGetNext(String... oids);
+  void asyncGetNext(SnmpCallback<VarbindCollection> callback,
+      String... oids);
 
   /**
-   * Creates an SNMP GETBULK operation.
+   * Invokes an asynchronous SNMP GETBULK operation.
+   * @param callback callback to invoke when a response is available
    * @param nonRepeaters number of non-repeating objects at the beginning of
    *    {@code oids}.
    * @param maxRepetitions maximum number of repetitions to retrieve for the
@@ -82,25 +88,26 @@ public interface SnmpAsyncOperations {
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch; the first {@code nonRepeaters} identifiers in the list
    *    are assumed to be non-repeating objects
-   * @return an operation that can be invoked to obtain a response
    */
-  SnmpOperation<List<VarbindCollection>> asyncGetBulk(int nonRepeaters,
+  void asyncGetBulk(SnmpCallback<List<VarbindCollection>> callback,
+      int nonRepeaters,
       int maxRepetitions, List<String> oids);
 
   /**
-   * Creates an SNMP GETBULK operation.
+   * Invokes an asynchronous SNMP GETBULK operation.
+   * @param callback callback to invoke when a response is available
    * @param nonRepeaters number of non-repeating objects at the beginning of
    *    {@code oids}.
    * @param maxRepetitions maximum number of repetitions to retrieve for the
    *    repeating objects in {@code oids}
    * @param varbinds a collection identifying the objects to fetch
-   * @return an operation that can be invoked to obtain a response
    */
-  SnmpOperation<List<VarbindCollection>> asyncGetBulk(int nonRepeaters,
-      int maxRepetitions, VarbindCollection varbinds);
+  void asyncGetBulk(SnmpCallback<List<VarbindCollection>> callback,
+      int nonRepeaters, int maxRepetitions, VarbindCollection varbinds);
 
   /**
-   * Create an SNMP GETBULK operation.
+   * Invokes an asynchronous SNMP GETBULK operation.
+   * @param callback callback to invoke when a response is available
    * @param nonRepeaters number of non-repeating objects at the beginning of
    *   {@code oids}.
    * @param maxRepetitions maximum number of repetitions to retrieve for the
@@ -108,26 +115,22 @@ public interface SnmpAsyncOperations {
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch; the first {@code nonRepeaters} identifiers in the 
    *    list are assumed to be for non-repeating objects
-   * @return an operation that can be invoked to obtain a response
    */
-  SnmpOperation<List<VarbindCollection>> asyncGetBulk(int nonRepeaters,
-      int maxRepetitions, String... oids);
+  void asyncGetBulk(SnmpCallback<List<VarbindCollection>> callback,
+      int nonRepeaters, int maxRepetitions, String... oids);
 
   /**
    * Creates a walker for a conceptual table.
-   * <p>
-   *   of {@code oids}
-   * @param oids MIB names or dotted-decimal object identifiers; the first 
+   * @param oids MIB names or dotted-decimal object identifiers; the first
    *   {@code nonRepeaters} identifiers in the list are assumed to be for 
    *   non-repeating objects
    * @return a walker that can be used to obtain rows from the table
    */
-  SnmpAsyncWalker<VarbindCollection> asyncWalk(int nonRepeaters, 
+  SnmpAsyncWalker<VarbindCollection> asyncWalk(int nonRepeaters,
       List<String> oids);
 
   /**
    * Creates a walker for a conceptual table.
-   * <p>
    * @param nonRepeaters number of non-repeating objects at the beginning
    *   of {@code oids}
    * @param oids MIB names or dotted-decimal object identifiers; the first 

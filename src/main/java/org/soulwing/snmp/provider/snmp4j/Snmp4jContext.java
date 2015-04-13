@@ -35,6 +35,7 @@ import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
 import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.SnmpAsyncWalker;
+import org.soulwing.snmp.SnmpCallback;
 import org.soulwing.snmp.SnmpContext;
 import org.soulwing.snmp.SnmpOperation;
 import org.soulwing.snmp.SnmpResponse;
@@ -58,7 +59,6 @@ class Snmp4jContext implements SnmpContext {
   private final PduFactory pduFactory;
   private final VarbindFactory varbindFactory;
   private final DisposeListener disposeListener;
-
   
   public Snmp4jContext(SnmpTarget target, SnmpTargetConfig config,
       Mib mib, Snmp snmp, Target snmp4jTarget, PduFactory pduFactory,
@@ -192,7 +192,7 @@ class Snmp4jContext implements SnmpContext {
    */
   @Override
   public SnmpResponse<VarbindCollection> get(List<String> oids) {
-    return new GetOperation(this, resolveOids(oids)).invoke();
+    return newGet(oids).invoke();
   }
 
   /**
@@ -200,7 +200,7 @@ class Snmp4jContext implements SnmpContext {
    */
   @Override
   public SnmpResponse<VarbindCollection> get(VarbindCollection varbinds) {
-    return new GetOperation(this, resolveOids(varbinds)).invoke();
+    return newGet(varbinds).invoke();
   }
 
   /**
@@ -208,7 +208,7 @@ class Snmp4jContext implements SnmpContext {
    */
   @Override
   public SnmpResponse<VarbindCollection> get(String... oids) {
-    return get(Arrays.asList(oids));
+    return newGet(oids).invoke();
   }
 
   /**
@@ -216,7 +216,7 @@ class Snmp4jContext implements SnmpContext {
    */
   @Override
   public SnmpResponse<VarbindCollection> getNext(List<String> oids) {
-    return new GetNextOperation(this, resolveOids(oids)).invoke();
+    return newGetNext(oids).invoke();
   }
 
   /**
@@ -224,16 +224,15 @@ class Snmp4jContext implements SnmpContext {
    */
   @Override
   public SnmpResponse<VarbindCollection> getNext(VarbindCollection varbinds) {
-    return new GetNextOperation(this, resolveOids(varbinds)).invoke();
+    return newGetNext(varbinds).invoke();
   }
-
 
   /**
    * {@inheritDoc}
    */
   @Override
   public SnmpResponse<VarbindCollection> getNext(String... oids) {
-    return getNext(Arrays.asList(oids));
+    return newGetNext(oids).invoke();
   }
 
   /**
@@ -242,8 +241,7 @@ class Snmp4jContext implements SnmpContext {
   @Override
   public SnmpResponse<List<VarbindCollection>> getBulk(int nonRepeaters,
       int maxRepetitions, List<String> oids) {
-    return new GetBulkOperation(this, resolveOids(oids), nonRepeaters, 
-        maxRepetitions).invoke();
+    return newGetBulk(nonRepeaters, maxRepetitions, oids).invoke();
   }
 
   /**
@@ -252,10 +250,8 @@ class Snmp4jContext implements SnmpContext {
   @Override
   public SnmpResponse<List<VarbindCollection>> getBulk(int nonRepeaters,
       int maxRepetitions, VarbindCollection varbinds) {
-    return new GetBulkOperation(this, resolveOids(varbinds), nonRepeaters,
-        maxRepetitions).invoke();
+    return newGetBulk(nonRepeaters, maxRepetitions, varbinds).invoke();
   }
-
 
   /**
    * {@inheritDoc}
@@ -263,7 +259,84 @@ class Snmp4jContext implements SnmpContext {
   @Override
   public SnmpResponse<List<VarbindCollection>> getBulk(int nonRepeaters,
       int maxRepetitions, String... oids) {
-    return getBulk(nonRepeaters, maxRepetitions, Arrays.asList(oids));
+    return newGetBulk(nonRepeaters, maxRepetitions, oids).invoke();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void asyncGet(SnmpCallback<VarbindCollection> callback,
+      List<String> oids) {
+    newGet(oids).invoke(callback);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void asyncGet(SnmpCallback<VarbindCollection> callback, VarbindCollection varbinds) {
+    newGet(varbinds).invoke(callback);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void asyncGet(SnmpCallback<VarbindCollection> callback, String... oids) {
+    newGet(oids).invoke(callback);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void asyncGetNext(SnmpCallback<VarbindCollection> callback, List<String> oids) {
+    newGetNext(oids).invoke(callback);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void asyncGetNext(SnmpCallback<VarbindCollection> callback,
+      VarbindCollection varbinds) {
+    newGetNext(varbinds).invoke(callback);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void asyncGetNext(SnmpCallback<VarbindCollection> callback, String... oids) {
+    newGetNext(oids).invoke(callback);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void asyncGetBulk(SnmpCallback<List<VarbindCollection>> callback,
+      int nonRepeaters, int maxRepetitions, List<String> oids) {
+    newGetBulk(nonRepeaters, maxRepetitions, oids).invoke(callback);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void asyncGetBulk(SnmpCallback<List<VarbindCollection>> callback,
+      int nonRepeaters, int maxRepetitions, VarbindCollection varbinds) {
+    newGetBulk(nonRepeaters, maxRepetitions, varbinds).invoke(callback);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void asyncGetBulk(SnmpCallback<List<VarbindCollection>> callback,
+      int nonRepeaters, int maxRepetitions, String... oids) {
+    newGetBulk(nonRepeaters, maxRepetitions, oids).invoke(callback);
   }
 
   /**
@@ -317,7 +390,7 @@ class Snmp4jContext implements SnmpContext {
    * {@inheritDoc}
    */
   @Override
-  public SnmpOperation<VarbindCollection> asyncGet(List<String> oids) {
+  public SnmpOperation<VarbindCollection> newGet(List<String> oids) {
     return new GetOperation(this, resolveOids(oids));
   }
 
@@ -325,7 +398,7 @@ class Snmp4jContext implements SnmpContext {
    * {@inheritDoc}
    */
   @Override
-  public SnmpOperation<VarbindCollection> asyncGet(VarbindCollection varbinds) {
+  public SnmpOperation<VarbindCollection> newGet(VarbindCollection varbinds) {
     return new GetOperation(this, resolveOids(varbinds));
   }
 
@@ -333,15 +406,15 @@ class Snmp4jContext implements SnmpContext {
    * {@inheritDoc}
    */
   @Override
-  public SnmpOperation<VarbindCollection> asyncGet(String... oids) {
-    return asyncGet(Arrays.asList(oids));
+  public SnmpOperation<VarbindCollection> newGet(String... oids) {
+    return newGet(Arrays.asList(oids));
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public SnmpOperation<VarbindCollection> asyncGetNext(List<String> oids) {
+  public SnmpOperation<VarbindCollection> newGetNext(List<String> oids) {
     return new GetNextOperation(this, resolveOids(oids));
   }
 
@@ -349,7 +422,7 @@ class Snmp4jContext implements SnmpContext {
    * {@inheritDoc}
    */
   @Override
-  public SnmpOperation<VarbindCollection> asyncGetNext(
+  public SnmpOperation<VarbindCollection> newGetNext(
       VarbindCollection varbinds) {
     return new GetNextOperation(this, resolveOids(varbinds));
   }
@@ -358,15 +431,15 @@ class Snmp4jContext implements SnmpContext {
    * {@inheritDoc}
    */
   @Override
-  public SnmpOperation<VarbindCollection> asyncGetNext(String... oids) {
-    return asyncGetNext(Arrays.asList(oids));
+  public SnmpOperation<VarbindCollection> newGetNext(String... oids) {
+    return newGetNext(Arrays.asList(oids));
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public SnmpOperation<List<VarbindCollection>> asyncGetBulk(int nonRepeaters,
+  public SnmpOperation<List<VarbindCollection>> newGetBulk(int nonRepeaters,
       int maxRepetitions, List<String> oids) {
     return new GetBulkOperation(this, resolveOids(oids), nonRepeaters, 
         maxRepetitions);
@@ -376,7 +449,7 @@ class Snmp4jContext implements SnmpContext {
    * {@inheritDoc}
    */
   @Override
-  public SnmpOperation<List<VarbindCollection>> asyncGetBulk(int nonRepeaters,
+  public SnmpOperation<List<VarbindCollection>> newGetBulk(int nonRepeaters,
       int maxRepetitions, VarbindCollection varbinds) {
     return new GetBulkOperation(this, resolveOids(varbinds), nonRepeaters,
         maxRepetitions);
@@ -386,9 +459,9 @@ class Snmp4jContext implements SnmpContext {
    * {@inheritDoc}
    */
   @Override
-  public SnmpOperation<List<VarbindCollection>> asyncGetBulk(int nonRepeaters,
+  public SnmpOperation<List<VarbindCollection>> newGetBulk(int nonRepeaters,
       int maxRepetitions, String... oids) {
-    return asyncGetBulk(nonRepeaters, maxRepetitions, Arrays.asList(oids));
+    return newGetBulk(nonRepeaters, maxRepetitions, Arrays.asList(oids));
   }
 
   /**
