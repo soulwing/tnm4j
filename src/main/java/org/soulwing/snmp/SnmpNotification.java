@@ -46,8 +46,8 @@ public interface SnmpNotification {
   /**
    * Gets a target that describes the sender of the notification.
    * <p>
-   * This could be used to create context that can be used to perform operations
-   * against the sender after receiving a notification.
+   * This could be used to create a context that can be used to perform
+   * operations against the sender after receiving a notification.
    * @return target describing the notification sender
    */
   SnmpTarget getPeer();

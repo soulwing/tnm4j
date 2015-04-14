@@ -55,7 +55,7 @@ public interface SnmpV1Trap extends SnmpNotification {
 
   /**
    * Gets the timestamp reported in the trap.
-   * @return
+   * @return timestamp
    */
   ObjectValue getTimestamp();
 
