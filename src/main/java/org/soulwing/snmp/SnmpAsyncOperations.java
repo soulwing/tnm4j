@@ -120,60 +120,54 @@ public interface SnmpAsyncOperations {
       int nonRepeaters, int maxRepetitions, String... oids);
 
   /**
-   * Creates a walker for a conceptual table.
+   * Invokes an asynchronous walk on a conceptual table.
+   * @param callback to invoke when a walker becomes available
    * @param oids MIB names or dotted-decimal object identifiers; the first
    *   {@code nonRepeaters} identifiers in the list are assumed to be for 
    *   non-repeating objects
-   * @return a walker that can be used to obtain rows from the table
    */
-  SnmpAsyncWalker<VarbindCollection> asyncWalk(int nonRepeaters,
-      List<String> oids);
+  void asyncWalk(SnmpCallback<SnmpAsyncWalker<VarbindCollection>> callback,
+      int nonRepeaters, List<String> oids);
 
   /**
-   * Creates a walker for a conceptual table.
+   * Invokes an asynchronous walk on a conceptual table.
+   * @param callback to invoke when a walker becomes available
    * @param nonRepeaters number of non-repeating objects at the beginning
    *   of {@code oids}
    * @param oids MIB names or dotted-decimal object identifiers; the first 
    *   {@code nonRepeaters} identifiers in the list are assumed to be for 
    *   non-repeating objects
-   * @return a future that can be used to obtain the list of table rows
    */
-  SnmpAsyncWalker<VarbindCollection> asyncWalk(int nonRepeaters, String... oids);
+  void asyncWalk(SnmpCallback<SnmpAsyncWalker<VarbindCollection>> callback,
+      int nonRepeaters, String... oids);
 
   /**
-   * Creates a walker for a conceptual table.
-   * <p>
-   * This is a high level operation that can be used to retrieve all 
-   * rows of a conceptual table.
+   * Invokes an asynchronous walk on a conceptual table.
+   * @param callback to invoke when a walker becomes available
    * @param nonRepeaters MIB names or dotted-decimal object identifiers 
    *   for the non-repeating elements to retrieve
    * @param repeaters MIB names or dotted-decimal object identifiers 
    *   for the table column elements to retrieve
-   * @return a future that can be used to obtain the list of table rows
    */
-  SnmpAsyncWalker<VarbindCollection> asyncWalk(List<String> nonRepeaters, 
+  void asyncWalk(SnmpCallback<SnmpAsyncWalker<VarbindCollection>> callback,
+      List<String> nonRepeaters, List<String> repeaters);
+
+  /**
+   * Invokes an asynchronous walk on a conceptual table.
+   * @param callback to invoke when a walker becomes available
+   * @param repeaters MIB names or dotted-decimal object identifiers
+   *   for the table column elements to retrieve
+   */
+  void asyncWalk(SnmpCallback<SnmpAsyncWalker<VarbindCollection>> callback,
       List<String> repeaters);
 
   /**
-   * Creates a walker for a conceptual table.
-   * <p>
-   * This is a high level operation that can be used to retrieve all 
-   * rows of a conceptual table.
-   * @param repeaters MIB names or dotted-decimal object identifiers 
+   * Invokes an asynchronous walk on a conceptual table.
+   * @param callback to invoke when a walker becomes available
+   * @param repeaters MIB names or dotted-decimal object identifiers
    *   for the table column elements to retrieve
-   * @return a walker that can be used to obtain rows from the table
    */
-  SnmpAsyncWalker<VarbindCollection> asyncWalk(List<String> repeaters);
-
-  /**
-   * Creates a walker for a conceptual table.
-   * <p>
-   * This is a high level operation that can be used to retrieve all 
-   * rows of a conceptual table.
-   * @param repeaters MIB names or dotted-decimal object identifiers 
-   *   for the table column elements to retrieve
-   * @return a walker that can be used to obtain rows from the table
-   */
-  SnmpAsyncWalker<VarbindCollection> asyncWalk(String... repeaters);
+  void asyncWalk(SnmpCallback<SnmpAsyncWalker<VarbindCollection>> callback,
+      String... repeaters);
 
 }

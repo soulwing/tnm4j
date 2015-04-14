@@ -114,4 +114,47 @@ public interface SnmpOperationFactory {
   SnmpOperation<List<VarbindCollection>> newGetBulk(int nonRepeaters,
       int maxRepetitions, String... oids);
 
+  /**
+   * Creates a walk operation.
+   * @param oids MIB names or dotted-decimal object identifiers; the first
+   *   {@code nonRepeaters} identifiers in the list are assumed to be for
+   *   non-repeating objects
+   */
+  SnmpAsyncWalker<VarbindCollection> newWalk(int nonRepeaters,
+      List<String> oids);
+
+  /**
+   * Creates a walk operation.
+   * @param nonRepeaters number of non-repeating objects at the beginning
+   *   of {@code oids}
+   * @param oids MIB names or dotted-decimal object identifiers; the first
+   *   {@code nonRepeaters} identifiers in the list are assumed to be for
+   *   non-repeating objects
+   */
+  SnmpAsyncWalker<VarbindCollection> newWalk(int nonRepeaters, String... oids);
+
+  /**
+   * Creates a walk operation.
+   * @param nonRepeaters MIB names or dotted-decimal object identifiers
+   *   for the non-repeating elements to retrieve
+   * @param repeaters MIB names or dotted-decimal object identifiers
+   *   for the table column elements to retrieve
+   */
+  SnmpAsyncWalker<VarbindCollection> newWalk(List<String> nonRepeaters,
+      List<String> repeaters);
+
+  /**
+   * Creates a walk operation.
+   * @param repeaters MIB names or dotted-decimal object identifiers
+   *   for the table column elements to retrieve
+   */
+  SnmpAsyncWalker<VarbindCollection> newWalk(List<String> repeaters);
+
+  /**
+   * Creates a walk operation.
+   * @param repeaters MIB names or dotted-decimal object identifiers
+   *   for the table column elements to retrieve
+   */
+  SnmpAsyncWalker<VarbindCollection> newWalk(String... repeaters);
+
 }

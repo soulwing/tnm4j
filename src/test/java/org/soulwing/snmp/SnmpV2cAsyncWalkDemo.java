@@ -40,12 +40,11 @@ public class SnmpV2cAsyncWalkDemo {
     SnmpFactory factory = SnmpFactory.getInstance();
     SnmpContext snmp = factory.newContext(target, mib);
 
-    SnmpAsyncWalker<VarbindCollection> walker = snmp.asyncWalk(
+    WalkCallback callback = new WalkCallback();
+    snmp.asyncWalk(callback,
         1, "sysUpTime", "ifIndex", "ifName", "ifOperStatus", "ifAdminStatus",
         "ifHCInOctets", "ifHCOutOctets");
     
-    WalkCallback callback = new WalkCallback();
-    walker.invoke(callback);
     callback.awaitShutdown();
     System.out.println("done");
     factory.close();

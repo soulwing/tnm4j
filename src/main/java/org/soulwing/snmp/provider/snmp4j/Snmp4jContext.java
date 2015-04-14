@@ -343,7 +343,7 @@ class Snmp4jContext implements SnmpContext {
    * {@inheritDoc}
    */
   @Override
-  public SnmpWalker<VarbindCollection> walk(int nonRepeaters, 
+  public SnmpWalker<VarbindCollection> walk(int nonRepeaters,
       List<String> oids) {
     return new GetBulkSyncWalker(this, resolveOids(oids), nonRepeaters, 
         config.getWalkMaxRepetitions());
@@ -384,6 +384,51 @@ class Snmp4jContext implements SnmpContext {
   @Override
   public SnmpWalker<VarbindCollection> walk(String... repeaters) {
     return walk(0, Arrays.asList(repeaters));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void asyncWalk(SnmpCallback<SnmpAsyncWalker<VarbindCollection>> callback,
+      int nonRepeaters, List<String> oids) {
+    newWalk(nonRepeaters, oids).invoke(callback);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void asyncWalk(SnmpCallback<SnmpAsyncWalker<VarbindCollection>> callback,
+      int nonRepeaters, String... oids) {
+    newWalk(nonRepeaters, oids).invoke(callback);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void  asyncWalk(SnmpCallback<SnmpAsyncWalker<VarbindCollection>> callback,
+      List<String> nonRepeaters, List<String> repeaters) {
+    newWalk(nonRepeaters, repeaters).invoke(callback);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void asyncWalk(SnmpCallback<SnmpAsyncWalker<VarbindCollection>> callback,
+      List<String> repeaters) {
+    newWalk(repeaters).invoke(callback);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void asyncWalk(SnmpCallback<SnmpAsyncWalker<VarbindCollection>> callback,
+      String... repeaters) {
+    newWalk(repeaters).invoke(callback);
   }
 
   /**
@@ -468,7 +513,7 @@ class Snmp4jContext implements SnmpContext {
    * {@inheritDoc}
    */
   @Override
-  public SnmpAsyncWalker<VarbindCollection> asyncWalk(int nonRepeaters,
+  public SnmpAsyncWalker<VarbindCollection> newWalk(int nonRepeaters,
       List<String> oids) {
     return new GetBulkAsyncWalker(this, resolveOids(oids), nonRepeaters, 
         config.getWalkMaxRepetitions());
@@ -478,38 +523,38 @@ class Snmp4jContext implements SnmpContext {
    * {@inheritDoc}
    */
   @Override
-  public SnmpAsyncWalker<VarbindCollection> asyncWalk(int nonRepeaters,
+  public SnmpAsyncWalker<VarbindCollection> newWalk(int nonRepeaters,
       String... oids) {
-    return asyncWalk(nonRepeaters, Arrays.asList(oids));
+    return newWalk(nonRepeaters, Arrays.asList(oids));
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public SnmpAsyncWalker<VarbindCollection> asyncWalk(List<String> nonRepeaters,
+  public SnmpAsyncWalker<VarbindCollection> newWalk(List<String> nonRepeaters,
       List<String> repeaters) {
     final int size = nonRepeaters.size() + repeaters.size();
     List<String> oids = new ArrayList<String>(size);
     oids.addAll(nonRepeaters);
     oids.addAll(repeaters);
-    return asyncWalk(nonRepeaters.size(), oids);
+    return newWalk(nonRepeaters.size(), oids);
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public SnmpAsyncWalker<VarbindCollection> asyncWalk(List<String> repeaters) {
-    return asyncWalk(0, repeaters);
+  public SnmpAsyncWalker<VarbindCollection> newWalk(List<String> repeaters) {
+    return newWalk(0, repeaters);
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public SnmpAsyncWalker<VarbindCollection> asyncWalk(String... repeaters) {
-    return asyncWalk(0, Arrays.asList(repeaters));
+  public SnmpAsyncWalker<VarbindCollection> newWalk(String... repeaters) {
+    return newWalk(0, Arrays.asList(repeaters));
   }
 
   protected OID[] resolveOids(List<String> oids) {
