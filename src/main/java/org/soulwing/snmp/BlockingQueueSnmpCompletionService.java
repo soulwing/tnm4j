@@ -25,8 +25,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
- * An {@link SnmpCompletionService} that is implemented using a 
- * {@link BlockingQueue}.
+ * An {@link SnmpCompletionService} that is backed by a {@link BlockingQueue}.
  *
  * @author Carl Harris
  */
@@ -36,9 +35,26 @@ public class BlockingQueueSnmpCompletionService<V>
   private final Map<SnmpCallback<V>, SnmpCallback<V>> pending = 
       new ConcurrentHashMap<SnmpCallback<V>, SnmpCallback<V>>();
   
-  private final BlockingQueue<SnmpEvent<V>> queue = 
-      new LinkedBlockingQueue<SnmpEvent<V>>();
-  
+  private final BlockingQueue<SnmpEvent<V>> queue;
+
+  /**
+   * Creates a new completion service backed by an unbounded blocking queue.
+   */
+  public BlockingQueueSnmpCompletionService() {
+    this(new LinkedBlockingQueue<SnmpEvent<V>>());
+  }
+
+  /**
+   * Creates a new completion service backed by the given blocking queue.
+   * @param queue queue that will be used to buffer received response data
+   */
+  public BlockingQueueSnmpCompletionService(BlockingQueue<SnmpEvent<V>> queue) {
+    this.queue = queue;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean isIdle() {
     return pending.isEmpty() && queue.isEmpty();
