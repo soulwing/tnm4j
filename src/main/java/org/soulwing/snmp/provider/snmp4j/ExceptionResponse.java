@@ -28,7 +28,7 @@ import org.soulwing.snmp.TimeoutException;
  *
  * @author Carl Harris
  */
-public class ExceptionResponse<V> implements SnmpResponse<V> {
+class ExceptionResponse<V> implements SnmpResponse<V> {
 
   private final Exception ex;
   
