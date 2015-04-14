@@ -938,9 +938,9 @@ finally {
 The notification event object contains an `SnmpNotification` that provides the
 details of the received INFORM or TRAP.  The `getType` method can be used to 
 determine the notification type.  Legacy SNMPv1 traps are a little 
-different than SNMPv2 INFORM and TRAP notifications.  Consequently when the
-trap type is `TRAPv1`, you may safely cast the notification object to 
-`SnmpV1Trap` to access the properties defined for an SNMPv1 trap.
+different than SNMPv2 INFORM and TRAP notifications. When the trap type is 
+`TRAPv1`, you may safely cast the notification object to  `SnmpV1Trap` to access 
+the additional properties defined for an SNMPv1 trap.
 
 On most Unix hosts, you can use the `snmptrap` and `snmpnotify` commands
 (which are part of the Net-SNMP package) to test your notification handler.
