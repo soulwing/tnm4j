@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>SnmpV2cAsyncDemo xref</title>
+<link type="text/css" rel="stylesheet" href="../../../stylesheet.css" />
+</head>
+<body>
+<div id="overview"><a href="../../../../testapidocs/org/soulwing/snmp/SnmpV2cAsyncDemo.html">View Javadoc</a></div><pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * tnm4j - Simplified SNMP API for Java</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> * Copyright (C) 2012 Carl Harris, Jr</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * This program is free software: you can redistribute it and/or modify</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * it under the terms of the GNU General Public License as published by</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * the Free Software Foundation, either version 3 of the License, or</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * (at your option) any later version.</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * This program is distributed in the hope that it will be useful,</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * GNU General Public License for more details.</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * along with this program.  If not, see &lt;<a href="http://www.gnu.org/licenses/&gt;" target="alexandria_uri">http://www.gnu.org/licenses/&gt;</a>.</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">package</strong> org.soulwing.snmp;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> java.util.regex.Matcher;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> java.util.regex.Pattern;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../org/soulwing/snmp/SnmpV2cAsyncDemo.html">SnmpV2cAsyncDemo</a> {
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String NOT_AVAILABLE = <span class="jxr_string">"N/A"</span>;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>    
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Pattern CISCOIOS_PATTERN =
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>        Pattern.compile(<span class="jxr_string">"Software &#92;&#92;(([^)]+)&#92;&#92;).*Version  *([^ ,]+) *"</span>);
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>    
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> main(String[] args) <strong class="jxr_keyword">throws</strong> Exception {    
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>      <strong class="jxr_keyword">final</strong> String deviceName = System.getProperty(<span class="jxr_string">"agent.name"</span>, <span class="jxr_string">"foo"</span>);
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>      <strong class="jxr_keyword">final</strong> String ipAddress = System.getProperty(<span class="jxr_string">"agent.ip"</span>, <span class="jxr_string">"10.0.0.1"</span>);
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>      <strong class="jxr_keyword">final</strong> String community = System.getProperty(<span class="jxr_string">"agent.community"</span>, <span class="jxr_string">"public"</span>);
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>      SimpleSnmpV2cTarget target = <strong class="jxr_keyword">new</strong> SimpleSnmpV2cTarget();
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>      target.setAddress(ipAddress);
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>      target.setCommunity(community);
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>      
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>      Mib mib = MibFactory.getInstance().newMib();
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>      mib.load(<span class="jxr_string">"RFC1213-MIB"</span>);
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>      SnmpContext snmp = SnmpFactory.getInstance().newContext(target, mib);
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>      SnmpCompletionService&lt;VarbindCollection&gt; completionService =
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>          <strong class="jxr_keyword">new</strong> BlockingQueueSnmpCompletionService&lt;VarbindCollection&gt;();
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>      completionService.submit(snmp.newGetNext(<span class="jxr_string">"sysDescr"</span>, <span class="jxr_string">"sysUpTime"</span>));
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>      <strong class="jxr_keyword">while</strong> (!completionService.isIdle()) {
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>        SnmpEvent&lt;VarbindCollection&gt; event = completionService.take();
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>        System.out.println(event.getContext().getTarget().getAddress());
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>        VarbindCollection varbinds = event.getResponse().get();
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>        String sysDescr = varbinds.get(<span class="jxr_string">"sysDescr"</span>).asString();
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>        String sysUpTime = varbinds.get(<span class="jxr_string">"sysUpTime"</span>).asString();
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>        Matcher matcher = CISCOIOS_PATTERN.matcher(sysDescr);
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>        <strong class="jxr_keyword">boolean</strong> found = matcher.find();
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>        String software = found ? matcher.group(1) : NOT_AVAILABLE;
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>        String version = found ? matcher.group(2) : NOT_AVAILABLE;
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>        System.out.format(<span class="jxr_string">"%-12s %-15s %-24s %-24s %s\n"</span>,
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>            <span class="jxr_string">"Device Name"</span>, <span class="jxr_string">"IP Address"</span>, <span class="jxr_string">"Software"</span>, <span class="jxr_string">"Version"</span> , <span class="jxr_string">"Up Time"</span>);
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>        System.out.format(<span class="jxr_string">"%-12s %-15s %-24s %-24s %s\n"</span>,
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>            deviceName, ipAddress, software, version, sysUpTime);
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>      }
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>      SnmpFactory.getInstance().close();
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>    }
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>    
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  }
+</pre>
+<hr/>
+<div id="footer">Copyright &#169; 2012&#x2013;2015. All rights reserved.</div>
+</body>
+</html>
