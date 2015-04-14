@@ -21,7 +21,7 @@ import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.provider.MibProvider;
 
 /**
- * DESCRIBE THE TYPE HERE.
+ * A {@link MibProvider} implementation based on Mibble.
  *
  * @author Carl Harris
  */

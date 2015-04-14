@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * DESCRIBE THE TYPE HERE.
+ * Mibble-based {@link org.soulwing.snmp.provider.MibProvider}
  *
  * @author Carl Harris
  */

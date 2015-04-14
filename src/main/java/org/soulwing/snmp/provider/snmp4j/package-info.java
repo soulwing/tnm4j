@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * DESCRIBE THE TYPE HERE.
+ * Snmp4j-based {@link org.soulwing.snmp.provider.SnmpProvider}
  *
  * @author Carl Harris
  */
