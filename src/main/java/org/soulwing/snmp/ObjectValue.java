@@ -27,7 +27,7 @@ public interface ObjectValue {
 
   /**
    * Gets the MIB syntax type identifier of the object.
-   * @return
+   * @return syntax identifier
    */
   int getSyntax();
 
@@ -68,7 +68,7 @@ public interface ObjectValue {
    * <li>TimeTicks &mdash; {@code Long} value of the object</li>
    * <li>Opaque &mdash; {@code byte} array containing the object's octets</li>
    * </ul>
-   * @return
+   * @return value representation
    */
   Object toObject();
   

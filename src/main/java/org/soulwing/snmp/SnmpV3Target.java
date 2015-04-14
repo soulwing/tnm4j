@@ -24,7 +24,7 @@ package org.soulwing.snmp;
  * An SNMPv3 target supports strong authentication and cryptographic privacy.
  * If the {@link #getAuthType() authType} property is not set, the underlying 
  * provider will not attempt authentication.  If the 
- * {@liink #getPrivType() privType} property is not set, the underlying
+ * {@link #getPrivType() privType} property is not set, the underlying
  * provider will not attempt to ensure privacy of communications.
  * 
  * @author Carl Harris

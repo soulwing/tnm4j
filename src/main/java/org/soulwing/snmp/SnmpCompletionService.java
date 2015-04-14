@@ -20,7 +20,7 @@ package org.soulwing.snmp;
 
 
 /**
- * A service that awaits the completion of {@link SnmpFuture} instances.
+ * A service that awaits the completion of {@link SnmpOperation} instances.
  *
  * @author Carl Harris
  */

@@ -30,7 +30,7 @@ public interface IndexExtractor {
    * Produces a description of each of the index objects contained in 
    * an OID for an object that is defined in a conceptual table.
    * @param oid OID of a conceptual table column value
-   * @return
+   * @return array of index descriptors, one per index component
    */
   IndexDescriptor[] extractIndexes(String oid);
   

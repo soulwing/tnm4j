@@ -21,10 +21,14 @@ package org.soulwing.snmp;
 /**
  * A provider of specialized MIB support for handling SNMPv1 TRAP PDUs.
  * <p>
- * SNMPv1 traps contain several fields that are represent in a manner similar
+ * SNMPv1 traps contain several fields that are represented in a manner similar
  * to variable bindings, but for which no managed object type is defined.  An
  * implementation of this class provides basic formatting support for these
  * fields.
+ * <p>
+ * This API is primarily intended to support
+ * {@link org.soulwing.snmp.provider.SnmpProvider} implementations.
+ *
  */
 public interface MibTrapV1Support {
 

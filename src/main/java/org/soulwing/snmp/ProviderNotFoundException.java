@@ -19,7 +19,7 @@ package org.soulwing.snmp;
 
 /**
  * An exception thrown when a named provider is not found by the 
- * {@link ServiceLoader}.
+ * {@link java.util.ServiceLoader}.
  *
  * @author Carl Harris
  */
@@ -31,7 +31,7 @@ public class ProviderNotFoundException extends MibException {
   
   /**
    * Constructs a new instance.
-   * @param providerName
+   * @param providerName name of the subject provider
    */
   public ProviderNotFoundException(String providerName) {
     super("provider not found: " + providerName);

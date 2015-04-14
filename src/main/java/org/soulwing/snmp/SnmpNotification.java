@@ -54,7 +54,7 @@ public interface SnmpNotification {
 
   /**
    * Gets the collection of variable bindings received in the notification.
-   * @return
+   * @return variable bindings
    */
   VarbindCollection getVarbinds();
 
