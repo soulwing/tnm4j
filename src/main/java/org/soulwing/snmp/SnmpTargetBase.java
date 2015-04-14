@@ -27,10 +27,8 @@ import java.util.Map;
  */
 public abstract class SnmpTargetBase implements SnmpTarget {
 
-  public static final int DEFAULT_PORT = 161;
-  
   private String address;
-  private int port = DEFAULT_PORT;
+  private int port = SnmpDefaults.AGENT_PORT;
   private Map<String, Object> properties = new HashMap<String, Object>();
 
   /**

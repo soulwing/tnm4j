@@ -44,7 +44,7 @@ public class SnmpV2cAsyncDemo {
     SnmpCompletionService<VarbindCollection> completionService =
         new BlockingQueueSnmpCompletionService<VarbindCollection>();
 
-    completionService.submit(snmp.asyncGetNext("sysDescr", "sysUpTime"));
+    completionService.submit(snmp.newGetNext("sysDescr", "sysUpTime"));
     while (!completionService.isIdle()) {
       SnmpEvent<VarbindCollection> event = completionService.take();
       System.out.println(event.getContext().getTarget().getAddress());

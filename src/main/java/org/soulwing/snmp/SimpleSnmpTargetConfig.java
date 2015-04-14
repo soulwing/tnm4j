@@ -26,13 +26,9 @@ package org.soulwing.snmp;
  */
 public class SimpleSnmpTargetConfig implements SnmpTargetConfig {
 
-  public static final int DEFAULT_RETRIES = 2;
-  public static final long DEFAULT_TIMEOUT = 10000L;
-  public static final int DEFAULT_WALK_MAX_REPETITIONS = 20;
-  
-  private int retries = DEFAULT_RETRIES;
-  private long timeout = DEFAULT_TIMEOUT;
-  private int walkMaxRepetitions = DEFAULT_WALK_MAX_REPETITIONS;
+  private int retries = SnmpDefaults.RETRIES;
+  private long timeout = SnmpDefaults.TIMEOUT;
+  private int walkMaxRepetitions = SnmpDefaults.WALK_MAX_REPETITIONS;
   
   private boolean walkAllowsTruncatedRepetition;
   
