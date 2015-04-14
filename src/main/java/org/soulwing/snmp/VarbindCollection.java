@@ -23,8 +23,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A immutable ordered collection of {@link Varbind} objects resulting from 
- * an SNMP operation.
+ * An ordered collection of {@link Varbind} objects resulting from
+ * an SNMP operation.  The collection supports both list-like and map-like
+ * access methods.
  *
  * @author Carl Harris
  */
