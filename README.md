@@ -802,9 +802,165 @@ You can create operation objects for operations you wish to perform, and
 delegate the handling of the callback.  `SnmpCompletionService` is designed 
 around this concept.
 
-Example: TODO
+Suppose we wanted to collect *sysName* and *sysUpTime* from many different 
+network devices.  Here's an example of how we might accomplish this using a
+completion service:
+
+```
+Mib mib = MibFactory.getInstance().newMib();
+mib.load("SNMPv2-MIB");
+
+SnmpCompletionService<VarbindCollection> completionService =
+    new BlockingQueueSnmpCompletionService<VarbindCollection>();
+
+completionService.submit(newOperation("10.0.0.1", "public", mib));
+completionService.submit(newOperation("10.0.0.2", "public", mib));
+completionService.submit(newOperation("10.0.0.3", "public", mib));
+
+while (!completionService.isIdle()) {
+  SnmpEvent<VarbindCollection> event = completionService.take();
+  VarbindCollection result = event.getResponse().get();
+  System.out.format("%s: sysName=%s sysUpTime=%s\n",
+      event.getContext().getTarget().getAddress(),
+      result.get("sysName"),
+      result.get("sysUpTime"));
+
+  event.getContext().close();
+}
+```
+
+The basic structure of the main body of our example is quite simple.  We submit
+operations on different network devices to the completion service, and then
+remain in the loop until all of the results have been obtained.  While the
+example simply uses a few hard-coded agent addresses, we could easily imagine
+looking those details up in a database and submitting operations to the 
+completion service for all of the devices in our network.  
+
+In the loop body, we can see that the `take` method on the completion service 
+returns an  `SnmpEvent` object, which we saw in the callback of our previous 
+example.  The `take` method blocks until the next event describing a completed 
+operation becomes available.  We extract the result from the event and print the 
+information requested by the operation.  Since we're done with the context 
+associated with the event, we close it. 
+
+The `newOperation` method is shown below.
+
+```
+private static SnmpOperation<VarbindCollection> newOperation(String address,
+    String community, Mib mib) {
+  SimpleSnmpV2cTarget target = new SimpleSnmpV2cTarget();
+  target.setAddress(address);
+  target.setCommunity(community);
+
+  return SnmpFactory.getInstance().newContext(target, mib)
+      .newGetNext("sysName", "sysUpTime");
+}
+```
+
+As we've seen in previous examples, we create a target that describes the
+SNMP agent on which we wish to execute an operation.  When use `SnmpFactory`
+to obtain a context for our target, and we use the `newGetNext` operation 
+factory method to obtain an `SnmpOperation` that will perform a GETNEXT
+for the *sysName* and *sysUpTime* objects.
+
+The context interface provides factory methods such as `newGetNext` for all of 
+the SNMP operations.  An `SnmpOperation` encapsulates a context, an operation, 
+and a list of SNMP objects on which the operation is to be performed.  An 
+operation can be invoked either synchronously or asynchronously.  When you 
+submit an operation to an `SnmpCompletionService`, the service invokes the 
+operation asynchronously, providing a callback that will be used to queue the 
+responses, making them available via the public API of the service.
+   
  
 Receiving SNMP Notifications (Traps, Informs)
 ---------------------------------------------
 
-TODO
+SNMP agents can be configured to send notifications to a management application
+when certain events occur.  For example, the standard MIB defines events that 
+can notify a management application when a network link managed by an agent 
+transitions to an up or down state, or to notify the application when an agent
+or the network device it is managing is restarted.  Tnm4j makes it easy to 
+respond to notifications received from SNMP agents in some manner that is 
+appropriate for your network application. 
+
+SNMP defines two different notification types; TRAP and INFORM.  An INFORM must 
+be acknowledged by the recipient, allowing the agent to be assured of its 
+delivery.  For the agent, a TRAP is purely fire and forget -- the agent does not 
+concern itself with whether a TRAP is actually received by any management 
+application.  The underlying SNMP provider takes care of acknowledging receipt
+of INFORM events, so the difference between TRAP and INFORM notifications is 
+completely transparent to your application.
+
+Tnm4j defines two fundamental objects for handling notifications from SNMP 
+agents; *listeners* and *handlers*.
+
+A listener is an instance of `SnmpListener` and is responsible for collaborating
+with the underlying SNMP provider to receive and route inbound notifications 
+from remote agents to your application.  Listener objects are created by 
+`SnmpFactory`.  A listener is configured to listen for notifications addressed 
+to a particular port address.  If your application needs to listen on more than 
+one port address, you create a listener for each address.
+
+> The default port used by a listener is UDP port 162, which is defined as the
+> standard notification port for SNMP.  On most operating systems, this is
+> a privileged port and can only be used by processes with superuser access.
+> If a `BindException` is thrown when attempting to add a listener, try 
+> specifying a port number greater than or equal to 1024 (and less than 65536).
+
+A handler is responsible for doing something useful with a received notification.
+Handlers implement the `SnmpNotificationHandler` interface.  This interface 
+declares a single `handleNotification` method that receives an event object
+that describes a notification and the agent from which it was received.  
+
+Here's an example of the basic setup:
+
+```
+Mib mib = MibFactory.getInstance().newMib();
+mib.load("SNMPv2-MIB");
+
+SnmpListener listener = SnmpFactory.getInstance().newListener(10162, mib);
+try {
+  listener.addHandler(new SnmpNotificationHandler() {
+    @Override
+    public Boolean handleNotification(SnmpNotificationEvent event) {
+      System.out.println("received a notification: " + event);
+      return true;
+    }
+  });
+
+  Thread.sleep(60000L);     // wait for some notifications to arrive
+}
+finally {
+  listener.close();         // listeners must be closed when no longer needed
+}
+```
+
+On most Unix hosts, you can use the `snmptrap` and `snmpnotify` commands
+(which are part of the Net-SNMP package) to test your notification handler.
+For example, the following shell commands send an INFORM, TRAP, and a legacy
+SNMPv1 TRAP, respectively:
+
+```
+snmpinform -v 2c -c public localhost:10162 {} 1.2.3.4 sysUpTime.0 t 218128
+snmptrap -v 2c -c public localhost:10162 {} 1.2.3.4 sysUpTime.0 t 218128
+snmptrap -v 1 -c public localhost:10162 enterprises.1446 10.0.0.1 0 0 ''
+```
+
+See the man pages for these commands for more details on how to use them to send
+notifications.
+
+A given listener supports an arbitrary number of handlers and orders them 
+according to a priority specified when each handler is registered.  The 
+listener-handler interaction is designed around the _strategy pattern_.  When a
+notification is received, handlers are notified in priority order.  Each handler 
+is allowed to inspect the notification and decide whether to handle it.  The 
+first handler that returns `true` is the last handler that will receive the 
+notification.  See the [SnmpListener javadoc] for details.
+
+The strategy-based design allows you to easily write highly cohesive 
+notification handlers, each focused on handling a particular kind of 
+notification, rather than having a single handler with hard-to-test (and 
+hard-to-debug) conditional logic for sorting out what kind of notification was 
+received and what do about it.
+
+
