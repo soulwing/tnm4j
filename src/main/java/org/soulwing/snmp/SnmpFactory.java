@@ -254,6 +254,16 @@ public class SnmpFactory {
   }
 
   /**
+   * Creates a new listener that listens on the default notification port
+   * with any local address, using the first available provider.
+   * @param mib MIB that will be passed into the listener
+   * @return SNMP notification listener
+   */
+  public SnmpListener newListener(Mib mib) {
+    return newListener(null, SnmpDefaults.NOTIFICATION_PORT, mib, null);
+  }
+
+  /**
    * Creates a new listener that listens on any local address using the
    * first available provider.
    * @param port port on which to listen
