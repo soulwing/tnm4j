@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.soulwing</groupId>
     <artifactId>soulwing-parent</artifactId>
-    <version>5</version>
+    <version>6</version>
   </parent>
   <groupId>org.soulwing.snmp</groupId>
   <artifactId>tnm4j</artifactId>
@@ -25,6 +25,27 @@
     <url>git@github.com:soulwing/${project.artifactId}.git</url>
     <tag>HEAD</tag>
   </scm>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.github.github</groupId>
+        <artifactId>site-maven-plugin</artifactId>
+        <configuration>
+          <message>Created site for ${project.version}</message>
+          <path>maven-site</path>
+          <server>github</server>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>site</goal>
+            </goals>
+            <phase>site</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
   <dependencies>
     <dependency>
       <groupId>org.snmp4j</groupId>
