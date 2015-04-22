@@ -62,7 +62,13 @@ class Snmp4jThreadFactory implements ThreadFactory {
 
     @Override
     public void run() {
-      delegate.start();
+      Snmp4jLogger.logger.info(this + " thread started");
+      try {
+        delegate.start();
+      }
+      finally {
+        Snmp4jLogger.logger.info(this + " thread exiting");
+      }
     }
 
     @Override
