@@ -24,6 +24,7 @@ import java.util.IdentityHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.snmp4j.SNMP4JSettings;
 import org.snmp4j.Snmp;
 import org.snmp4j.Target;
 import org.snmp4j.smi.Address;
@@ -35,6 +36,7 @@ import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.SnmpContext;
 import org.soulwing.snmp.SnmpException;
+import org.soulwing.snmp.SnmpFactory;
 import org.soulwing.snmp.SnmpListener;
 import org.soulwing.snmp.SnmpTarget;
 import org.soulwing.snmp.SnmpTargetConfig;
@@ -65,6 +67,14 @@ public class Snmp4jProvider implements SnmpProvider, DisposeListener {
       new IdentityHashMap<Object, Object>();
 
   private volatile Snmp snmp;
+
+  static {
+    SNMP4JSettings.setThreadFactory(
+        new Snmp4jThreadFactory(SnmpFactory.getInstance().getThreadFactory()));
+    SNMP4JSettings.setTimerFactory(
+        new ScheduledExecutorServiceTimerFactory(
+            SnmpFactory.getInstance().getScheduledExecutorService()));
+  }
 
   /**
    * {@inheritDoc}
