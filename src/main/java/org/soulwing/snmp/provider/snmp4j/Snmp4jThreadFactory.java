@@ -48,27 +48,21 @@ class Snmp4jThreadFactory implements ThreadFactory {
     Thread thread = delegate.newThread(task);
     thread.setName(name);
     thread.setDaemon(daemon);
-    return new WorkerThread(thread);
+    return new ThreadWorkerTask(new ThreadWrapper(thread));
   }
 
   
-  private static class WorkerThread implements WorkerTask {
+  private static class ThreadWorkerTask implements WorkerTask {
 
     private final Thread delegate;
     
-    public WorkerThread(Thread delegate) {
+    public ThreadWorkerTask(Thread delegate) {
       this.delegate = delegate;
     }
 
     @Override
     public void run() {
-      Snmp4jLogger.logger.info(delegate + " thread started");
-      try {
-        delegate.start();
-      }
-      finally {
-        Snmp4jLogger.logger.info(delegate + " thread exiting");
-      }
+      delegate.start();
     }
 
     @Override
@@ -83,6 +77,27 @@ class Snmp4jThreadFactory implements ThreadFactory {
     @Override
     public void interrupt() {
       delegate.interrupt();
+    }
+
+  }
+
+  private static class ThreadWrapper extends Thread {
+
+    private final Thread delegate;
+
+    public ThreadWrapper(Thread delegate) {
+      this.delegate = delegate;
+    }
+
+    @Override
+    public void run() {
+      Snmp4jLogger.logger.debug(delegate + " thread running");
+      try {
+        delegate.run();
+      }
+      finally {
+        Snmp4jLogger.logger.debug(delegate + " thread terminated");
+      }
     }
 
   }
