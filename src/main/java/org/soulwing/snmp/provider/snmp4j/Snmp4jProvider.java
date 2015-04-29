@@ -27,6 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.snmp4j.SNMP4JSettings;
 import org.snmp4j.Snmp;
 import org.snmp4j.Target;
+import org.snmp4j.TransportMapping;
 import org.snmp4j.smi.Address;
 import org.snmp4j.smi.GenericAddress;
 import org.snmp4j.smi.SMIAddress;
@@ -66,7 +67,7 @@ public class Snmp4jProvider implements SnmpProvider, DisposeListener {
   private final IdentityHashMap<Object, Object> refs =
       new IdentityHashMap<Object, Object>();
 
-  private volatile Snmp snmp;
+  private volatile UncloseableUdpTransportMapping transportMapping;
 
   static {
     SNMP4JSettings.setThreadFactory(
@@ -127,17 +128,29 @@ public class Snmp4jProvider implements SnmpProvider, DisposeListener {
   }
 
   private Snmp getSnmp() {
-    if (snmp == null) {
+    try {
+      return new Snmp(getTransportMapping());
+    }
+    catch (IOException ex) {
+      throw new SnmpException("error creating SNMP session", ex);
+    }
+  }
+
+  private TransportMapping getTransportMapping() throws IOException {
+    if (transportMapping == null) {
+      lock.lock();
       try {
-        logger.info("starting SNMP listener");
-        snmp = new Snmp(new DefaultUdpTransportMapping());
-        snmp.listen();
+        if (transportMapping == null) {
+          logger.info("starting transport listener");
+          transportMapping = new UncloseableUdpTransportMapping();
+          transportMapping.listen();
+        }
       }
-      catch (IOException ex) {
-        throw new SnmpException("error creating SNMP session", ex);
+      finally {
+        lock.unlock();
       }
     }
-    return snmp;
+    return transportMapping;
   }
 
   @Override
@@ -167,7 +180,9 @@ public class Snmp4jProvider implements SnmpProvider, DisposeListener {
 
   private void shutdown() {
     try {
-      snmp.close();
+      if (transportMapping != null) {
+        transportMapping.shutdown();
+      }
     }
     catch (IOException ex) {
       Snmp4jLogger.logger.warn("while closing SNMP session: {}", ex.toString(), ex);
