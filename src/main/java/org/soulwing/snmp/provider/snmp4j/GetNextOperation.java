@@ -45,7 +45,7 @@ class GetNextOperation extends VarbindCollectionOperation {
    */
   @Override
   protected ResponseEvent doInvoke(PDU request) throws IOException {
-    return context.getSnmp().getNext(request, context.getSnmp4jTarget());
+    return context.getSession().getNext(request, context.getSnmp4jTarget());
   }
 
   /**
@@ -54,7 +54,7 @@ class GetNextOperation extends VarbindCollectionOperation {
   @Override
   protected void doInvoke(PDU request, Object userObject)
       throws IOException {
-    context.getSnmp().getNext(request, context.getSnmp4jTarget(), userObject, 
+    context.getSession().getNext(request, context.getSnmp4jTarget(), userObject,
         this);
   }
 

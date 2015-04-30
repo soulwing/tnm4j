@@ -27,11 +27,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.snmp4j.SNMP4JSettings;
 import org.snmp4j.Snmp;
 import org.snmp4j.Target;
-import org.snmp4j.TransportMapping;
 import org.snmp4j.smi.Address;
 import org.snmp4j.smi.GenericAddress;
-import org.snmp4j.smi.SMIAddress;
-import org.snmp4j.smi.SMIConstants;
 import org.snmp4j.smi.UdpAddress;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.soulwing.snmp.Mib;
@@ -67,7 +64,7 @@ public class Snmp4jProvider implements SnmpProvider, DisposeListener {
   private final IdentityHashMap<Object, Object> refs =
       new IdentityHashMap<Object, Object>();
 
-  private volatile UncloseableUdpTransportMapping transportMapping;
+  private volatile Snmp snmp;
 
   static {
     SNMP4JSettings.setThreadFactory(
@@ -96,8 +93,11 @@ public class Snmp4jProvider implements SnmpProvider, DisposeListener {
       Target snmp4jTarget = createTarget(target);
       PduFactory pduFactory = createPduFactory(target);
       snmp4jTarget.setAddress(createAddress(target));
-      snmp4jTarget.setRetries(config.getRetries());
-      snmp4jTarget.setTimeout(config.getTimeout());
+
+      // timeout will be handled in SessionWrapper
+      snmp4jTarget.setRetries(0);
+      snmp4jTarget.setTimeout(Integer.MAX_VALUE);
+
       Snmp4jContext context = new Snmp4jContext(target, config, mib,
           getSnmp(), snmp4jTarget, pduFactory,
           new SimpleVarbindFactory(mib), this);
@@ -128,29 +128,25 @@ public class Snmp4jProvider implements SnmpProvider, DisposeListener {
   }
 
   private Snmp getSnmp() {
-    try {
-      return new Snmp(getTransportMapping());
-    }
-    catch (IOException ex) {
-      throw new SnmpException("error creating SNMP session", ex);
-    }
-  }
-
-  private TransportMapping getTransportMapping() throws IOException {
-    if (transportMapping == null) {
-      lock.lock();
+    if (snmp == null) {
       try {
-        if (transportMapping == null) {
-          logger.info("starting transport listener");
-          transportMapping = new UncloseableUdpTransportMapping();
-          transportMapping.listen();
+        lock.lock();
+        try {
+          if (snmp == null) {
+            snmp = new Snmp(new DefaultUdpTransportMapping());
+            snmp.listen();
+            logger.info("started SNMP listener");
+          }
+        }
+        catch (IOException ex) {
+          throw new SnmpException("error creating SNMP session", ex);
         }
       }
       finally {
         lock.unlock();
       }
     }
-    return transportMapping;
+    return snmp;
   }
 
   @Override
@@ -180,8 +176,10 @@ public class Snmp4jProvider implements SnmpProvider, DisposeListener {
 
   private void shutdown() {
     try {
-      if (transportMapping != null) {
-        transportMapping.shutdown();
+      if (snmp != null) {
+        snmp.close();
+        Snmp4jLogger.logger.info("SNMP listener shutdown");
+        snmp = null;
       }
     }
     catch (IOException ex) {
@@ -217,6 +215,5 @@ public class Snmp4jProvider implements SnmpProvider, DisposeListener {
     }
     throw new RuntimeException("unsupported target type");
   }
-
 
 }

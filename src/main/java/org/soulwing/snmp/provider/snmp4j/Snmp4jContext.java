@@ -56,7 +56,7 @@ class Snmp4jContext implements SnmpContext {
   private final SnmpTarget target;
   private final SnmpTargetConfig config;
   private final Mib mib;
-  private final Snmp snmp;
+  private final Snmp4jSession snmp;
   private final Target snmp4jTarget;
   private final PduFactory pduFactory;
   private final VarbindFactory varbindFactory;
@@ -68,7 +68,8 @@ class Snmp4jContext implements SnmpContext {
     this.target = target;
     this.config = config;
     this.mib = mib;
-    this.snmp = snmp;
+    this.snmp = new SessionWrapper(snmp, config.getRetries(),
+        config.getTimeout());
     this.snmp4jTarget = snmp4jTarget;
     this.pduFactory = pduFactory;
     this.varbindFactory = varbindFactory;
@@ -92,10 +93,10 @@ class Snmp4jContext implements SnmpContext {
   }
 
   /**
-   * Gets the {@code snmp} property.
+   * Gets the {@code session} property.
    * @return property value
    */
-  public Snmp getSnmp() {
+  public Snmp4jSession getSession() {
     return snmp;
   }
 
@@ -137,12 +138,6 @@ class Snmp4jContext implements SnmpContext {
   @Override
   public void close() {
     if (!closed.compareAndSet(false, true)) return;
-    try {
-      snmp.close();
-    }
-    catch (IOException ex) {
-      throw new SnmpException(ex);
-    }
     disposeListener.onDispose(this);
   }
 
@@ -151,6 +146,7 @@ class Snmp4jContext implements SnmpContext {
    */
   @Override
   protected void finalize() throws Throwable {
+    System.out.println("finalizing context");
     close();
     super.finalize();
   }

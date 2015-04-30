@@ -91,7 +91,7 @@ class Snmp4jThreadFactory implements ThreadFactory {
 
     @Override
     public void run() {
-      Snmp4jLogger.logger.debug(delegate + " thread running");
+      Snmp4jLogger.logger.debug(delegate + (delegate.isDaemon() ? " daemon" : "") + " thread running");
       try {
         delegate.run();
       }

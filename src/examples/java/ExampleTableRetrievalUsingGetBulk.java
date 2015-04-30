@@ -37,6 +37,8 @@ class ExampleTableRetrievalUsingGetBulk {
     target.setAddress(System.getProperty("tnm4j.agent.address", "10.0.0.1"));
     target.setCommunity(System.getProperty("tnm4j.agent.community", "public"));
 
+    Thread.sleep(15000);
+
     SnmpContext context = SnmpFactory.getInstance().newContext(target, mib);
     try {
       final int maxRepetitions = 10;
@@ -80,6 +82,9 @@ class ExampleTableRetrievalUsingGetBulk {
     finally {
       context.close();
     }
+
+    Thread.sleep(10000);
+    SnmpFactory.getInstance().close();
   }
 
 }

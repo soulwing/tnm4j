@@ -62,6 +62,8 @@ class ExampleTableRetrievalUsingWalk {
     finally {
       context.close();
     }
+
+    SnmpFactory.getInstance().close();
   }
 
 }

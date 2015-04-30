@@ -57,7 +57,7 @@ class GetBulkOperation extends AbstractOperation<List<VarbindCollection>> {
   @Override
   protected ResponseEvent doInvoke(PDU request) throws IOException {
     configureRequest(request);
-    return context.getSnmp().getBulk(request, context.getSnmp4jTarget());
+    return context.getSession().getBulk(request, context.getSnmp4jTarget());
   }
 
   /**
@@ -66,7 +66,7 @@ class GetBulkOperation extends AbstractOperation<List<VarbindCollection>> {
   @Override
   protected void doInvoke(PDU request, Object userObject) throws IOException {
     configureRequest(request);
-    context.getSnmp().getBulk(request, context.getSnmp4jTarget(), userObject,
+    context.getSession().getBulk(request, context.getSnmp4jTarget(), userObject,
         this);
   }
 
