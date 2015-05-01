@@ -146,7 +146,6 @@ class Snmp4jContext implements SnmpContext {
    */
   @Override
   protected void finalize() throws Throwable {
-    System.out.println("finalizing context");
     close();
     super.finalize();
   }
