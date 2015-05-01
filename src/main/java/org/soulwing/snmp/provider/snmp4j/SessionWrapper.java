@@ -188,7 +188,7 @@ class SessionWrapper implements Snmp4jSession {
       catch (IOException ex) {
         onResponse(new ResponseEvent(delegate, target.getAddress(),
             request, null, userHandle, ex));
-        future.cancel(true);
+        future.cancel(false);
       }
     }
 
