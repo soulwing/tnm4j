@@ -216,7 +216,7 @@ class SessionWrapper implements Snmp4jSession {
       if (logger.isTraceEnabled()) {
         logger.trace("response received");
       }
-      future.cancel(true);
+      future.cancel(false);
       cancel(request, this);
     }
 
