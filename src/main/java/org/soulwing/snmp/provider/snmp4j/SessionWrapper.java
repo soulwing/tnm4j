@@ -18,6 +18,8 @@
  */
 package org.soulwing.snmp.provider.snmp4j;
 
+import static org.soulwing.snmp.provider.snmp4j.Snmp4jLogger.logger;
+
 import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -177,7 +179,9 @@ class SessionWrapper implements Snmp4jSession {
 
     public final void send() {
       try {
-        Snmp4jLogger.logger.debug("sending request");
+        if (logger.isTraceEnabled()) {
+          logger.trace("sending request");
+        }
         future = executorService.schedule(this, timeout, TimeUnit.MILLISECONDS);
         delegate.send(request, target, transportMapping, userHandle, this);
       }
@@ -196,7 +200,9 @@ class SessionWrapper implements Snmp4jSession {
     private void timeout() {
       cancel(request, this);
       if (retries == 0) {
-        Snmp4jLogger.logger.debug("signaling timeout");
+        if (logger.isDebugEnabled()) {
+          logger.debug("signaling timeout");
+        }
         onResponse(new ResponseEvent(delegate, target.getAddress(),
             request, null, userHandle));
         return;
@@ -207,7 +213,9 @@ class SessionWrapper implements Snmp4jSession {
 
     @Override
     public void onResponse(ResponseEvent event) {
-      Snmp4jLogger.logger.info("response received");
+      if (logger.isTraceEnabled()) {
+        logger.trace("response received");
+      }
       future.cancel(true);
       cancel(request, this);
     }
