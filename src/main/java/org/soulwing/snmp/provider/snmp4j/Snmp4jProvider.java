@@ -167,7 +167,7 @@ public class Snmp4jProvider implements SnmpProvider, DisposeListener {
     try {
       refs.remove(ref);
       if (!refs.isEmpty()) return;
-      shutdown();
+//      shutdown();
     }
     finally {
       lock.unlock();
