@@ -48,7 +48,7 @@ class Snmp4jThreadFactory implements ThreadFactory {
     Thread thread = delegate.newThread(task);
     thread.setName(name);
     thread.setDaemon(daemon);
-    return new ThreadWorkerTask(new ThreadWrapper(thread));
+    return new ThreadWorkerTask(thread);
   }
 
   
@@ -81,25 +81,4 @@ class Snmp4jThreadFactory implements ThreadFactory {
 
   }
 
-  private static class ThreadWrapper extends Thread {
-
-    private final Thread delegate;
-
-    public ThreadWrapper(Thread delegate) {
-      this.delegate = delegate;
-    }
-
-    @Override
-    public void run() {
-      Snmp4jLogger.logger.debug(delegate + (delegate.isDaemon() ? " daemon" : "") + " thread running");
-      try {
-        delegate.run();
-      }
-      finally {
-        Snmp4jLogger.logger.debug(delegate + " thread terminated");
-      }
-    }
-
-  }
-  
 }
