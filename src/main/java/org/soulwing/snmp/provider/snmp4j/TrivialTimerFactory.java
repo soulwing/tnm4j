@@ -31,7 +31,7 @@ import org.snmp4j.util.TimerFactory;
 
 /**
  * A {@link TimerFactory} that produces {@link CommonTimer} objects
- * that delegate directory to a {@link java.util.Timer}.
+ * that delegate directly to a {@link java.util.Timer}.
  *
  * @author Carl Harris
  */
