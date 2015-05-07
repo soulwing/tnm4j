@@ -39,7 +39,6 @@ import org.soulwing.snmp.SimpleSnmpV2cTarget;
 import org.soulwing.snmp.SnmpCompletionService;
 import org.soulwing.snmp.SnmpContext;
 import org.soulwing.snmp.SnmpEvent;
-import org.soulwing.snmp.SnmpResponse;
 import org.soulwing.snmp.TimeoutException;
 import org.soulwing.snmp.VarbindCollection;
 
