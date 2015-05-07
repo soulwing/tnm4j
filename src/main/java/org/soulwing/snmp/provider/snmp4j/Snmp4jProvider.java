@@ -35,6 +35,7 @@ import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.SnmpContext;
 import org.soulwing.snmp.SnmpException;
 import org.soulwing.snmp.SnmpFactory;
+import org.soulwing.snmp.SnmpFactoryConfig;
 import org.soulwing.snmp.SnmpListener;
 import org.soulwing.snmp.SnmpTarget;
 import org.soulwing.snmp.SnmpTargetConfig;
@@ -47,7 +48,10 @@ import org.soulwing.snmp.provider.SnmpProvider;
  */
 public class Snmp4jProvider implements SnmpProvider, DisposeListener {
 
-  private static final String PROVIDER_NAME = "snmp4j";
+  public static final String PROVIDER_NAME = "snmp4j";
+
+  public static final String USE_SINGLE_SESSION =
+      PROVIDER_NAME + ".use.single.session";
 
   private static final TargetStrategy[] targetStrategies = {
       new CommunityTargetStrategy(),
@@ -63,6 +67,8 @@ public class Snmp4jProvider implements SnmpProvider, DisposeListener {
 
   private final IdentityHashMap<Object, Object> refs =
       new IdentityHashMap<Object, Object>();
+
+  private boolean useSingleSession;
 
   private volatile Snmp snmp;
 
@@ -82,11 +88,22 @@ public class Snmp4jProvider implements SnmpProvider, DisposeListener {
     return PROVIDER_NAME;
   }
 
+  @Override
+  public void init(SnmpFactoryConfig config) {
+    Object useSingleSession = config.getProperty(USE_SINGLE_SESSION);
+    if (useSingleSession instanceof Boolean) {
+      this.useSingleSession = (Boolean) useSingleSession;
+    }
+    else if (useSingleSession != null) {
+      this.useSingleSession = Boolean.valueOf(useSingleSession.toString());
+    }
+  }
+
   /**
    * {@inheritDoc}
    */
   @Override
-  public SnmpContext newContext(SnmpTarget target, SnmpTargetConfig config, 
+  public SnmpContext newContext(SnmpTarget target, SnmpTargetConfig config,
       Mib mib) {
     lock.lock();
     try {
@@ -166,8 +183,8 @@ public class Snmp4jProvider implements SnmpProvider, DisposeListener {
     lock.lock();
     try {
       refs.remove(ref);
-      if (!refs.isEmpty()) return;
-//      shutdown();
+      if (!refs.isEmpty() || useSingleSession) return;
+      shutdown();
     }
     finally {
       lock.unlock();
