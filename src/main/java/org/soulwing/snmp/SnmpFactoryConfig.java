@@ -18,6 +18,9 @@
 
 package org.soulwing.snmp;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * A configuration object for {@link SnmpFactory}.
  *
@@ -34,6 +37,8 @@ public class SnmpFactoryConfig {
    * Default size of the scheduled worker pool.
    */
   public static final int DEFAULT_SCHEDULED_WORKER_POOL_SIZE = 1;
+
+  private final Map<String, Object> properties = new HashMap<String, Object>();
 
   private int workerPoolSize = DEFAULT_WORKER_POOL_SIZE;
 
@@ -87,6 +92,25 @@ public class SnmpFactoryConfig {
    */
   public void setScheduledWorkerPoolSize(int scheduledWorkerPoolSize) {
     this.scheduledWorkerPoolSize = scheduledWorkerPoolSize;
+  }
+
+  /**
+   * Gets the value of a provider-specific property.
+   * @param name name of the value to retrieve
+   * @return property value associated with {@code name} or {@code null} if
+   *    the named property does not exist
+   */
+  public Object getProperty(String name) {
+    return properties.get(name);
+  }
+
+  /**
+   * Sets the value of a provider-specific property.
+   * @param name name of the property to retrieve
+   * @param value the value to set
+   */
+  public void setProperty(String name, Object value) {
+    properties.put(name, value);
   }
 
 }

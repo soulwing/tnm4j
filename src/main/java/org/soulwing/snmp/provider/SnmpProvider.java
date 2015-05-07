@@ -19,6 +19,7 @@ package org.soulwing.snmp.provider;
 
 import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.SnmpContext;
+import org.soulwing.snmp.SnmpFactoryConfig;
 import org.soulwing.snmp.SnmpListener;
 import org.soulwing.snmp.SnmpTarget;
 import org.soulwing.snmp.SnmpTargetConfig;
@@ -35,17 +36,26 @@ public interface SnmpProvider {
    * @return provider name (never {@code null})
    */
   String getName();
-  
+
+  /**
+   * Initializes this provider instance.
+   * <p>
+   * This method is invoked once, after the factory has been instantiated,
+   * before the provider is called upon to create contexts or listeners.
+   * @param config configuration associated with the caling factory
+   */
+  void init(SnmpFactoryConfig config);
+
   /**
    * Creates a new SNMPv2c context.
    * @param target target agent
-   * @param config context configuration; the provider can safely 
+   * @param config context configuration; the provider can safely
    *    assume that the configuration is immutable for the lifetime of the
-   *    returned context 
+   *    returned context
    * @param mib MIB provider
    * @return SNMP context
    */
-  SnmpContext newContext(SnmpTarget target, SnmpTargetConfig config, 
+  SnmpContext newContext(SnmpTarget target, SnmpTargetConfig config,
       Mib mib);
 
   /**

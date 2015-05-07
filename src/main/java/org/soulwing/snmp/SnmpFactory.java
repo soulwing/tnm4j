@@ -18,7 +18,6 @@
 package org.soulwing.snmp;
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -57,17 +56,18 @@ public class SnmpFactory {
   private final ExecutorService executorService;
   private final ScheduledExecutorService scheduledExecutorService;
   private final ThreadFactory threadFactory;
+  private final SnmpFactoryConfig factoryConfig;
 
   private SimpleSnmpTargetConfig defaultTargetConfig = 
       new SimpleSnmpTargetConfig();
-  
 
   private SnmpFactory(ExecutorService executorService,
       ScheduledExecutorService scheduledExecutorService,
-      ThreadFactory threadFactory) {
+      ThreadFactory threadFactory, SnmpFactoryConfig factoryConfig) {
     this.executorService = executorService;
     this.scheduledExecutorService = scheduledExecutorService;
     this.threadFactory = threadFactory;
+    this.factoryConfig = factoryConfig;
   }
   
   /**
@@ -108,9 +108,10 @@ public class SnmpFactory {
               threadFactory);
           ScheduledExecutorService scheduledExecutorService =
               new ScheduledThreadPoolExecutor(
-                  config.getScheduledWorkerPoolSize(), threadFactory);
+                  config.getScheduledWorkerPoolSize(),
+                  new ScheduledThreadFactory(threadFactory));
           instance = new SnmpFactory(executorService, scheduledExecutorService,
-              threadFactory);
+              threadFactory, config);
         }
       }
     }
@@ -122,7 +123,25 @@ public class SnmpFactory {
       return new Thread(r);
     }
   }
-  
+
+  private static final class ScheduledThreadFactory implements ThreadFactory {
+
+    private final ThreadFactory delegate;
+
+    public ScheduledThreadFactory(ThreadFactory delegate) {
+      this.delegate = delegate;
+    }
+
+    @Override
+    public Thread newThread(Runnable r) {
+      final Thread thread = delegate.newThread(r);
+      thread.setName("Scheduled " + thread.getName());
+      thread.setDaemon(true);
+      return thread;
+    }
+
+  }
+
   /**
    * Gets the executor service that should be used for short-lived tasks.
    * @return executor service
@@ -149,6 +168,14 @@ public class SnmpFactory {
   public ThreadFactory getThreadFactory() {
     assertNotClosed();
     return threadFactory;
+  }
+
+  /**
+   * Gets the factory configuration associated with this instance.
+   * @return factory config
+   */
+  public SnmpFactoryConfig getFactoryConfig() {
+    return factoryConfig;
   }
 
   /**
@@ -321,6 +348,7 @@ public class SnmpFactory {
       lock.lock();
       try {
         provider = findProvider(providerName);
+        provider.init(factoryConfig);
         providerMap.put(provider.getName(), provider);
       }
       finally {
