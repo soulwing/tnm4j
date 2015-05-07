@@ -27,7 +27,7 @@ public class SnmpV2cDemo {
   private static final Pattern CISCOIOS_PATTERN =
       Pattern.compile("Software \\(([^)]+)\\).*Version  *([^ ,]+) *");
   
-  public static void main(String[] args) throws Exception {    
+  public static void main(String[] args) throws Exception {
     final String deviceName = System.getProperty("agent.name", "foo");
     final String ipAddress = System.getProperty("agent.ip", "10.0.0.1");
     final String community = System.getProperty("agent.community", "public");
@@ -35,11 +35,12 @@ public class SnmpV2cDemo {
     SimpleSnmpV2cTarget target = new SimpleSnmpV2cTarget();
     target.setAddress(ipAddress);
     target.setCommunity(community);
-    
+
     Mib mib = MibFactory.getInstance().newMib();
     mib.load("RFC1213-MIB");
-        
-    SnmpContext snmp = SnmpFactory.getInstance().newContext(target, mib);
+
+    final SnmpFactory factory = SnmpFactory.getInstance();
+    SnmpContext snmp = factory.newContext(target, mib);
 
     VarbindCollection varbinds = snmp.getNext("sysDescr", "sysUpTime").get();
     String sysDescr = varbinds.get("sysDescr").asString();
@@ -48,14 +49,14 @@ public class SnmpV2cDemo {
     boolean found = matcher.find();
     String software = found ? matcher.group(1) : NOT_AVAILABLE;
     String version = found ? matcher.group(2) : NOT_AVAILABLE;
-    
-    System.out.format("%-12s %-15s %-24s %-24s %s\n", 
-        "Device Name", "IP Address", "Software", "Version" , "Up Time");
-    
+
+    System.out.format("%-12s %-15s %-24s %-24s %s\n",
+        "Device Name", "IP Address", "Software", "Version", "Up Time");
+
     System.out.format("%-12s %-15s %-24s %-24s %s\n",
         deviceName, ipAddress, software, version, sysUpTime);
 
-    SnmpFactory.getInstance().close();
+    snmp.close();
   }
   
 }
