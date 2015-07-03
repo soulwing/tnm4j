@@ -35,7 +35,7 @@ import org.snmp4j.util.TimerFactory;
  *
  * @author Carl Harris
  */
-public class TrivialTimerFactory implements TimerFactory {
+class TrivialTimerFactory implements TimerFactory {
 
   @Override
   public CommonTimer createTimer() {
