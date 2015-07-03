@@ -38,6 +38,11 @@ interface Snmp4jSession extends Session {
   void get(PDU pdu, Target target, Object userHandle,
       ResponseListener listener) throws IOException;
 
+  ResponseEvent set(PDU pdu, Target target) throws IOException;
+
+  void set(PDU pdu, Target target, Object userHandle,
+      ResponseListener listener) throws IOException;
+
   ResponseEvent getNext(PDU pdu, Target target) throws IOException;
 
   void getNext(PDU pdu, Target target, Object userHandle,

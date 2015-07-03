@@ -155,8 +155,8 @@ class Snmp4jContext implements SnmpContext {
    */
   @Override
   public Varbind newVarbind(String oid, Object value) {
-    OID resolvedOid = resolveOid(oid);
-    int syntax = mib.syntaxForObject(resolvedOid.toString());
+    VariableBinding varbind = resolveOid(oid);
+    int syntax = mib.syntaxForObject(varbind.getOid().toString());
     Variable variable = AbstractVariable.createFromSyntax(syntax);
     if (variable instanceof Integer32) {
       ((Integer32) variable).setValue(((Number) value).intValue());
@@ -187,7 +187,8 @@ class Snmp4jContext implements SnmpContext {
       throw new IllegalStateException("unrecognized type");
     }
 
-    return varbindFactory.newVarbind(new VariableBinding(resolvedOid, variable));
+    varbind.setVariable(variable);
+    return varbindFactory.newVarbind(varbind);
   }
 
   /**
@@ -212,6 +213,30 @@ class Snmp4jContext implements SnmpContext {
   @Override
   public SnmpResponse<VarbindCollection> get(String... oids) {
     return newGet(oids).invoke();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public SnmpResponse<VarbindCollection> set(Varbind... varbinds) {
+    return newSet(varbinds).invoke();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public SnmpResponse<VarbindCollection> set(List<Varbind> varbinds) {
+    return newSet(varbinds).invoke();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public SnmpResponse<VarbindCollection> set(VarbindCollection varbinds) {
+    return newSet(varbinds).invoke();
   }
 
   /**
@@ -462,6 +487,30 @@ class Snmp4jContext implements SnmpContext {
    * {@inheritDoc}
    */
   @Override
+  public SnmpOperation<VarbindCollection> newSet(List<Varbind> varbinds) {
+    return new SetOperation(this, resolveVarbinds(varbinds));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public SnmpOperation<VarbindCollection> newSet(VarbindCollection varbinds) {
+    return new SetOperation(this, resolveVarbinds(varbinds));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public SnmpOperation<VarbindCollection> newSet(Varbind... varbinds) {
+    return newSet(Arrays.asList(varbinds));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public SnmpOperation<VarbindCollection> newGetNext(List<String> oids) {
     return new GetNextOperation(this, resolveOids(oids));
   }
@@ -560,25 +609,55 @@ class Snmp4jContext implements SnmpContext {
     return newWalk(0, Arrays.asList(repeaters));
   }
 
-  protected OID[] resolveOids(List<String> oids) {
-    OID[] resolvedOids = new OID[oids.size()];
+  private VariableBinding[] resolveOids(List<String> oids) {
+    VariableBinding[] resolvedOids = new VariableBinding[oids.size()];
     for (int i = 0; i < oids.size(); i++) {
       resolvedOids[i] = resolveOid(oids.get(i));
     }
     return resolvedOids;
   }
 
-  protected OID[] resolveOids(VarbindCollection varbinds) {
-    OID[] resolvedOids = new OID[varbinds.size()];
+  private VariableBinding[] resolveOids(VarbindCollection varbinds) {
+    VariableBinding[] resolvedOids = new VariableBinding[varbinds.size()];
     for (int i = 0; i < varbinds.size(); i++) {
       Varbind varbind = varbinds.get(i);
-      resolvedOids[i] = varbind instanceof Snmp4jVarbind ?
-          ((Snmp4jVarbind) varbind).getDelegate().getOid() : new OID(varbind.getOid());
+      resolvedOids[i] = new VariableBinding(varbind instanceof Snmp4jVarbind ?
+          ((Snmp4jVarbind) varbind).getDelegate().getOid() : new OID(varbind.getOid()));
     }
     return resolvedOids;
   }
 
-  protected OID resolveOid(String oid) {
+  private VariableBinding[] resolveVarbinds(List<Varbind> varbinds) {
+    VariableBinding[] resolvedVarbinds = new VariableBinding[varbinds.size()];
+    for (int i = 0; i < varbinds.size(); i++) {
+      resolvedVarbinds[i] = resolveVarbind(varbinds.get(i));
+    }
+    return resolvedVarbinds;
+  }
+
+  private VariableBinding[] resolveVarbinds(VarbindCollection varbinds) {
+    VariableBinding[] resolvedVarbinds = new VariableBinding[varbinds.size()];
+    for (int i = 0; i < varbinds.size(); i++) {
+      Varbind varbind = varbinds.get(i);
+      if (varbind instanceof Snmp4jVarbind) {
+        VariableBinding vb = ((Snmp4jVarbind) varbind).getDelegate();
+        resolvedVarbinds[i] = new VariableBinding(vb.getOid());
+        resolvedVarbinds[i].setVariable(vb.getVariable());
+      }
+      else {
+        resolvedVarbinds[i] = resolveVarbind(varbind);
+      }
+    }
+    return resolvedVarbinds;
+  }
+
+  private VariableBinding resolveVarbind(Varbind varbind) {
+    VariableBinding vb = resolveOid(varbind.getOid());
+    vb.setVariable(newVariable(varbind.getSyntax(), varbind.toObject()));
+    return vb;
+  }
+
+  private VariableBinding resolveOid(String oid) {
     if (!OID_PATTERN.matcher(oid).matches() && mib != null) {
       String resolvedOid = mib.nameToOid(oid);
       if (resolvedOid == null) {
@@ -586,7 +665,40 @@ class Snmp4jContext implements SnmpContext {
       }
       oid = resolvedOid;
     }
-    return new OID(oid);
+    return new VariableBinding(new OID(oid));
+  }
+
+  private Variable newVariable(int syntax, Object value) {
+    Variable variable = AbstractVariable.createFromSyntax(syntax);
+    if (variable instanceof Integer32) {
+      ((Integer32) variable).setValue(((Number) value).intValue());
+    }
+    else if (variable instanceof UnsignedInteger32) {
+      ((UnsignedInteger32) variable).setValue(Math.abs(((Number) value).longValue()));
+    }
+    else if (variable instanceof Counter64) {
+      ((Counter64) variable).setValue(((Number) value).longValue());
+    }
+    else if (variable instanceof OctetString) {
+      if (value instanceof String) {
+        ((OctetString) variable).setValue((String) value);
+      }
+      else {
+        ((OctetString) variable).setValue((byte[]) value);
+      }
+    }
+    else if (variable instanceof OID) {
+      if (value instanceof String) {
+        ((OID) variable).setValue((String) value);
+      }
+      else {
+        ((OID) variable).setValue((int[]) value);
+      }
+    }
+    else {
+      throw new IllegalStateException("unrecognized type");
+    }
+    return variable;
   }
 
 }

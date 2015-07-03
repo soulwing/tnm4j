@@ -18,8 +18,6 @@
 
 package org.soulwing.snmp.provider.snmp4j;
 
-import static org.soulwing.snmp.provider.snmp4j.Snmp4jLogger.logger;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
@@ -28,8 +26,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.event.ResponseEvent;
-import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.OID;
+import org.snmp4j.smi.VariableBinding;
 import org.soulwing.snmp.SnmpAsyncWalker;
 import org.soulwing.snmp.SnmpCallback;
 import org.soulwing.snmp.SnmpEvent;
@@ -53,7 +51,7 @@ abstract class AbstractAsyncWalker<V>
   
   final int nonRepeaters;
   final int maxRepetitions;
-  final OID[] requestedOids;
+  final VariableBinding[] requestedVarbinds;
   
   private int repeaters;
   private PDU response;
@@ -63,17 +61,17 @@ abstract class AbstractAsyncWalker<V>
   /**
    * Constructs a new instance.
    * @param context
-   * @param oids
+   * @param varbinds
    * @param nonRepeaters
    * @param maxRepetitions
    */
-  protected AbstractAsyncWalker(Snmp4jContext context, OID[] oids, 
-      int nonRepeaters, int maxRepetitions) {
-    super(context, oids);
+  protected AbstractAsyncWalker(Snmp4jContext context,
+      VariableBinding[] varbinds, int nonRepeaters, int maxRepetitions) {
+    super(context, varbinds);
     this.nonRepeaters = nonRepeaters;
     this.maxRepetitions = maxRepetitions;
-    this.repeaters = oids.length - nonRepeaters;
-    this.requestedOids = Arrays.copyOf(oids, oids.length);
+    this.repeaters = varbinds.length - nonRepeaters;
+    this.requestedVarbinds = Arrays.copyOf(varbinds, varbinds.length);
   }
   
   /**
@@ -122,7 +120,7 @@ abstract class AbstractAsyncWalker<V>
   @Override
   public SnmpResponse<SnmpAsyncWalker<V>> invoke() throws SnmpException,
       TimeoutException {
-    PDU request = createRequest(oids);
+    PDU request = createRequest(varbinds);
     try {
       ResponseEvent event = doInvoke(request);
       validateResponse(event);
@@ -231,7 +229,7 @@ abstract class AbstractAsyncWalker<V>
     int i = 0;
     while (offset + i < response.size() && i < repeaters) {
       OID oid = response.get(offset + i).getOid();
-      if (!oid.startsWith(requestedOids[nonRepeaters + i])) {
+      if (!oid.startsWith(requestedVarbinds[nonRepeaters + i].getOid())) {
         return true;
       }
       i++;
@@ -246,7 +244,7 @@ abstract class AbstractAsyncWalker<V>
   private void setNextOids(int offset) {
     for (int i = 0; i < repeaters; i++) {
       OID oid = response.get(offset + i).getOid();
-      oids[i + nonRepeaters] = oid;
+      varbinds[i + nonRepeaters] = new VariableBinding(oid);
     }
   }
 

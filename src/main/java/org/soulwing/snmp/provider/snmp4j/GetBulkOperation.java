@@ -25,6 +25,7 @@ import java.util.List;
 import org.snmp4j.PDU;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.smi.OID;
+import org.snmp4j.smi.VariableBinding;
 import org.soulwing.snmp.MutableVarbindCollection;
 import org.soulwing.snmp.Varbind;
 import org.soulwing.snmp.VarbindCollection;
@@ -42,11 +43,11 @@ class GetBulkOperation extends AbstractOperation<List<VarbindCollection>> {
   /**
    * Constructs a new instance.
    * @param context
-   * @param oids
+   * @param varbinds
    */
-  public GetBulkOperation(Snmp4jContext context, OID[] oids,
+  public GetBulkOperation(Snmp4jContext context, VariableBinding[] varbinds,
       int nonRepeaters, int maxRepetitions) {
-    super(context, oids);
+    super(context, varbinds);
     this.nonRepeaters = nonRepeaters;
     this.maxRepetitions = maxRepetitions;
   }
@@ -77,7 +78,7 @@ class GetBulkOperation extends AbstractOperation<List<VarbindCollection>> {
 
   @Override
   protected List<VarbindCollection> createResult(PDU response) {
-    final int repeaters = oids.length - nonRepeaters;
+    final int repeaters = varbinds.length - nonRepeaters;
     List<VarbindCollection> rows = new ArrayList<VarbindCollection>(maxRepetitions);
     int offset = nonRepeaters;
     while (offset < response.size()) {

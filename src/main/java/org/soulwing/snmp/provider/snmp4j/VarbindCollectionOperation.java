@@ -20,6 +20,7 @@ package org.soulwing.snmp.provider.snmp4j;
 
 import org.snmp4j.PDU;
 import org.snmp4j.smi.OID;
+import org.snmp4j.smi.VariableBinding;
 import org.soulwing.snmp.VarbindCollection;
 
 /**
@@ -34,10 +35,11 @@ abstract class VarbindCollectionOperation
   /**
    * Constructs a new instance.
    * @param context
-   * @param oids
+   * @param varbinds
    */
-  public VarbindCollectionOperation(Snmp4jContext context, OID[] oids) {
-    super(context, oids);
+  public VarbindCollectionOperation(Snmp4jContext context,
+  VariableBinding[] varbinds) {
+    super(context, varbinds);
   }
 
   /**

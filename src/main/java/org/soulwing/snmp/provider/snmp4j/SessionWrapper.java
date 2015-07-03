@@ -126,6 +126,19 @@ class SessionWrapper implements Snmp4jSession {
   }
 
   @Override
+  public ResponseEvent set(PDU pdu, Target target) throws IOException {
+    pdu.setType(PDU.SET);
+    return send(pdu, target);
+  }
+
+  @Override
+  public void set(PDU pdu, Target target, Object userHandle,
+      ResponseListener listener) throws IOException {
+    pdu.setType(PDU.SET);
+    send(pdu, target, userHandle, listener);
+  }
+
+  @Override
   public ResponseEvent getNext(PDU pdu, Target target) throws IOException {
     pdu.setType(PDU.GETNEXT);
     return send(pdu, target);

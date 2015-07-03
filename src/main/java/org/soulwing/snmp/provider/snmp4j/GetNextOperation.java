@@ -22,7 +22,7 @@ import java.io.IOException;
 
 import org.snmp4j.PDU;
 import org.snmp4j.event.ResponseEvent;
-import org.snmp4j.smi.OID;
+import org.snmp4j.smi.VariableBinding;
 
 /**
  * An SNMP GETNEXT operation.
@@ -34,10 +34,10 @@ class GetNextOperation extends VarbindCollectionOperation {
   /**
    * Constructs a new instance.
    * @param context
-   * @param oids
+   * @param varbinds
    */
-  public GetNextOperation(Snmp4jContext context, OID[] oids) {
-    super(context, oids);
+  public GetNextOperation(Snmp4jContext context, VariableBinding[] varbinds) {
+    super(context, varbinds);
   }
 
   /**

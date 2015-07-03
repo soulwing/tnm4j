@@ -52,6 +52,27 @@ public interface SnmpOperationFactory {
   SnmpOperation<VarbindCollection> newGet(String... oids);
 
   /**
+   * Creates an SNMP SET operation.
+   * @param varbinds variable bindings to set
+   * @return an operation that can be invoked to obtain a response
+   */
+  SnmpOperation<VarbindCollection> newSet(List<Varbind> varbinds);
+
+  /**
+   * Creates an SNMP SET operation.
+   * @param varbinds a collection identifying the objects to fetch
+   * @return an operation that can be invoked to obtain a response
+   */
+  SnmpOperation<VarbindCollection> newSet(VarbindCollection varbinds);
+
+  /**
+   * Creates an SNMP SET operation.
+   * @param varbinds variable bindings to set
+   * @return an operation that can be invoked to obtain a response
+   */
+  SnmpOperation<VarbindCollection> newSet(Varbind... varbinds);
+
+  /**
    * Creates an SNMP GETNEXT operation.
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch

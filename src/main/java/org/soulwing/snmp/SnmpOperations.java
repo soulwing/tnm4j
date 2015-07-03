@@ -44,10 +44,34 @@ public interface SnmpOperations {
   SnmpResponse<VarbindCollection> get(VarbindCollection varbinds);
 
   /**
+   * Performs an SNMP SET operation.
+   * @param varbinds variable bindings to set
+   * @return a response containing the resulting varbinds in the same order
+   *    and with the same keys as the requested varbinds
+   */
+  SnmpResponse<VarbindCollection> set(Varbind... varbinds);
+
+  /**
+   * Performs an SNMP SET operation.
+   * @param varbinds variable bindings to set
+   * @return a response containing the resulting varbinds in the same order
+   *    and with the same keys as the requested varbinds
+   */
+  SnmpResponse<VarbindCollection> set(List<Varbind> varbinds);
+
+  /**
+   * Performs an SNMP GET operation.
+   * @param varbinds a collection identifying the objects to set
+   * @return a response containing the resulting varbinds in the same order
+   *    and with the same keys as the requested varbinds
+   */
+  SnmpResponse<VarbindCollection> set(VarbindCollection varbinds);
+
+  /**
    * Performs an SNMP GET operation.
    * @param oids MIB names or dotted-decimal object identifiers for the
    *    objects to fetch
-   * @return a response containing the retrieved varbinds in the same order 
+   * @return a response containing the retrieved varbinds in the same order
    *    and with the same keys as the requested objects
    */
   SnmpResponse<VarbindCollection> get(String... oids);

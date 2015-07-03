@@ -26,7 +26,6 @@ import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.event.ResponseListener;
-import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.VariableBinding;
 import org.soulwing.snmp.SnmpCallback;
@@ -46,15 +45,15 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
     ResponseListener {
 
   final Snmp4jContext context;
-  final OID[] oids;
+  final VariableBinding[] varbinds;
 
   /**
    * Constructs a new instance.
    * @param context
-   * @param oids
+   * @param varbinds
    */
-  AbstractOperation(Snmp4jContext context, OID[] oids) {
-    this.oids = oids;
+  AbstractOperation(Snmp4jContext context, VariableBinding[] varbinds) {
+    this.varbinds = varbinds;
     this.context = context;
   }
 
@@ -93,7 +92,7 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
    */
   @Override
   public SnmpResponse<V> invoke() throws SnmpException, TimeoutException {
-    PDU request = createRequest(oids);
+    PDU request = createRequest(varbinds);
     try {
       ResponseEvent event = doInvoke(request);
       validateResponse(event);
@@ -113,7 +112,7 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
    */
   @Override
   public void invoke(SnmpCallback<V> callback) {
-    PDU request = createRequest(oids);
+    PDU request = createRequest(varbinds);
     try {
       doInvoke(request, callback);
       if (logger.isDebugEnabled()) {
@@ -130,15 +129,10 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
     }
   }
 
-  /**
-   * 
-   * @param oids
-   * @return
-   */
-  protected PDU createRequest(OID... oids) {
+  protected PDU createRequest(VariableBinding[] varbinds) {
     PDU pdu = context.getPduFactory().newPDU();
-    for (OID oid : oids) {
-      pdu.add(new VariableBinding(oid));
+    for (VariableBinding varbind : varbinds) {
+      pdu.add(varbind);
     }
     return pdu;
   }

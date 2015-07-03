@@ -18,7 +18,7 @@
 
 package org.soulwing.snmp.provider.snmp4j;
 
-import org.snmp4j.smi.OID;
+import org.snmp4j.smi.VariableBinding;
 import org.soulwing.snmp.SnmpResponse;
 import org.soulwing.snmp.SnmpWalker;
 import org.soulwing.snmp.VarbindCollection;
@@ -34,13 +34,13 @@ class GetBulkSyncWalker extends GetBulkAsyncWalker {
   /**
    * Constructs a new instance.
    * @param context
-   * @param oids
+   * @param varbinds
    * @param nonRepeaters
    * @param maxRepetitions
    */
-  public GetBulkSyncWalker(Snmp4jContext context, OID[] oids,
+  public GetBulkSyncWalker(Snmp4jContext context, VariableBinding[] varbinds,
       int nonRepeaters, int maxRepetitions) {
-    super(context, oids, nonRepeaters, maxRepetitions);
+    super(context, varbinds, nonRepeaters, maxRepetitions);
   }
 
   /**

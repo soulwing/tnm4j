@@ -23,6 +23,7 @@ import java.io.IOException;
 import org.snmp4j.PDU;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.smi.OID;
+import org.snmp4j.smi.VariableBinding;
 import org.soulwing.snmp.MutableVarbindCollection;
 import org.soulwing.snmp.SnmpAsyncWalker;
 import org.soulwing.snmp.Varbind;
@@ -36,9 +37,9 @@ import org.soulwing.snmp.VarbindCollection;
 class GetBulkAsyncWalker
     extends AbstractAsyncWalker<VarbindCollection> {
 
-  public GetBulkAsyncWalker(Snmp4jContext context, OID[] oids,
+  public GetBulkAsyncWalker(Snmp4jContext context, VariableBinding[] varbinds,
       int nonRepeaters, int maxRepetitions) {
-    super(context, oids, nonRepeaters, maxRepetitions);
+    super(context, varbinds, nonRepeaters, maxRepetitions);
   }
 
   @Override
@@ -65,7 +66,8 @@ class GetBulkAsyncWalker
     final int responseSize = response.size();
     MutableVarbindCollection row = new MutableVarbindCollection();
     for (int i = 0; i < nonRepeaters; i++) {
-      if (i < responseSize && response.get(i).getOid().startsWith(oids[i])) {
+      if (i < responseSize
+          && response.get(i).getOid().startsWith(varbinds[i].getOid())) {
         Varbind v = context.getVarbindFactory().newVarbind(response.get(i));
         row.add(i, objectNameToKey(v), v);
       }
@@ -76,7 +78,7 @@ class GetBulkAsyncWalker
       for (int i = 0; i < repeaters; i++) {
         if (i + offset < response.size()) {
           OID oid = response.get(i + offset).getOid();
-          if (oid.startsWith(requestedOids[i + nonRepeaters])) {
+          if (oid.startsWith(requestedVarbinds[i + nonRepeaters].getOid())) {
             Varbind v = context.getVarbindFactory()
                 .newVarbind(response.get(i + offset));
             row.add(i + nonRepeaters, objectNameToKey(v), v);
