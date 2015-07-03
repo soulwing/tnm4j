@@ -435,7 +435,7 @@ a list of object identifiers consisting of the specified non-repeating object
 identifiers followed by the identifiers associated with the other (repeating)
 objects in the collection.
 
-It's possible to ask for two many objects in a single GETNEXT request.  We
+It's possible to ask for too many objects in a single GETNEXT request.  We
 check for that case by comparing the size of the row to the number of objects
 we requested.
 
