@@ -653,7 +653,7 @@ class Snmp4jContext implements SnmpContext {
 
   private VariableBinding resolveVarbind(Varbind varbind) {
     VariableBinding vb = resolveOid(varbind.getOid());
-    vb.setVariable(newVariable(varbind.getSyntax(), varbind.toObject()));
+    vb.setVariable(Snmp4jVarbind.newVariable(varbind.getSyntax(), varbind.toObject()));
     return vb;
   }
 
@@ -666,39 +666,6 @@ class Snmp4jContext implements SnmpContext {
       oid = resolvedOid;
     }
     return new VariableBinding(new OID(oid));
-  }
-
-  private Variable newVariable(int syntax, Object value) {
-    Variable variable = AbstractVariable.createFromSyntax(syntax);
-    if (variable instanceof Integer32) {
-      ((Integer32) variable).setValue(((Number) value).intValue());
-    }
-    else if (variable instanceof UnsignedInteger32) {
-      ((UnsignedInteger32) variable).setValue(Math.abs(((Number) value).longValue()));
-    }
-    else if (variable instanceof Counter64) {
-      ((Counter64) variable).setValue(((Number) value).longValue());
-    }
-    else if (variable instanceof OctetString) {
-      if (value instanceof String) {
-        ((OctetString) variable).setValue((String) value);
-      }
-      else {
-        ((OctetString) variable).setValue((byte[]) value);
-      }
-    }
-    else if (variable instanceof OID) {
-      if (value instanceof String) {
-        ((OID) variable).setValue((String) value);
-      }
-      else {
-        ((OID) variable).setValue((int[]) value);
-      }
-    }
-    else {
-      throw new IllegalStateException("unrecognized type");
-    }
-    return variable;
   }
 
 }

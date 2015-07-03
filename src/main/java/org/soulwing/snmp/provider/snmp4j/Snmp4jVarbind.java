@@ -21,9 +21,12 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import org.snmp4j.smi.AbstractVariable;
+import org.snmp4j.smi.Counter64;
+import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.IpAddress;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
+import org.snmp4j.smi.UnsignedInteger32;
 import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
 import org.soulwing.snmp.Formatter;
@@ -95,6 +98,11 @@ class Snmp4jVarbind implements Varbind {
   @Override
   public String asString() {
     return formatter.format(toObject(getVariable()));
+  }
+
+  @Override
+  public void set(Object value) {
+    delegate.setVariable(newVariable(delegate.getSyntax(), value));
   }
 
   private Variable getVariable() throws SnmpException {
@@ -184,6 +192,39 @@ class Snmp4jVarbind implements Varbind {
   @Override
   public String toString() {
     return asString();
+  }
+
+  static Variable newVariable(int syntax, Object value) {
+    Variable variable = AbstractVariable.createFromSyntax(syntax);
+    if (variable instanceof Integer32) {
+      ((Integer32) variable).setValue(((Number) value).intValue());
+    }
+    else if (variable instanceof UnsignedInteger32) {
+      ((UnsignedInteger32) variable).setValue(Math.abs(((Number) value).longValue()));
+    }
+    else if (variable instanceof Counter64) {
+      ((Counter64) variable).setValue(((Number) value).longValue());
+    }
+    else if (variable instanceof OctetString) {
+      if (value instanceof String) {
+        ((OctetString) variable).setValue((String) value);
+      }
+      else {
+        ((OctetString) variable).setValue((byte[]) value);
+      }
+    }
+    else if (variable instanceof OID) {
+      if (value instanceof String) {
+        ((OID) variable).setValue((String) value);
+      }
+      else {
+        ((OID) variable).setValue((int[]) value);
+      }
+    }
+    else {
+      throw new IllegalStateException("unrecognized type");
+    }
+    return variable;
   }
 
 }

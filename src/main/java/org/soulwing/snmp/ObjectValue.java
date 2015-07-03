@@ -71,5 +71,11 @@ public interface ObjectValue {
    * @return value representation
    */
   Object toObject();
-  
+
+  /**
+   * Sets the value of the object.
+   * @param value
+   */
+  void set(Object value);
+
 }
