@@ -95,4 +95,8 @@ class ImmutableObjectValue implements ObjectValue {
     }
   }
 
+  @Override
+  public void set(Object value) {
+  }
+
 }
