@@ -454,19 +454,19 @@ allows us to perform the *while* loop in the previous example on the remote
 agent itself.  Just like GETNEXT, the GETBULK operation takes a list of object 
 identifiers.  As we've seen, when executing the GETNEXT operation, the agent 
 returns the successor object instance for each of the specified object
-identifiers.  With GETBULK, the agent returns the next *N* object instances for 
-each of the specified identifiers.
+identifiers.  With GETBULK, the agent returns the next *N* successor object 
+instances for each of the specified identifiers.
 
 We specify the maximum value for *N* as one of the parameters to the GETNEXT
-operation; the protocol specification calls this parameter *max-repetitions*.  
-The value we specify indicates the maximum number of "rows" we want to retrieve
-in a single GETBULK operation.  Of course, the agent may choose to return a value
-less than *N*.
+operation; the protocol specification calls this parameter *max-repetitions*.  The 
+value we specify indicates the maximum number of "rows" we want to retrieve in a 
+single GETBULK operation.  Of course, the agent may choose to return a value less 
+than *N*.
 
 In our previous example using GETNEXT, we included *sysUpTime* in the request.
 Since GETBULK effectively performs *N* GETNEXT operations, we need a way to tell 
 it that some of the object identifiers in the request are for non-repeating 
-objects.  The GETBULK operation includes *non-repeating* parameter for this 
+objects.  The GETBULK operation includes a *non-repeating* parameter for this 
 purpose -- this parameter is used to indicate that the first *k* identifiers
 in the list are for non-repeating identifiers.
 
@@ -502,7 +502,7 @@ worse, the remote agent is allowed to return a partial last row -- i.e. it is
 allowed to truncate the last row if the entire row won't fit neatly into an SNMP 
 PDU.
 
-> If all of this is making you feel like you'll just deal with the poor  
+> If all of this is making you feel like you'll just deal with the poor 
 > performance of table retrieval using GETNEXT, we have good news!  In the next
 > section, we discuss using Tnm4j's high level table walk operation, which
 > allows you to get all of the performance benefits of using GETBULK to
@@ -815,7 +815,7 @@ response is available.  However, when we invoke `get` on the response object
 inside of our callback, it will never block -- the callback is not invoked 
 until a response is available.
 
-If a timeout or other error occurs while executing the asynchronous operation
+If a timeout or other error occurs while executing the asynchronous operation,
 the call to `get` next will throw an appropriate exception.  This allows our
 callback to handle the exception using an ordinary *try* block.
 
