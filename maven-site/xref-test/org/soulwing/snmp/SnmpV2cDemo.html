@@ -35,7 +35,7 @@
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Pattern CISCOIOS_PATTERN =
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>        Pattern.compile(<span class="jxr_string">"Software &#92;&#92;(([^)]+)&#92;&#92;).*Version  *([^ ,]+) *"</span>);
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>    
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> main(String[] args) <strong class="jxr_keyword">throws</strong> Exception {    
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> main(String[] args) <strong class="jxr_keyword">throws</strong> Exception {
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>      <strong class="jxr_keyword">final</strong> String deviceName = System.getProperty(<span class="jxr_string">"agent.name"</span>, <span class="jxr_string">"foo"</span>);
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>      <strong class="jxr_keyword">final</strong> String ipAddress = System.getProperty(<span class="jxr_string">"agent.ip"</span>, <span class="jxr_string">"10.0.0.1"</span>);
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>      <strong class="jxr_keyword">final</strong> String community = System.getProperty(<span class="jxr_string">"agent.community"</span>, <span class="jxr_string">"public"</span>);
@@ -43,30 +43,31 @@
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>      SimpleSnmpV2cTarget target = <strong class="jxr_keyword">new</strong> SimpleSnmpV2cTarget();
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>      target.setAddress(ipAddress);
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>      target.setCommunity(community);
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>      
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>      Mib mib = MibFactory.getInstance().newMib();
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>      mib.load(<span class="jxr_string">"RFC1213-MIB"</span>);
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>          
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>      SnmpContext snmp = SnmpFactory.getInstance().newContext(target, mib);
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>  
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>      VarbindCollection varbinds = snmp.getNext(<span class="jxr_string">"sysDescr"</span>, <span class="jxr_string">"sysUpTime"</span>).get();
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>      String sysDescr = varbinds.get(<span class="jxr_string">"sysDescr"</span>).asString();
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>      String sysUpTime = varbinds.get(<span class="jxr_string">"sysUpTime"</span>).asString();
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>      Matcher matcher = CISCOIOS_PATTERN.matcher(sysDescr);
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>      <strong class="jxr_keyword">boolean</strong> found = matcher.find();
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>      String software = found ? matcher.group(1) : NOT_AVAILABLE;
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>      String version = found ? matcher.group(2) : NOT_AVAILABLE;
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>      
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>      System.out.format(<span class="jxr_string">"%-12s %-15s %-24s %-24s %s\n"</span>, 
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>          <span class="jxr_string">"Device Name"</span>, <span class="jxr_string">"IP Address"</span>, <span class="jxr_string">"Software"</span>, <span class="jxr_string">"Version"</span> , <span class="jxr_string">"Up Time"</span>);
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>      
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>      System.out.format(<span class="jxr_string">"%-12s %-15s %-24s %-24s %s\n"</span>,
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>          deviceName, ipAddress, software, version, sysUpTime);
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>      SnmpFactory.getInstance().close();
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>    }
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>    
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  }
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>      <strong class="jxr_keyword">final</strong> SnmpFactory factory = SnmpFactory.getInstance();
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>      SnmpContext snmp = factory.newContext(target, mib);
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>      VarbindCollection varbinds = snmp.getNext(<span class="jxr_string">"sysDescr"</span>, <span class="jxr_string">"sysUpTime"</span>).get();
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>      String sysDescr = varbinds.get(<span class="jxr_string">"sysDescr"</span>).asString();
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>      String sysUpTime = varbinds.get(<span class="jxr_string">"sysUpTime"</span>).asString();
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>      Matcher matcher = CISCOIOS_PATTERN.matcher(sysDescr);
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>      <strong class="jxr_keyword">boolean</strong> found = matcher.find();
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>      String software = found ? matcher.group(1) : NOT_AVAILABLE;
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>      String version = found ? matcher.group(2) : NOT_AVAILABLE;
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>      System.out.format(<span class="jxr_string">"%-12s %-15s %-24s %-24s %s\n"</span>,
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>          <span class="jxr_string">"Device Name"</span>, <span class="jxr_string">"IP Address"</span>, <span class="jxr_string">"Software"</span>, <span class="jxr_string">"Version"</span>, <span class="jxr_string">"Up Time"</span>);
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>      System.out.format(<span class="jxr_string">"%-12s %-15s %-24s %-24s %s\n"</span>,
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>          deviceName, ipAddress, software, version, sysUpTime);
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>      snmp.close();
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>    }
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>    
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2012&#x2013;2015. All rights reserved.</div>

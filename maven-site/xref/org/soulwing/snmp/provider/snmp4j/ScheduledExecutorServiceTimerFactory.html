@@ -68,14 +68,14 @@
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>    <strong class="jxr_keyword">class</strong> <a href="../../../../../org/soulwing/snmp/provider/snmp4j/ScheduledExecutorServiceTimerFactory.html">ScheduledCommonTimer</a> <strong class="jxr_keyword">implements</strong> CommonTimer {
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>  
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>      <strong class="jxr_keyword">private</strong> ScheduledFuture&lt;?&gt; future;
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>      <strong class="jxr_keyword">private</strong> <a href="../../../../../org/soulwing/snmp/provider/snmp4j/ScheduledExecutorServiceTimerFactory.html">TimerTaskWrapper</a> wrapper;
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>      <strong class="jxr_keyword">private</strong> <a href="../../../../../org/soulwing/snmp/provider/snmp4j/TrivialTimerFactory.html">TimerTaskWrapper</a> wrapper;
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>      @Override
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> schedule(TimerTask task, <strong class="jxr_keyword">long</strong> delay) {
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>        <strong class="jxr_keyword">if</strong> (future != <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>          cancel();
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>        }
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>        wrapper = <strong class="jxr_keyword">new</strong> <a href="../../../../../org/soulwing/snmp/provider/snmp4j/ScheduledExecutorServiceTimerFactory.html">TimerTaskWrapper</a>(task);
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>        wrapper = <strong class="jxr_keyword">new</strong> <a href="../../../../../org/soulwing/snmp/provider/snmp4j/TrivialTimerFactory.html">TimerTaskWrapper</a>(task);
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>        future = executorService.schedule(wrapper, delay, TimeUnit.MILLISECONDS);
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>        wrapper.setFuture(future);
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>        logger.debug(<span class="jxr_string">"scheduled task {} with delay {}"</span>, task, delay);
@@ -93,7 +93,7 @@
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>        <strong class="jxr_keyword">if</strong> (future != <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>          cancel();
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>        }
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>        wrapper = <strong class="jxr_keyword">new</strong> <a href="../../../../../org/soulwing/snmp/provider/snmp4j/ScheduledExecutorServiceTimerFactory.html">TimerTaskWrapper</a>(task);
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>        wrapper = <strong class="jxr_keyword">new</strong> <a href="../../../../../org/soulwing/snmp/provider/snmp4j/TrivialTimerFactory.html">TimerTaskWrapper</a>(task);
 <a class="jxr_linenumber" name="L89" href="#L89">89</a>        future = executorService.scheduleWithFixedDelay(
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>            wrapper, delay, period, TimeUnit.MILLISECONDS);
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>        wrapper.setFuture(future);
@@ -110,12 +110,12 @@
 <a class="jxr_linenumber" name="L102" href="#L102">102</a> 
 <a class="jxr_linenumber" name="L103" href="#L103">103</a>   }
 <a class="jxr_linenumber" name="L104" href="#L104">104</a> 
-<a class="jxr_linenumber" name="L105" href="#L105">105</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../org/soulwing/snmp/provider/snmp4j/ScheduledExecutorServiceTimerFactory.html">TimerTaskWrapper</a> <strong class="jxr_keyword">extends</strong> TimerTask {
+<a class="jxr_linenumber" name="L105" href="#L105">105</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../org/soulwing/snmp/provider/snmp4j/TrivialTimerFactory.html">TimerTaskWrapper</a> <strong class="jxr_keyword">extends</strong> TimerTask {
 <a class="jxr_linenumber" name="L106" href="#L106">106</a> 
 <a class="jxr_linenumber" name="L107" href="#L107">107</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> TimerTask delegate;
 <a class="jxr_linenumber" name="L108" href="#L108">108</a>     <strong class="jxr_keyword">private</strong> ScheduledFuture&lt;?&gt; future;
 <a class="jxr_linenumber" name="L109" href="#L109">109</a> 
-<a class="jxr_linenumber" name="L110" href="#L110">110</a>     <strong class="jxr_keyword">public</strong> <a href="../../../../../org/soulwing/snmp/provider/snmp4j/ScheduledExecutorServiceTimerFactory.html">TimerTaskWrapper</a>(TimerTask delegate) {
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>     <strong class="jxr_keyword">public</strong> <a href="../../../../../org/soulwing/snmp/provider/snmp4j/TrivialTimerFactory.html">TimerTaskWrapper</a>(TimerTask delegate) {
 <a class="jxr_linenumber" name="L111" href="#L111">111</a>       <strong class="jxr_keyword">this</strong>.delegate = delegate;
 <a class="jxr_linenumber" name="L112" href="#L112">112</a>     }
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> 
