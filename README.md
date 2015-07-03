@@ -349,17 +349,16 @@ finally {
 ```
 
 
-
-
-
 Retrieving Rows from Conceptual Tables
 --------------------------------------
 
 SNMP represents tabular information by allowing a particular object **type** to
 have many instances, each identified with a unique subidentifier appended to
-the object type's identifier.  For example, in the previous section we learned
-that the standard MIB's network interface table has perhaps many instances of
-the *ifDescr* object; one for each network interface managed by an agent.
+the object type's identifier.  For example, in 
+[A Brief Diversion on the topic of Object Indexes] (#a-brief-diversion-on-the-topic-of-object-indexes)
+we learned that the standard MIB's network interface table has perhaps many 
+instances of the *ifDescr* object type; one for each network interface managed 
+by an agent.
 
 They're called "conceptual" tables, because their representation isn't really
 all that tabular.  A table "column" is really just an object type, and because
