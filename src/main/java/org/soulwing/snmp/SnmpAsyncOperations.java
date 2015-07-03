@@ -53,6 +53,29 @@ public interface SnmpAsyncOperations {
       String... oids);
 
   /**
+   * Invokes an asynchronous SNMP SET operation.
+   * @param callback callback to invoke when a response is available
+   * @param varbinds variable bindings to set in the operation
+   */
+  void asyncSet(SnmpCallback<VarbindCollection> callback, List<Varbind> varbinds);
+
+  /**
+   * Invokes an asynchronous SNMP SET operation.
+   * @param callback callback to invoke when a response is available
+   * @param varbinds variable bindings to set in the operation
+   */
+  void asyncSet(SnmpCallback<VarbindCollection> callback,
+      VarbindCollection varbinds);
+
+  /**
+   * Invokes an asynchronous SNMP SET operation.
+   * @param callback callback to invoke when a response is available
+   * @param varbinds variable bindings to set in the operation
+   */
+  void asyncSet(SnmpCallback<VarbindCollection> callback,
+      Varbind... varbinds);
+
+  /**
    * Invokes an asynchronous SNMP GETNEXT operation.
    * @param callback callback to invoke when a response is available
    * @param oids MIB names or dotted-decimal object identifiers for the

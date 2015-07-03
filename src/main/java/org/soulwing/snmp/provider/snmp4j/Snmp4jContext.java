@@ -315,6 +315,21 @@ class Snmp4jContext implements SnmpContext {
     newGet(oids).invoke(callback);
   }
 
+  @Override
+  public void asyncSet(SnmpCallback<VarbindCollection> callback, List<Varbind> varbinds) {
+    newSet(varbinds).invoke(callback);
+  }
+
+  @Override
+  public void asyncSet(SnmpCallback<VarbindCollection> callback, VarbindCollection varbinds) {
+    newSet(varbinds).invoke(callback);
+  }
+
+  @Override
+  public void asyncSet(SnmpCallback<VarbindCollection> callback, Varbind... varbinds) {
+    newSet(varbinds).invoke(callback);
+  }
+
   /**
    * {@inheritDoc}
    */
