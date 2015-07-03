@@ -24,16 +24,15 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 
-import net.percederberg.mibble.Mib;
-import net.percederberg.mibble.MibLoader;
-import net.percederberg.mibble.MibValueSymbol;
-import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.soulwing.snmp.Formatter;
 import org.soulwing.snmp.IndexExtractor;
+
+import net.percederberg.mibble.Mib;
+import net.percederberg.mibble.MibLoader;
+import net.percederberg.mibble.MibValueSymbol;
 
 /**
  * Unit tests for {@link CachingIndexExtractorFactory}.
