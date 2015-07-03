@@ -147,7 +147,8 @@ methods include variants which take a variable number of arguments or a
 In addition to the `get`, the context provides methods to support all of the 
 fundamental SNMP operations: GET, GETNEXT, GETBULK, and SET.  Moreover, it 
 provides methods to support easy and efficient SNMP table walks, which we'll 
-cover later. See the [javadoc] for the full details.
+cover later. See the [javadoc] (http://soulwing.github.io/tnm4j/maven-site/apidocs)
+for the full details.
 
 You might have noticed there are quite a few *gets* in those two lines of code
 inside of the *try* block.  The snippet is written in the idiomatic style
@@ -170,21 +171,22 @@ finally {
 ```
 
 Now we can see that when we use `getNext` to perform a GETNEXT operation, the
-return value is an `SnmpResponse`.  If you check out the [javadoc] for
-`SnmpResponse` you'll see that it has a single method (`get`) that retrieves
-the result of the SNMP operation.  The response object works kinda like the
-JDK's `Future` object -- the `get` method will block until the
-result of the operation is available.  If the operation fails, the relevant
-exception will be thrown when you try to get the result from the response
-object.
+return value is an `SnmpResponse`.  If you check out the the javadoc
+[SnmpResponse] (http://soulwing.github.io/tnm4j/maven-site/apidocs/org/soulwing/snmp/SnmpResponse.html) 
+you'll see that it has a single method (`get`) that retrieves the result of the 
+SNMP operation.  The response object works kinda like the JDK's `Future` 
+object -- the `get` method will block until the result of the operation is 
+available.  If the operation fails, the relevant exception will be thrown when 
+you try to get the result from the response object.
 
 Assuming that the operation succeeds, the result we retrieve from the response
-object is a `VarbindCollection` (see [javadoc]).  This object is *not* a subtype
-of the JDK's `Collection` type.  However, it has an interface with methods that
-have familiar signatures supporting both list-like and map-like access to the
-varbinds in the collection.  In this example, we're using a list-like getter
-that takes an index -- since we requested only one varbind in the GET operation,
-there is exactly one varbind in the result (and it has index 0).
+object is a `VarbindCollection` (see [javadoc] (http://soulwing.github.io/tnm4j/maven-site/apidocs)).  
+This object is *not* a subtype of the JDK's `Collection` type.  However, it has
+an interface with methods that have familiar signatures supporting both list-like 
+and map-like access to the varbinds in the collection.  In this example, we're 
+using a list-like getter that takes an index -- since we requested only one 
+varbind in the GET operation, there is exactly one varbind in the result 
+(and it has index 0).
 
 > In addition to the access methods provided on the `VarbindCollection`
 > interface, you can use the `asList` or `asMap` methods to efficiently coerce
@@ -1017,7 +1019,9 @@ listener-handler interaction is designed around the _strategy pattern_.  When a
 notification is received, handlers are notified in priority order.  Each handler 
 is allowed to inspect the notification and decide whether to handle it.  The 
 first handler that returns `true` is the last handler that will receive the 
-notification.  See the [SnmpListener javadoc] for details.
+notification.  See the javadoc for 
+[SnmpListener] (http://soulwing.github.io/tnm4j/maven-site/apidocs/org/soulwing/snmp/SnmpListener.html)
+for more information.
 
 The strategy-based design allows you to easily write highly cohesive 
 notification handlers, each focused on handling a particular kind of 
