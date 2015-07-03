@@ -133,7 +133,7 @@ finally {
 }
 ```
 
-The preceding snippet uses the context to invoke a GETNEXT operation on the
+The preceding snippet uses the context to invoke a GET operation on the
 remote agent and stores a reference to the retrieved variable bindings --
 *varbinds* in SNMP speak.  The numeric object ID used here (in case you
 didn't recognize it) is the SNMP `sysUpTime` object.  When invoking an
@@ -144,8 +144,8 @@ methods include variants which take a variable number of arguments or a
 > If you're wondering why we're using numeric OIDs here instead of names,
 > just hang on... we'll get there shortly!
 
-In addition to the `get` method, the context provides methods to support all of 
-the fundamental SNMP operations: GET, GETNEXT, GETBULK, and SET.  Moreover, it 
+In addition to the `get`, the context provides methods to support all of the 
+fundamental SNMP operations: GET, GETNEXT, GETBULK, and SET.  Moreover, it 
 provides methods to support easy and efficient SNMP table walks, which we'll 
 cover later. See the [javadoc] for the full details.
 
@@ -294,6 +294,62 @@ you specify the index would be redundant.  Coming up next, we learn how to
 retrieve MIB tables (such as the standard MIB's interface table).  We'll find it
 very convenient that we don't have to know the index of the row in order to
 retrieve a row's columns.
+
+### Setting Object Values
+
+In addition to retrieving object values from a remote agent, we can set object
+values.  For example, we can set the value for the *sysContact* object by 
+invoking the `set` method on the context:
+
+```
+import org.soulwing.snmp4j.*;
+
+Mib mib = MibFactory.getInstance().newMib();
+mib.load("SNMPv2-MIB");
+
+SimpleSnmpV2cTarget target = new SimpleSnmpV2cTarget();
+target.setAddress("10.0.0.1");
+target.setCommunity("public");
+
+SnmpContext context = SnmpFactory.getInstance().newContext(target, mib);
+try {
+  Varbind vb = context.newVarbind("sysContact.0", "nobody@nowhere.net");
+  VarbindCollection result = context.set(vb).get();
+  System.out.println(result.get("sysContact"));
+}
+finally {
+  context.close();
+}
+```
+
+Notice that when specifying a variable binding to set an object value, we must
+use an object *instance* identifier -- in this case we are specifying the
+identifier for the singleton instance of the *sysContact* object.
+
+We pass one or more variable bindings to the `set` method.  Each variable 
+binding associates a value with an object identifier.  The context has a
+factory method that creates `Varbind` objects given an object identifier and
+an object value.  The value you pass must be compatible with the data type 
+of the associated SNMP object.  
+
+We can also pass a `VarbindCollection` to the `set` method.  This allows you
+to fetch a current value for an object, change the value, and update it on the 
+remote agent:
+
+```
+try {
+  VarbindCollection vbs = context.getNext("sysContact").get();
+  result.get("sysContact").set("nobody@nowhere.net");
+  VarbindCollection result = context.set(vbs).get();
+  System.out.println(result.get("sysContact"));
+}
+finally {
+  context.close();
+}
+```
+
+
+
 
 
 Retrieving Rows from Conceptual Tables
@@ -871,7 +927,7 @@ submit an operation to an `SnmpCompletionService`, the service invokes the
 operation asynchronously, providing a callback that will be used to queue the 
 responses, making them available via the public API of the service.
    
- 
+
 Receiving SNMP Notifications (Traps, Informs)
 ---------------------------------------------
 
