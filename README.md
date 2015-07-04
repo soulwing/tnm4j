@@ -170,23 +170,22 @@ finally {
 }
 ```
 
-Now we can see that when we use `getNext` to perform a GETNEXT operation, the
+Now we can see that when we use `get` to perform a GET operation, the
 return value is an `SnmpResponse`.  If you check out the the javadoc
 [SnmpResponse] (http://soulwing.github.io/tnm4j/maven-site/apidocs/org/soulwing/snmp/SnmpResponse.html) 
 you'll see that it has a single method (`get`) that retrieves the result of the 
-SNMP operation.  The response object works kinda like the JDK's `Future` 
+SNMP operation.  The response object is patterned after the JDK's `Future` 
 object -- the `get` method will block until the result of the operation is 
 available.  If the operation fails, the relevant exception will be thrown when 
 you try to get the result from the response object.
 
 Assuming that the operation succeeds, the result we retrieve from the response
-object is a `VarbindCollection` (see [javadoc] (http://soulwing.github.io/tnm4j/maven-site/apidocs)).  
-This object is *not* a subtype of the JDK's `Collection` type.  However, it has
-an interface with methods that have familiar signatures supporting both list-like 
-and map-like access to the varbinds in the collection.  In this example, we're 
-using a list-like getter that takes an index -- since we requested only one 
-varbind in the GET operation, there is exactly one varbind in the result 
-(and it has index 0).
+object is a [VarbindCollection] (http://soulwing.github.io/tnm4j/maven-site/apidocs).  This object 
+is *not* a subtype of the JDK's `Collection` type.  However, it has an interface 
+with methods that have familiar signatures supporting both list-like and map-like 
+access to the varbinds in the collection.  In this example, we're using a 
+list-like getter that takes an index -- since we requested only one varbind in the 
+GET operation, there is exactly one varbind in the result (and it has index 0).
 
 > In addition to the access methods provided on the `VarbindCollection`
 > interface, you can use the `asList` or `asMap` methods to efficiently coerce
@@ -238,64 +237,63 @@ to invoke a GETNEXT operation -- in the previous example we used a GET
 operation.  The reason for this change involves something fundamental about the
 way management objects are represented by SNMP.
 
-### A Brief Diversion on the topic of Object Indexes
-
-In SNMP, every managed object **type** has a unique object identifier.  For
-example, the standard MIB includes an interface table with an object named
-*ifDescr* that describes a network interface.  The unique identifier of the
-*ifDescr* object **type** is 1.3.6.1.2.1.2.2.1.2. Similarly, the *sysUpTime*
-object **type** is identified as 1.3.6.1.2.1.1.3.
-
-*Every* SNMP object **instance** has an index that is appended to the object
-identifier for the object **type**.  For an object like *ifDescr* this makes
-sense -- a network device often has many network interfaces, so SNMP needs to
-be able to uniquely identify every instance of *ifDescr* (one per network
-interface). The third instance of *ifDescr* (corresponding to the third
-network interface managed by the agent) might have an index of 3, resulting in
-an object instance identifier of 1.3.6.1.2.1.2.2.1.2.3; the type identifier with
-.3 appended to the end.
-
-What is often surprising to newcomers to SNMP, is that even object types with
-singleton instances have an index.  So even *sysUpTime*, for which a given agent
-only ever has one instance, must have an index.  In SNMP, the index for
-singleton object instances is 0.  This index is appended to the end of the
-object type identifier, just as any other index subidentifier would be.  In our
-first examples, we used 1.3.6.1.2.1.1.3.0 as the object identifier to GET
-from the target agent.  Now we know that this identifier refers to the singleton
-instance of *sysUpTime*.
-
-In our last example, we used a GETNEXT operation.  Extracting out just the two
-most relevant lines of code, we had this:
-
-```
-VarbindCollection result = context.getNext("sysUpTime").get();
-System.out.println(result.get("sysUpTime"));
-```
-
-So why did we call `getNext` instead of `get`?  In SNMP, the GETNEXT operation
-returns the object **instance** whose identifier is the successor of the
-identifier specified in the operation.  Due to the fact that the index
-subidentifier is appended to the object **type** identifier, the type
-identifier is always the predecessor of the first **instance** of that type.
-
-For example the **type** identifier for *sysUpTime* is 1.3.6.1.2.1.1.3, which
-is always the predecessor of object 1.3.6.1.2.1.1.3.0 (the singleton
-**instance** of *sysUpTime*).  When we issue a GETNEXT for *sysUpTime*, the
-agent returns its successor; namely *sysUpTime.0*.
-
-You might be wondering if we could have also used a GET operation and specified
-the object as *sysUpTime.0*.  Indeed we could have done so, and the reason we
-didn't is mostly a question of style -- using GETNEXT to retrieve instances
-of singleton object types is the idiomatic choice in SNMP.
-
-The other to thing to note about our example is that even though the retrieved
-*sysUpTime* object instance has an index of 0, we retrieved it from the
-result object (`VarbindCollection`) without specifying the index.  The
-collection could only contain one instance of any given object type, so making
-you specify the index would be redundant.  Coming up next, we learn how to
-retrieve MIB tables (such as the standard MIB's interface table).  We'll find it
-very convenient that we don't have to know the index of the row in order to
-retrieve a row's columns.
+> #### A Brief Diversion on the topic of Object Indexes
+>
+> In SNMP, every managed object **type** has a unique object identifier.  For
+> example, the standard MIB includes an interface table with an object named
+> *ifDescr* that describes a network interface.  The unique identifier of the
+> *ifDescr* object **type** is 1.3.6.1.2.1.2.2.1.2. Similarly, the *sysUpTime*
+> object **type** is identified as 1.3.6.1.2.1.1.3.
+> 
+> *Every* SNMP object **instance** has an index that is appended to the object
+> identifier for the object **type**.  For an object like *ifDescr* this makes
+> sense -- a network device often has many network interfaces, so SNMP needs to
+> be able to uniquely identify every instance of *ifDescr* (one per network
+> interface). The third instance of *ifDescr* (corresponding to the third
+> network interface managed by the agent) might have an index of 3, resulting in
+> an object instance identifier of 1.3.6.1.2.1.2.2.1.2.3; i.e. the **type**
+> identifier with .3 appended to the end.
+> 
+> What is often surprising to newcomers to SNMP, is that even object types with
+> singleton instances have an index.  So *sysUpTime*, for which a given agent
+> only ever has one instance, must have an index.  In SNMP, the index for
+> singleton object instances is 0.  This index is appended to the end of the
+> object type identifier, just like any other index.  In our first examples, we 
+> used 1.3.6.1.2.1.1.3.0 as the object identifier to GET from the target agent. 
+> Now we know that this identifier refers to the singleton instance of *sysUpTime*.
+>
+> In our last example, we used a GETNEXT operation.  Extracting out just the two
+> most relevant lines of code, we had this:
+>
+> ```
+> VarbindCollection result = context.getNext("sysUpTime").get();
+> System.out.println(result.get("sysUpTime"));
+> ```
+> 
+> So why did we call `getNext` instead of `get`?  In SNMP, the GETNEXT operation
+> returns the object **instance** whose identifier is the successor of the
+> identifier specified in the operation.  Due to the fact that the index
+> subidentifier is appended to the object **type** identifier, the type
+> identifier is always the predecessor of the first **instance** of that type.
+>
+> For example the **type** identifier for *sysUpTime* is 1.3.6.1.2.1.1.3, which
+> is always the predecessor of object 1.3.6.1.2.1.1.3.0 (the singleton
+> **instance** of *sysUpTime*).  When we issue a GETNEXT for *sysUpTime*, the
+> agent returns its successor; namely *sysUpTime.0*.
+>
+> You might be wondering if we could have also used a GET operation and specified
+> the object as *sysUpTime.0*.  Indeed we could have done so, and the reason we
+> didn't is mostly a question of style -- using GETNEXT to retrieve instances
+> of singleton object types is the idiomatic choice in SNMP.
+>
+> The other to thing to note about our example is that even though the retrieved
+> *sysUpTime* object instance has an index of 0, we retrieved it from the
+> result object (`VarbindCollection`) without specifying the index.  The
+> collection could only contain one instance of any given object type, so making
+> you specify the index would be redundant.  Coming up shortly, we learn how to
+> retrieve MIB tables (such as the standard MIB's interface table).  We'll find 
+> it very convenient that we don't have to know the index of the row in order to
+> retrieve a row's columns.
 
 ### Setting Object Values
 
@@ -426,7 +424,7 @@ another GETNEXT operation.
 
 This example also illustrates the common practice of including *sysUpTime* in 
 the list of object identifiers for each GETNEXT operation.  This provides an
-agent-based time basis for computing rates for counters such as the input and
+agent-centric time basis for computing rates for counters such as the input and
 output octet counters.  Including a singleton object type like *sysUpTime*
 means that we can't simply use all of the object identifiers for the current row 
 in the request for the next row -- the successor to *sysUpTime.0* is 
@@ -439,38 +437,39 @@ objects in the collection.
 
 It's possible to ask for too many objects in a single GETNEXT request.  We
 check for that case by comparing the size of the row to the number of objects
-we requested.
+we requested.  Requesting too many objects in a single request is a programming 
+error, so we simply throw an exception.
 
 ### Table Retrieval Using GETBULK
 
 If you ran the previous example to collect the interface table from a real
 network device, you probably noticed that it's a bit slow.  Using GETNEXT, we
 have to make a full round trip over the network for each entry in the target
-SNMP agent's interface table.  You can probably imagine that's not going to work
-very well for a network switch that contains tens or hundreds of managed
-interfaces.
+SNMP agent's interface table.  You can probably imagine that this approach is not 
+going to work very well for a something like an IP route table that could contain
+hundreds of thousands of rows.
 
 In SNMPv2, the GETBULK operation was introduced to the protocol to provide a
-improving table retrieval performance.  Conceptually, the GETBULK operation 
-allows us to perform the *while* loop in the previous example on the remote 
-agent itself.  Just like GETNEXT, the GETBULK operation takes a list of object 
-identifiers.  As we've seen, when executing the GETNEXT operation, the agent 
-returns the successor object instance for each of the specified object
+solution for improving table retrieval performance.  Conceptually, the GETBULK 
+operation allows us to perform the *while* loop in the previous example on the 
+remote agent itself.  Just like GETNEXT, the GETBULK operation takes a list of 
+object identifiers.  As we've seen, when executing the GETNEXT operation, the 
+agent returns the successor object instance for each of the specified object
 identifiers.  With GETBULK, the agent returns the next *N* successor object 
 instances for each of the specified identifiers.
 
 We specify the maximum value for *N* as one of the parameters to the GETNEXT
 operation; the protocol specification calls this parameter *max-repetitions*.  The 
 value we specify indicates the maximum number of "rows" we want to retrieve in a 
-single GETBULK operation.  Of course, the agent may choose to return a value less 
-than *N*.
+single GETBULK operation.  Of course, the agent may choose to return fewer than
+the number of rows we specify.
 
 In our previous example using GETNEXT, we included *sysUpTime* in the request.
 Since GETBULK effectively performs *N* GETNEXT operations, we need a way to tell 
 it that some of the object identifiers in the request are for non-repeating 
 objects.  The GETBULK operation includes a *non-repeating* parameter for this 
 purpose -- this parameter is used to indicate that the first *k* identifiers
-in the list are for non-repeating identifiers.
+in the list are for non-repeating object types.
 
 Performing a GETBULK operation with Tnm4j is easy enough:
 
@@ -480,8 +479,8 @@ List<VarbindCollection> rows = context.getBulk(1, 10,
 ```
 
 The first parameter to `getBulk` indicates that there is one non-repeating
-object in the list (_sysUpTime_).  The second parameter indicates that we want 
-the agent to return as many as 10 rows for the specified columns of the 
+object type in the list (_sysUpTime_).  The second parameter indicates that we 
+want the agent to return as many as 10 rows for the specified columns of the 
 interface table.  The remaining parameters identify the object names we wish to
 retrieve. The return value from `getBulk` is a list of `VarbindCollection` 
 objects.  Based on the parameters specified in this example, the list will 
@@ -683,7 +682,7 @@ IPv6 addresses that are configured on the interfaces of a network device.  The
 review the definition of this table, you'll note that the most important pieces
 of information in this table -- the interface index and the address itself -- 
 cannot be retrieved from the table; the ACCESS-TYPE of these objects is 
-`not-accessible`.  
+*not-accessible*.  
 
 Tnm4j makes it easy to access this information (which is encoded in the object
 identifiers of the other objects in the table), as shown in the following
@@ -818,15 +817,15 @@ inside of our callback, it will never block -- the callback is not invoked
 until a response is available.
 
 If a timeout or other error occurs while executing the asynchronous operation,
-the call to `get` next will throw an appropriate exception.  This allows our
-callback to handle the exception using an ordinary *try* block.
+the call to `get` on the response object will throw an appropriate exception.  
+This allows our callback to handle the exception using an ordinary *try* block.
 
 In this example, the context object is closed before the callback returns.  As
 we discussed previously, context objects are lightweight, but should be closed
-when no longer needed.  In our example, we don't need the context any more so
-we close it.  In your design, you might choose to retain the context for 
-subsequent operations, and that's fine too -- you just need to close the context
-when it really is no longer needed.
+when no longer needed.  In our example, after the callback is finished, we don't 
+need the context any more so we close it.  In your design, you might choose to
+retain the context for subsequent operations, and that's fine too -- you just 
+need to close the context when it really is no longer needed.
 
 If you plop this example into a main method, as is, you'll probably find that
 it exits without printing anything.  Because our example doesn't really have 
@@ -836,9 +835,9 @@ use asynchronous operations if the application didn't have better things to do
 than hang around waiting for a response from the remote SNMP agent. 
 
 To make the example work, you could easily add a `Thread.sleep` after the call 
-to `asyncGetNext` to but the main thread to sleep for long enough for a response 
+to `asyncGetNext` to put the main thread to sleep for long enough for a response 
 to be received.  This is imprecise, but good enough for this silly example. In 
-the [example code] provided with Tnm4j, the callback is modified so that the 
+the example code provided with Tnm4j, the callback is modified so that the 
 main method can block until a response is received. 
 
 ### Using a Completion Service to Collect Results
@@ -846,18 +845,18 @@ main method can block until a response is received.
 Often, in creating network management applications you will write code that 
 simply needs to collect and record information from many different SNMP agents.
 An `SnmpCompletionService` can be used to simplify this work.  The completion
-service provides provides a `submit` to which you can submit `SnmpOperation`
-object instances for asynchronous execution.  The service has a queue like
-interface that you can use to retrieve `SnmpEvent` objects for completed 
-operations, in either a blocking on non-blocking manner.
+service provides provides a `submit` method to which you can submit 
+`SnmpOperation` object instances for asynchronous execution.  The service has a 
+queue like interface that you can use to retrieve `SnmpEvent` objects for 
+completed operations, in either a blocking on non-blocking manner.
 
 In addition to the methods such as `getNext` and `asyncGetNext` that directly 
 execute SNMP operations, `SnmpContext` provides factory methods that create 
 `SnmpOperation` objects.  An operation object provides two overloads of its 
-`invoke` method, providing for either synchronous or asynchronous execution.  
-You can create operation objects for operations you wish to perform, and 
-delegate the handling of the callback.  `SnmpCompletionService` is designed 
-around this concept.
+`invoke` method, providing for either synchronous or asynchronous execution.  You 
+can create operation objects for operations you wish to perform, and delegate the 
+handling of the callback.  `SnmpCompletionService` is designed around this 
+concept.
 
 Suppose we wanted to collect *sysName* and *sysUpTime* from many different 
 network devices.  Here's an example of how we might accomplish this using a
@@ -916,9 +915,9 @@ private static SnmpOperation<VarbindCollection> newOperation(String address,
 
 As we've seen in previous examples, we create a target that describes the
 SNMP agent on which we wish to execute an operation.  When use `SnmpFactory`
-to obtain a context for our target, and we use the `newGetNext` operation 
-factory method to obtain an `SnmpOperation` that will perform a GETNEXT
-for the *sysName* and *sysUpTime* objects.
+to obtain a context for our target, and we use the `newGetNext` factory 
+method to obtain an `SnmpOperation` that will perform a GETNEXT for the *sysName* 
+and *sysUpTime* objects.
 
 The context interface provides factory methods such as `newGetNext` for all of 
 the SNMP operations.  An `SnmpOperation` encapsulates a context, an operation, 
@@ -944,9 +943,9 @@ SNMP defines two different notification types; TRAP and INFORM.  An INFORM must
 be acknowledged by the recipient, allowing the agent to be assured of its 
 delivery.  For the agent, a TRAP is purely fire and forget -- the agent does not 
 concern itself with whether a TRAP is actually received by any management 
-application.  The underlying SNMP provider takes care of acknowledging receipt
-of INFORM events, so the difference between TRAP and INFORM notifications is 
-completely transparent to your application.
+application.  In Tnm4j, the underlying SNMP provider takes care of acknowledging 
+receipt of INFORM events, so the difference between TRAP and INFORM notifications 
+is completely transparent to your application.
 
 Tnm4j defines two fundamental objects for handling notifications from SNMP 
 agents; *listeners* and *handlers*.
