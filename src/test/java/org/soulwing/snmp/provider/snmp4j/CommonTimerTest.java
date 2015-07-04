@@ -51,6 +51,8 @@ public class CommonTimerTest {
 
   private static final long REPEAT_COUNT = 4;
 
+  private static final long TIMING_FUDGE = 10;
+
   private ScheduledExecutorServiceTimerFactory factory;
 
   @Before
@@ -97,7 +99,7 @@ public class CommonTimerTest {
       final long start = System.currentTimeMillis();
       assertThat(task.awaitReady(2 * REPEATING_DELAY), is(true));
       assertThat(System.currentTimeMillis() - start,
-          is(greaterThanOrEqualTo(REPEATING_DELAY)));
+          is(greaterThanOrEqualTo(REPEATING_DELAY - TIMING_FUDGE)));
     }
 
     timer.cancel();
