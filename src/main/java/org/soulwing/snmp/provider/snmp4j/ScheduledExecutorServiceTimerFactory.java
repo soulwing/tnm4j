@@ -60,17 +60,16 @@ class ScheduledExecutorServiceTimerFactory implements TimerFactory {
   class ScheduledCommonTimer implements CommonTimer {
 
     private ScheduledFuture<?> future;
-    private TimerTaskWrapper wrapper;
 
     @Override
     public void schedule(TimerTask task, long delay) {
       if (future != null) {
         cancel();
       }
-      wrapper = new TimerTaskWrapper(task);
-      future = executorService.schedule(wrapper, delay, TimeUnit.MILLISECONDS);
-      wrapper.setFuture(future);
-      logger.debug("scheduled task {} with delay {}", task, delay);
+      TimerTaskWrapper wrapper = new TimerTaskWrapper(task);
+      future = executorService.schedule(wrapper, delay,
+          TimeUnit.MILLISECONDS);
+      logger.debug("scheduled timer {} with delay {}", this, delay);
     }
 
     @Override
@@ -85,11 +84,10 @@ class ScheduledExecutorServiceTimerFactory implements TimerFactory {
       if (future != null) {
         cancel();
       }
-      wrapper = new TimerTaskWrapper(task);
+      TimerTaskWrapper wrapper = new TimerTaskWrapper(task);
       future = executorService.scheduleWithFixedDelay(
           wrapper, delay, period, TimeUnit.MILLISECONDS);
-      wrapper.setFuture(future);
-      logger.debug("scheduled task {} with delay {} and period {}", task, delay,
+      logger.debug("scheduled timer {} with delay {} and period {}", this, delay,
           period);
     }
 
@@ -97,7 +95,13 @@ class ScheduledExecutorServiceTimerFactory implements TimerFactory {
     public void cancel() {
       if (future == null) return;
       future.cancel(false);
-      logger.debug("canceled timer for task {}", wrapper);
+      logger.debug("canceled timer " + this);
+      future = null;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+      future = null;
     }
 
   }
@@ -105,18 +109,9 @@ class ScheduledExecutorServiceTimerFactory implements TimerFactory {
   private static class TimerTaskWrapper extends TimerTask {
 
     private final TimerTask delegate;
-    private ScheduledFuture<?> future;
 
     public TimerTaskWrapper(TimerTask delegate) {
       this.delegate = delegate;
-    }
-
-    public ScheduledFuture<?> getFuture() {
-      return future;
-    }
-
-    public void setFuture(ScheduledFuture<?> future) {
-      this.future = future;
     }
 
     @Override
@@ -142,14 +137,14 @@ class ScheduledExecutorServiceTimerFactory implements TimerFactory {
 
     @Override
     public boolean cancel() {
-      logger.debug("canceling timer task {}", this);
-      return future.cancel(false);
+      return false;
     }
 
     @Override
     public long scheduledExecutionTime() {
       return delegate.scheduledExecutionTime();
     }
+
   }
 
 }
