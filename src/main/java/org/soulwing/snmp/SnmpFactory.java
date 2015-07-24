@@ -106,10 +106,11 @@ public class SnmpFactory {
               config.getWorkerPoolSize(), config.getWorkerPoolSize(), 0L,
               TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
               threadFactory);
-          ScheduledExecutorService scheduledExecutorService =
+          ScheduledThreadPoolExecutor scheduledExecutorService =
               new ScheduledThreadPoolExecutor(
                   config.getScheduledWorkerPoolSize(),
                   new ScheduledThreadFactory(threadFactory));
+          scheduledExecutorService.setRemoveOnCancelPolicy(true);
           instance = new SnmpFactory(executorService, scheduledExecutorService,
               threadFactory, config);
         }
