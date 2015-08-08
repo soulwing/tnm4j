@@ -2,7 +2,7 @@ tnm4j
 =====
 
 [![Build Status](https://travis-ci.org/soulwing/tnm4j.svg?branch=master)](https://travis-ci.org/soulwing/tnm4j)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.soulwing/tnm4j/badge.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aorg.soulwing%20a%3Atnm4j*)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.soulwing.snmp/tnm4j/badge.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aorg.soulwing.snmp%20a%3Atnm4j*)
 
 
 A simplified SNMP API for Java, inspired by Jürgen Schönwälder's Tnm
