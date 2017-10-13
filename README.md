@@ -17,16 +17,14 @@ Architecture
 ------------
 Tnm4j provides a lightweight façade over an SNMP adapter and a MIB parser
 adapter.  These adapters each implement a Tnm4j service provider interface to
-adapt a third-party library for use with Tnm4j.  The JDK's [ServiceLoader]
-(http://docs.oracle.com/javase/7/docs/api/java/util/ServiceLoader.html)
+adapt a third-party library for use with Tnm4j.  The JDK's [ServiceLoader](http://docs.oracle.com/javase/7/docs/api/java/util/ServiceLoader.html)
 mechanism is used to locate adapters for SNMP and MIB parsing support.
 
-The default SNMP adapter uses [Snmp4j] (http://www.snmp4j.org) by Frank Fock and
+The default SNMP adapter uses [Snmp4j](http://www.snmp4j.org) by Frank Fock and
 Jochen Katz.  Snmp4j is an outstanding library providing comprehensive support
 for SNMP communications in Java.
 
-The default MIB adapter uses Per Cederberg's excellent [Mibble]
-(http://www.mibble.org) MIB parser.
+The default MIB adapter uses Per Cederberg's excellent [Mibble](http://www.mibble.org) MIB parser.
 
 Other SNMP providers or MIB parsers could be easily adapted for use with
 Tnm4j by implementing the necessary SPI.
@@ -149,7 +147,7 @@ methods include variants which take a variable number of arguments or a
 In addition to the `get`, the context provides methods to support all of the 
 fundamental SNMP operations: GET, GETNEXT, GETBULK, and SET.  Moreover, it 
 provides methods to support easy and efficient SNMP table walks, which we'll 
-cover later. See the [javadoc] (http://soulwing.github.io/tnm4j/maven-site/apidocs)
+cover later. See the [javadoc](http://soulwing.github.io/tnm4j/maven-site/apidocs)
 for the full details.
 
 You might have noticed there are quite a few *gets* in those two lines of code
@@ -174,7 +172,7 @@ finally {
 
 Now we can see that when we use `get` to perform a GET operation, the
 return value is an `SnmpResponse`.  If you check out the the javadoc
-[SnmpResponse] (http://soulwing.github.io/tnm4j/maven-site/apidocs/org/soulwing/snmp/SnmpResponse.html) 
+[SnmpResponse](http://soulwing.github.io/tnm4j/maven-site/apidocs/org/soulwing/snmp/SnmpResponse.html) 
 you'll see that it has a single method (`get`) that retrieves the result of the 
 SNMP operation.  The response object is patterned after the JDK's `Future` 
 object -- the `get` method will block until the result of the operation is 
@@ -182,7 +180,7 @@ available.  If the operation fails, the relevant exception will be thrown when
 you try to get the result from the response object.
 
 Assuming that the operation succeeds, the result we retrieve from the response
-object is a [VarbindCollection] (http://soulwing.github.io/tnm4j/maven-site/apidocs).  This object 
+object is a [VarbindCollection](http://soulwing.github.io/tnm4j/maven-site/apidocs).  This object 
 is *not* a subtype of the JDK's `Collection` type.  However, it has an interface 
 with methods that have familiar signatures supporting both list-like and map-like 
 access to the varbinds in the collection.  In this example, we're using a 
@@ -357,7 +355,7 @@ Retrieving Rows from Conceptual Tables
 SNMP represents tabular information by allowing a particular object **type** to
 have many instances, each identified with a unique subidentifier appended to
 the object type's identifier.  For example, in 
-[A Brief Diversion on the topic of Object Indexes] (#a-brief-diversion-on-the-topic-of-object-indexes)
+[A Brief Diversion on the topic of Object Indexes](#a-brief-diversion-on-the-topic-of-object-indexes)
 we learned that the standard MIB's network interface table has perhaps many 
 instances of the *ifDescr* object type; one for each network interface managed 
 by an agent.
@@ -663,7 +661,7 @@ yourself, because Tnm4j has done it for you.  Just as it does for all of the
 native SNMP operations, Tnm4j provides an asynchronous variant of the high level
 walk operation.  This allows you to walk arbitrarily large tables without 
 blocking, and allows concurrent retrieval of tables from multiple agents without
-requiring a retrieval thread per agent.  See [Asynchronous Operations] (#asynchronous-operations)
+requiring a retrieval thread per agent.  See [Asynchronous Operations](#asynchronous-operations)
 for details.  
 
 ### Accessing Table Index Objects
@@ -678,7 +676,7 @@ management application.
 
 Table index objects often contain information that is important to network 
 management applications.  For example, suppose that our management application 
-wants to use the [IPV6-MIB] (http://www.ietf.org/rfc/rfc2465.txt) to obtain the 
+wants to use the [IPV6-MIB](http://www.ietf.org/rfc/rfc2465.txt) to obtain the 
 IPv6 addresses that are configured on the interfaces of a network device.  The
 `ipv6AddrTable` contains the information that we'd like to retrieve.  If you 
 review the definition of this table, you'll note that the most important pieces
@@ -1021,7 +1019,7 @@ notification is received, handlers are notified in priority order.  Each handler
 is allowed to inspect the notification and decide whether to handle it.  The 
 first handler that returns `true` is the last handler that will receive the 
 notification.  See the javadoc for 
-[SnmpListener] (http://soulwing.github.io/tnm4j/maven-site/apidocs/org/soulwing/snmp/SnmpListener.html)
+[SnmpListener](http://soulwing.github.io/tnm4j/maven-site/apidocs/org/soulwing/snmp/SnmpListener.html)
 for more information.
 
 The strategy-based design allows you to easily write highly cohesive 
