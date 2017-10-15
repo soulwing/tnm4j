@@ -30,6 +30,8 @@ import org.snmp4j.security.PrivAES256;
 import org.snmp4j.security.PrivDES;
 import org.snmp4j.security.SecurityLevel;
 import org.snmp4j.security.SecurityProtocols;
+import org.snmp4j.security.SecurityModels;
+import org.snmp4j.security.TSM;
 import org.snmp4j.security.USM;
 import org.snmp4j.security.UsmUser;
 import org.snmp4j.smi.OID;
@@ -43,9 +45,9 @@ import org.soulwing.snmp.SnmpV3Target;
  * @author Carl Harris
  */
 class UserTargetStrategy implements TargetStrategy {
-
+  private static final OctetString localEngineId = new OctetString(MPv3.createLocalEngineID());
   private static final USM usm = new USM(SecurityProtocols.getInstance(),
-      new OctetString(MPv3.createLocalEngineID()), 0);
+      localEngineId, 0);
 
   @Override
   public Target newTarget(SnmpTarget target) {
@@ -60,11 +62,13 @@ class UserTargetStrategy implements TargetStrategy {
     }
     
     OctetString securityName = new OctetString(v3Target.getSecurityName());
-    
+    SecurityModels.getInstance().addSecurityModel(usm);
+
     usm.addUser(new UsmUser(securityName, 
             authType(v3Target), new OctetString(v3Target.getAuthPassphrase()),
             privType(v3Target), new OctetString(v3Target.getPrivPassphrase())));    
 
+    SecurityModels.getInstance().addSecurityModel(new TSM(localEngineId, false));
     UserTarget userTarget = new UserTarget();
     userTarget.setSecurityName(securityName);
     userTarget.setVersion(SnmpConstants.version3);
