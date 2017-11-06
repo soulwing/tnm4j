@@ -1,5 +1,1 @@
-before_install: git clone -b travis $(git config --get remote.origin.url) target/travis
 script: mvn install
-branches:
-  except:
-  - travis
