@@ -820,8 +820,8 @@ inside of our callback, it will never block -- the callback is not invoked
 until a response is available.
 
 If a timeout or other error occurs while executing the asynchronous operation,
-the call to `get` on the response object will throw an appropriate exception.  
-This allows our callback to handle the exception using an ordinary *try* block.
+the call to `get` on the response object will throw an appropriate exception. This 
+allows our callback to handle the exception using an ordinary *try* block.
 
 In this example, the context object is closed before the callback returns.  As
 we discussed previously, context objects are lightweight, but should be closed
