@@ -171,7 +171,7 @@ finally {
 ```
 
 Now we can see that when we use `get` to perform a GET operation, the
-return value is an `SnmpResponse`.  If you check out the the javadoc
+return value is an `SnmpResponse`.  If you check out the javadoc for
 [SnmpResponse](http://soulwing.github.io/tnm4j/maven-site/apidocs/org/soulwing/snmp/SnmpResponse.html) 
 you'll see that it has a single method (`get`) that retrieves the result of the 
 SNMP operation.  The response object is patterned after the JDK's `Future` 
