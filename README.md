@@ -639,9 +639,12 @@ finally {
 
 As you can see, using `walk` is the easier than using either GETBULK or GETNEXT.
 We obtain an `SnmpWalker` object from the context, using the `walk` method with 
-a parameter list that is essentially the same as what we used for `getBulk`. The 
-walker has a `next` method that executes GETBULK operations with the remote 
-agent as needed to retrieve all of the rows from the table.  
+a parameter list that is essentially the same as what we used for `getBulk`; the
+first parameter is the number of non-repeating object types in the list, followed
+by the names of the non-repeating objects (just `sysUpTime`), followed by the
+names of the columns we want to retrieve from a table. The walker has a `next` 
+method that executes GETBULK operations with the remote agent as needed to 
+retrieve all of the rows from the table.  
 
 While not shown here, the return value from `next` is an `SnmpResponse`
 just as it is for any other operation.  We invoke `get` on the return value 
