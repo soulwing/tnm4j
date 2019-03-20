@@ -21,8 +21,12 @@ package org.soulwing.snmp.provider.mibble;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import net.percederberg.mibble.Mib;
 import net.percederberg.mibble.MibLoader;
@@ -35,10 +39,13 @@ import net.percederberg.mibble.MibLoaderException;
  */
 class CachingMibRepository implements MibRepository {
 
+  private final Lock lock = new ReentrantLock();
+
   private final MibLoader loader = new MibLoader();
 
-  private final ConcurrentMap<String, Mib> cache =
-      new ConcurrentHashMap<String, Mib>();
+  private final List<String> names = new ArrayList<>();
+
+  private final Map<String, Mib> cache = new HashMap<String, Mib>();
 
   /**
    * Retrieves an iterable containing the names of MIB modules that have
@@ -48,7 +55,7 @@ class CachingMibRepository implements MibRepository {
    */
   @Override
   public Iterable<String> names() {
-    return cache.keySet();
+    return names;
   }
 
   /**
@@ -65,11 +72,17 @@ class CachingMibRepository implements MibRepository {
 
   @Override
   public Mib load(String name) throws MibLoaderException, IOException {
-    Mib mib = cache.get(name);
-    if (mib == null) {
-      mib = installMib(loader.load(name));
+    lock.lock();
+    try {
+      Mib mib = cache.get(name);
+      if (mib == null) {
+        mib = installMib(loader.load(name));
+      }
+      return mib;
     }
-    return mib;
+    finally {
+      lock.unlock();
+    }
   }
 
   @Override
@@ -83,8 +96,16 @@ class CachingMibRepository implements MibRepository {
   }
 
   private Mib installMib(Mib mib) {
-    cache.put(mib.getName(), mib);
-    return mib;
+    lock.lock();
+    try {
+      final String name = mib.getName();
+      names.add(0, name);
+      cache.put(name, mib);
+      return mib;
+    }
+    finally {
+      lock.unlock();
+    }
   }
 
   @Override

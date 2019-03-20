@@ -56,17 +56,17 @@ public class MibbleIndexExtractorTest {
     loader.load("TOKEN-RING-RMON-MIB");
     loader.load("RMON2-MIB");
     loader.load("ALARM-MIB");
-    loader.load(getClass().getResource("ERICSSON-TOP-MIB"));
-    loader.load(getClass().getResource("ERICSSON-TC-MIB"));
-    loader.load(getClass().getResource("ERICSSON-ALARM-TC-MIB"));
-    loader.load(getClass().getResource("ERICSSON-ALARM-PC-MIB"));
-    loader.load(getClass().getResource("ERICSSON-ALARM-MIB"));
+    loader.load(getClass().getClassLoader().getResource("mibs/ERICSSON-TOP-MIB"));
+    loader.load(getClass().getClassLoader().getResource("mibs/ERICSSON-TC-MIB"));
+    loader.load(getClass().getClassLoader().getResource("mibs/ERICSSON-ALARM-TC-MIB"));
+    loader.load(getClass().getClassLoader().getResource("mibs/ERICSSON-ALARM-PC-MIB"));
+    loader.load(getClass().getClassLoader().getResource("mibs/ERICSSON-ALARM-MIB"));
 
     // this is an OID reported in the notification
     final String oid = "1.3.6.1.4.1.193.183.4.1.3.5.1.5";
 
     final Mib mib = loader.getMib("ERICSSON-ALARM-MIB");
-    MibValueSymbol symbol = mib.getSymbolByOid(oid);
+    final MibValueSymbol symbol = mib.getSymbolByOid(oid);
     final MibbleIndexExtractor extractor = new MibbleIndexExtractor(symbol);
     assertThat(extractor.extractIndexes(oid), is(emptyArray()));
   }
