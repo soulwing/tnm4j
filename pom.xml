@@ -117,8 +117,8 @@
     </repository>
     <repository>
       <id>mibble</id>
-      <name>Mibble Respository</name>
-      <url>https://nexus.cns.vt.edu/nexus/content/groups/public/</url>
+      <name>Open NMS Repository (for Mibble)</name>
+      <url>http://maven.opennms.org/content/groups/opennms.org-release</url>
       <releases><enabled>true</enabled></releases>
     </repository>
   </repositories>
