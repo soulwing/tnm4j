@@ -438,7 +438,7 @@ objects in the collection.
 It's possible to ask for too many objects in a single GETNEXT request.  We
 check for that case by comparing the size of the row to the number of objects
 we requested.  Requesting too many objects in a single request is a programming 
-error, so we simply throw an exception.
+error, so we simply print an error message and exit the loop.
 
 ### Table Retrieval Using GETBULK
 
