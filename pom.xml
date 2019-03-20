@@ -59,12 +59,12 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>net.percederberg</groupId>
+      <groupId>net.percederberg.mibble</groupId>
       <artifactId>mibble</artifactId>
       <version>2.9.3</version>
     </dependency>
     <dependency>
-      <groupId>net.percederberg</groupId>
+      <groupId>net.percederberg.mibble</groupId>
       <artifactId>mibble-mibs</artifactId>
       <version>2.9.3</version>
       <scope>runtime</scope>
