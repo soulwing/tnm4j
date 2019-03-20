@@ -62,6 +62,11 @@ class MibbleIndexExtractor implements IndexExtractor {
   @Override
   public IndexDescriptor[] extractIndexes(String instanceOid) {
     String oid = symbol.getValue().toString();
+
+    // GitHub issue 9 fix; we might be asked to extract indexes from an
+    // OID that represents a type, not an instance.
+    if (oid.equals(instanceOid)) return new IndexDescriptor[0];
+
     String suboid = instanceOid.substring(oid.length() + 1);
     int[] components = oidToArray(suboid);
     int offset = 0;

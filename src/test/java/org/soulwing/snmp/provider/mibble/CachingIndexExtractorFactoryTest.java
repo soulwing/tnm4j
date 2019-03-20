@@ -24,11 +24,14 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 
+import java.io.File;
+
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.soulwing.snmp.IndexExtractor;
+import org.soulwing.snmp.MibFactory;
 
 import net.percederberg.mibble.Mib;
 import net.percederberg.mibble.MibLoader;
@@ -73,5 +76,50 @@ public class CachingIndexExtractorFactoryTest {
     MibValueSymbol symbol = mib.getSymbolByOid(Constants.SYS_DESCR_OID);
     factory.getIndexExtractor(symbol);
   }
+
+  @Test
+  public void testNewIndexExtractorForColumnType() throws Exception {
+    MibValueSymbol symbol = mib.getSymbolByOid(Constants.IF_DESCR_OID);
+    IndexExtractor extractor = factory.getIndexExtractor(symbol);
+    assertThat(extractor, is(not(nullValue())));
+    assertThat(factory.getIndexExtractor(symbol), is(sameInstance(extractor)));
+  }
+
+  @Test
+  public void testGithubIssue9() throws Exception {
+    // Test case for https://github.com/soulwing/tnm4j/issues/9
+    MibLoader loader = new MibLoader();
+    loader.load("SNMPv2-SMI");
+    loader.load("SNMPv2-TC");
+    loader.load("SNMPv2-CONF");
+    loader.load("SNMP-FRAMEWORK-MIB");
+    loader.load("SNMP-TARGET-MIB");
+    loader.load("SNMP-NOTIFICATION-MIB");
+    loader.load("IANA-ITU-ALARM-TC-MIB");
+    loader.load("ITU-ALARM-TC-MIB");
+    loader.load("INET-ADDRESS-MIB");
+    loader.load("RFC1155-SMI");
+    loader.load("RFC1158-MIB");
+    loader.load("RFC-1212");
+    loader.load("RFC1213-MIB");
+    loader.load("RMON-MIB");
+    loader.load("RFC1271-MIB");
+    loader.load("TOKEN-RING-RMON-MIB");
+    loader.load("RMON2-MIB");
+    loader.load("ALARM-MIB");
+    loader.load(new File("ERICSSON-TOP-MIB"));
+    loader.load(new File("ERICSSON-TC-MIB"));
+    loader.load(new File("ERICSSON-ALARM-TC-MIB"));
+    loader.load(new File("ERICSSON-ALARM-PC-MIB"));
+    loader.load(new File("ERICSSON-ALARM-MIB"));
+
+    final Mib mib = loader.getMib("ERICSSON-ALARM-MIB");
+    MibValueSymbol symbol = mib.getSymbolByOid("1.3.6.1.4.1.193.183.4.1.3.5.1.5");
+    IndexExtractor extractor = factory.getIndexExtractor(symbol);
+    assertThat(extractor, is(not(nullValue())));
+    assertThat(factory.getIndexExtractor(symbol), is(sameInstance(extractor)));
+    extractor.extractIndexes("1.3.6.1.4.1.193.183.4.1.3.5.1.5");
+  }
+  
 
 }
