@@ -45,7 +45,6 @@ public class SimpleVarbindFactoryTest {
     mib.load("SNMPv2-SMI");
     mib.load("SNMPv2-TC");
     mib.load("SNMPv2-CONF");
-    mib.load("SNMPv2-MIB");
     mib.load("SNMP-FRAMEWORK-MIB");
     mib.load("SNMP-TARGET-MIB");
     mib.load("SNMP-NOTIFICATION-MIB");
@@ -67,16 +66,12 @@ public class SimpleVarbindFactoryTest {
     mib.load(getClass().getClassLoader().getResource("mibs/ERICSSON-ALARM-PC-MIB"));
     mib.load(getClass().getClassLoader().getResource("mibs/ERICSSON-ALARM-MIB"));
 
-    final SimpleVarbindFactory factory = new SimpleVarbindFactory(mib);
-    final String oid = mib.nameToOid("sysUpTime.0");
-    System.out.println(mib.oidToInstanceName(oid));
-
     VariableBinding binding = new VariableBinding();
     binding.setOid(new OID("1.3.6.1.2.1.1.3.0"));
     binding.setVariable(new Integer32(42));
 
+    final SimpleVarbindFactory factory = new SimpleVarbindFactory(mib);
     final Varbind vb = factory.newVarbind(binding);
-
     assertThat(vb.getName(), is(equalTo("sysUpTime.0")));
   }
 
