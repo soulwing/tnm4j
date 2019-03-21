@@ -47,7 +47,7 @@ public interface SnmpProvider {
   void init(SnmpFactoryConfig config);
 
   /**
-   * Creates a new SNMPv2c context.
+   * Creates a new SNMP context.
    * @param target target agent
    * @param config context configuration; the provider can safely
    *    assume that the configuration is immutable for the lifetime of the
