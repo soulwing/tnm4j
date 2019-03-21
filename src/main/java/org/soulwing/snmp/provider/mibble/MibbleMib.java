@@ -20,21 +20,26 @@ package org.soulwing.snmp.provider.mibble;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
-import net.percederberg.mibble.MibLoader;
-import net.percederberg.mibble.MibLoaderException;
-import net.percederberg.mibble.MibType;
-import net.percederberg.mibble.MibValueSymbol;
-import net.percederberg.mibble.snmp.SnmpObjectType;
-import net.percederberg.mibble.value.ObjectIdentifierValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.soulwing.snmp.Formatter;
 import org.soulwing.snmp.IndexExtractor;
 import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.MibException;
 import org.soulwing.snmp.MibTrapV1Support;
 import org.soulwing.snmp.ModuleParseException;
+import net.percederberg.mibble.MibLoaderException;
+import net.percederberg.mibble.MibType;
+import net.percederberg.mibble.MibValueSymbol;
+import net.percederberg.mibble.snmp.SnmpObjectType;
+import net.percederberg.mibble.value.ObjectIdentifierValue;
 
 class MibbleMib implements Mib, MibTrapV1Support {
+
+  private final Logger logger = LoggerFactory.getLogger(MibbleMib.class);
 
   private final MibRepository repository;
 
@@ -113,12 +118,48 @@ class MibbleMib implements Mib, MibTrapV1Support {
   }
 
   MibValueSymbol getSymbolByOid(String oid) {
-    MibValueSymbol symbol = null;
-    for (String scope : repository.names()) {
-      symbol = getSymbolByOid(scope, oid);
-      if (symbol != null) break;
+    return geBestSymbolByOidMatch(oid, getAllSymbolByOidMatches(oid));
+  }
+
+  private MibValueSymbol geBestSymbolByOidMatch(String oid,
+      List<MibValueSymbol> matches) {
+
+    if (matches.isEmpty()) return null;
+
+    // assume first match is best
+    MibValueSymbol best = matches.get(0);
+    String bestSuffix = oid.replaceFirst("^" + best.getValue().toString() + ".", "");
+    int bestRank = bestSuffix.split("\\.").length;
+
+    for (int i = 0, max = matches.size(); i < max; i++) {
+      final MibValueSymbol other = matches.get(i);
+      final String otherSuffix =
+          oid.replaceFirst("^" + other.getValue().toString() + ".", "");
+      final int otherRank = otherSuffix.split("\\.").length;
+      // he have a new best if the range of this match is better
+      if (otherRank < bestRank) {
+        best = other;
+        bestRank = otherRank;
+      }
     }
-    return symbol;
+    if (logger.isDebugEnabled()) {
+      logger.debug("getSymbolByOid selected best match {}", best);
+    }
+    return best;
+  }
+
+  private List<MibValueSymbol> getAllSymbolByOidMatches(String oid) {
+    final List<MibValueSymbol> matches = new ArrayList<>();
+    for (String scope : repository.names()) {
+      final MibValueSymbol symbol = getSymbolByOid(scope, oid);
+      if (symbol != null) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("getSymbolByOid found match: {}", symbol);
+        }
+        matches.add(symbol);
+      }
+    }
+    return matches;
   }
 
   private MibValueSymbol getSymbolByOid(String scope, String oid) {

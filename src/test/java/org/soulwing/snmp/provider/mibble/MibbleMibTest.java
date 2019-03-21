@@ -26,14 +26,13 @@ import java.io.File;
 import java.net.URL;
 import java.util.Collections;
 
-import net.percederberg.mibble.MibLoader;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.soulwing.snmp.Mib;
+import net.percederberg.mibble.MibLoader;
 
 /**
  * Tests for {@link MibbleMib}.
@@ -175,6 +174,28 @@ public class MibbleMibTest {
     });
 
     mib.load(url);
+  }
+
+  @Test
+  public void testFindBestNameForOid() throws Exception {
+    final MibbleMib mib = new MibbleMib();
+    mib.load("SNMPv2-SMI");
+    mib.load("SNMPv2-TC");
+    mib.load("SNMPv2-MIB");
+    mib.load("RFC1155-SMI");
+    assertThat(mib.oidToInstanceName("1.3.6.1.6.3.1.1.4.1.0"),
+        is(equalTo("snmpTrapOID.0")));
+  }
+
+  @Test
+  public void testFindBestNameForOidWhenMultipleEqualMatches() throws Exception {
+    final MibbleMib mib = new MibbleMib();
+    mib.load("SNMPv2-SMI");
+    mib.load("SNMPv2-TC");
+    mib.load("SNMPv2-MIB");
+    mib.load("RFC1213-MIB");
+    assertThat(mib.oidToInstanceName("1.3.6.1.6.3.1.1.4.1.0"),
+        is(equalTo("snmpTrapOID.0")));
   }
 
 
