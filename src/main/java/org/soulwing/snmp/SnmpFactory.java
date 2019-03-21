@@ -233,7 +233,7 @@ public class SnmpFactory {
   }
 
   /**
-   * Gets a new SNMPv2c context using the first available provider, default
+   * Gets a new SNMP context using the first available provider, default
    * MIB, and the factory's default configuration. 
    * @param target target agent
    * @return SNMP context object
@@ -244,7 +244,7 @@ public class SnmpFactory {
   }
 
   /**
-   * Gets a new SNMPv2c context using the first available provider and the
+   * Gets a new SNMP context using the first available provider and the
    * factory's default configuration.
    * @param target target agent
    * @param mib MIB that will be passed into the context
@@ -255,7 +255,7 @@ public class SnmpFactory {
   }
 
   /**
-   * Gets a new SNMPv2c context using the first available provider.
+   * Gets a new SNMP context using the first available provider.
    * @param target target agent
    * @param config SNMP configuration for the context
    * @return SNMP context object
@@ -266,7 +266,7 @@ public class SnmpFactory {
   }
 
   /**
-   * Gets a new SNMPv2c context using the named provider.
+   * Gets a new SNMP context using the named provider.
    * @param target target agent
    * @param mib MIB that will be passed into the context
    * @param config SNMP configuration for the context
