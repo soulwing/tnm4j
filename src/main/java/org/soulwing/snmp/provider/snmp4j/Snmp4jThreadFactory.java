@@ -48,16 +48,18 @@ class Snmp4jThreadFactory implements ThreadFactory {
     Thread thread = delegate.newThread(task);
     thread.setName(name);
     thread.setDaemon(daemon);
-    return new ThreadWorkerTask(thread);
+    return new ThreadWorkerTask(thread, task);
   }
 
   
   private static class ThreadWorkerTask implements WorkerTask {
 
     private final Thread delegate;
+    private final WorkerTask task;
     
-    public ThreadWorkerTask(Thread delegate) {
+    public ThreadWorkerTask(Thread delegate, WorkerTask task) {
       this.delegate = delegate;
+      this.task = task;
     }
 
     @Override
@@ -67,16 +69,17 @@ class Snmp4jThreadFactory implements ThreadFactory {
 
     @Override
     public void terminate() {
+      task.terminate();
     }
 
     @Override
     public void join() throws InterruptedException {
-      delegate.join();
+      task.join();
     }
 
     @Override
     public void interrupt() {
-      delegate.interrupt();
+      task.interrupt();
     }
 
   }
