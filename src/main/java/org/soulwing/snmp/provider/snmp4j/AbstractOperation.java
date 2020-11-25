@@ -26,7 +26,6 @@ import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.event.ResponseListener;
-import org.snmp4j.smi.OID;
 import org.snmp4j.smi.VariableBinding;
 import org.soulwing.snmp.SnmpCallback;
 import org.soulwing.snmp.SnmpEvent;
@@ -140,14 +139,14 @@ abstract class AbstractOperation<V> implements SnmpOperation<V>,
   protected void validateResponse(ResponseEvent event) {
     final Exception error = event.getError();
     if (error != null) {
-      throw new RuntimeException(error);
+      throw new SnmpException(error);
     }
     PDU response = event.getResponse();
     if (response == null) {
       throw new TimeoutException();
     }
     if (response.getErrorStatus() != 0) {
-      throw new RuntimeException("response indicates " 
+      throw new SnmpException("response indicates "
           + response.getErrorStatusText()
           + " at index " + response.getErrorIndex());
     }
