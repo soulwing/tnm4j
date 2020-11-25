@@ -239,8 +239,8 @@ public class SnmpFactory {
    * @return SNMP context object
    */
   public SnmpContext newContext(SnmpTarget target) {
-    return newContext(target, MibFactory.getInstance().newMib(),
-        defaultTargetConfig, null);
+    return newContext(target, defaultTargetConfig,
+        MibFactory.getInstance().newMib(), null);
   }
 
   /**
@@ -251,7 +251,7 @@ public class SnmpFactory {
    * @return SNMP context object
    */
   public SnmpContext newContext(SnmpTarget target, Mib mib) {
-    return newContext(target, mib, defaultTargetConfig, null);
+    return newContext(target, defaultTargetConfig, mib, null);
   }
 
   /**
@@ -262,7 +262,35 @@ public class SnmpFactory {
    */
   public SnmpContext newContext(SnmpTarget target, 
       SnmpTargetConfig config) {
-    return newContext(target, MibFactory.getInstance().newMib(), config, null);
+    return newContext(target, config, MibFactory.getInstance().newMib(), null);
+  }
+
+  /**
+   * Gets a new SNMP context using the first available provider.
+   * @param target target agent
+   * @param config SNMP configuration for the context
+   * @param mib MIB that will be passed into the context
+   * @return SNMP context object
+   */
+  public SnmpContext newContext(SnmpTarget target, SnmpTargetConfig config,
+      Mib mib) {
+    return newContext(target, config, mib, null);
+  }
+
+  /**
+   * Gets a new SNMP context using the named provider.
+   * @param target target agent
+   * @param config SNMP configuration for the context
+   * @param mib MIB that will be passed into the context
+   * @param providerName name of the desired provider
+   * @return SNMP context object
+   * @throws ProviderNotFoundException if the named provider cannot be
+   *    found on the class path
+   */
+  public SnmpContext newContext(SnmpTarget target, SnmpTargetConfig config,
+      Mib mib, String providerName) {
+    assertNotClosed();
+    return getProvider(providerName).newContext(target, config.clone(), mib);
   }
 
   /**
@@ -274,7 +302,9 @@ public class SnmpFactory {
    * @return SNMP context object
    * @throws ProviderNotFoundException if the named provider cannot be
    *    found on the class path
+   * @deprecated Use {@link #newContext(SnmpTarget, SnmpTargetConfig, Mib, String)} instead
    */
+  @Deprecated
   public SnmpContext newContext(SnmpTarget target, Mib mib,
       SnmpTargetConfig config, String providerName) {
     assertNotClosed();
