@@ -1,2 +1,0 @@
-mib.load("IEEE8021-Q-BRIDGE-MIB")
-
