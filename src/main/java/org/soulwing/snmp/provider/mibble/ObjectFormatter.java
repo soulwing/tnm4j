@@ -18,9 +18,7 @@
 package org.soulwing.snmp.provider.mibble;
 
 import org.soulwing.snmp.Formatter;
-
 import net.percederberg.mibble.MibType;
-import net.percederberg.mibble.MibTypeSymbol;
 import net.percederberg.mibble.MibTypeTag;
 import net.percederberg.mibble.MibValueSymbol;
 import net.percederberg.mibble.snmp.SnmpObjectType;
@@ -34,10 +32,14 @@ class ObjectFormatter implements Formatter {
   // Pre-SMIv2 textual conventions and types
   private static final String NETWORK_ADDRESS_TYPE = "NetworkAddress";  // RFC 1155 section 3.2.3.1
   private static final String DISPLAY_STRING_TYPE = "DisplayString";    // RFC 1213 section 3.2
-  
+
+  // Some other common textual conventions that lack display hints
+  private static final String INTL_DISPLAY_STRING_TYPE = "InternationalDisplayString";  // RFC 2790
+
   // default display hints
   private static final String INTEGER_HINT = "d";
   private static final String DISPLAY_STRING_HINT = "1a";
+  private static final String INTL_DISPLAY_STRING_HINT = "1t";
   private static final String OCTET_STRING_HINT = "1x:";
   private static final String IP_ADDRESS_HINT = "1d.";
   
@@ -109,6 +111,9 @@ class ObjectFormatter implements Formatter {
     if (syntax.getReferenceSymbol() != null) {
       if (syntax.getReferenceSymbol().getName().equals(DISPLAY_STRING_TYPE)) {
         return DISPLAY_STRING_HINT;
+      }
+      if (syntax.getReferenceSymbol().getName().equals(INTL_DISPLAY_STRING_TYPE)) {
+        return INTL_DISPLAY_STRING_HINT;
       }
     }
     return defaultHint;
