@@ -13,6 +13,51 @@ simple Tcl scripts.  Tnm4j attempts to bring this same simplicity to the
 task of writing network management applications in Java or in Java-based
 scripting languages such as Groovy.
 
+Running the Examples Using Docker
+---------------------------------
+
+The `src/examples/java` subdirectory contains several examples.
+
+Running the examples is easy if you have Maven and if you have or (or are 
+willing to install) Docker Desktop and Docker Compose on your workstation. 
+
+The `src/examples/docker` subdirectory contains a `Dockerfile` that can be 
+used to create a Linux-based container image that runs Net-SNMP, with 
+configuration that matches up with the `src/examples/java/ExampleTargets`. At 
+the base directory for this project, there is a `docker-compose.yml` that
+can build and run the container for you.
+
+Steps for running the examples:
+1. Install [Docker Desktop](https://docs.docker.com/desktop/)
+2. Install [Docker Compose](https://docs.docker.com/compose/install/)
+3. Open a shell and navigate to the base directory for this project. 
+4. Run Docker Compose in the base directory.
+   ```bash
+   docker-compose up --build
+   ```
+   The first time you start up, you'll see the container image being built.
+   Subsequently, when you run `docker-compose up --build` it should reuse
+   the cached image.
+   
+   After the image is built, it will run and you'll see the Net-SNMP console
+   output.
+5. In another shell, navigate to the base directory for this project. In this
+   shell you'll run an example using Maven as follows.
+   ```bash
+   mvn -Pexamples clean compile exec:java -Dexec.mainClass=Example01_GetAndGetNext
+   ```
+   Maven will build the project and run the example class you specified. You
+   can run any of the examples in `src/examples/java` in this same manner.
+6. After you're done playing with the examples, go back to the first shell,
+   hit Ctrl-C on the keyboard and then
+   ```bash
+   docker-compose down
+   ``` 
+7. You can save a little disk space by getting rid of the container image, too.
+   ```bash
+   docker image rm tnm4j-netsnmp
+   ```
+
 Architecture
 ------------
 Tnm4j provides a lightweight façade over an SNMP adapter and a MIB parser
@@ -1008,9 +1053,9 @@ For example, the following shell commands can be used to send our example
 handler an INFORM, TRAP, and a legacy SNMPv1 TRAP, respectively:
 
 ```
-snmpinform -v 2c -c public localhost:10162 {} 1.2.3.4 sysUpTime.0 t 218128
-snmptrap -v 2c -c public localhost:10162 {} 1.2.3.4 sysUpTime.0 t 218128
-snmptrap -v 1 -c public localhost:10162 enterprises.1446 10.0.0.1 0 0 ''
+snmpinform -v 2c -c public localhost:11162 {} 1.2.3.4 sysUpTime.0 t 218128
+snmptrap -v 2c -c public localhost:11162 {} 1.2.3.4 sysUpTime.0 t 218128
+snmptrap -v 1 -c public localhost:11162 enterprises.1446 10.0.0.1 0 0 ''
 ```
 
 See the man pages for these commands for more details on how to use them to send

@@ -17,33 +17,36 @@
  * limitations under the License.
  */
 
-import org.soulwing.snmp.SimpleSnmpV2cTarget;
+import org.soulwing.snmp.Mib;
+import org.soulwing.snmp.MibFactory;
 import org.soulwing.snmp.SnmpContext;
 import org.soulwing.snmp.SnmpFactory;
+import org.soulwing.snmp.SnmpTarget;
+import org.soulwing.snmp.Varbind;
 import org.soulwing.snmp.VarbindCollection;
 
 /**
- * An example that shows a simple GET operation using the numeric object
- * identifiers for the {@code sysUpTime} object in the standard MIB.
+ * An example that shows a simple SET operation to change the sysName assigned
+ * to an agent.
  *
  * @author Carl Harris
  */
-public class ExampleGetOperation {
+public class Example02_GetAndSet {
 
   public static void main(String[] args) throws Exception {
-    SimpleSnmpV2cTarget target = new SimpleSnmpV2cTarget();
-    target.setAddress(System.getProperty("tnm4j.agent.address", "10.0.0.1"));
-    target.setCommunity(System.getProperty("tnm4j.agent.community", "public"));
+    Mib mib = MibFactory.getInstance().newMib();
+    mib.load("SNMPv2-MIB");
+    SnmpTarget target = ExampleTargets.v3ReadWrite();
+    try (SnmpContext context = SnmpFactory.getInstance().newContext(target, mib)) {
+      System.out.format("Before: %s\n", context.get("sysName.0").get());
 
-    SnmpContext context = SnmpFactory.getInstance().newContext(target);
-    try {
-      VarbindCollection result = context.get("1.3.6.1.2.1.1.3.0").get();
-      System.out.println(result.get(0));
-    }
-    finally {
-      context.close();
+      Varbind sysName = context.newVarbind("sysName.0", "net-snmp");
+      VarbindCollection result = context.set(sysName).get();
+
+      System.out.format("After: %s\n", result);
     }
 
+    SnmpFactory.getInstance().close();
   }
 
 }

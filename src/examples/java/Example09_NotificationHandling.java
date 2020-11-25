@@ -19,29 +19,25 @@
 
 import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.MibFactory;
-import org.soulwing.snmp.SimpleSnmpV2cTarget;
-import org.soulwing.snmp.SnmpCallback;
-import org.soulwing.snmp.SnmpContext;
-import org.soulwing.snmp.SnmpEvent;
-import org.soulwing.snmp.SnmpException;
 import org.soulwing.snmp.SnmpFactory;
 import org.soulwing.snmp.SnmpListener;
 import org.soulwing.snmp.SnmpNotificationEvent;
 import org.soulwing.snmp.SnmpNotificationHandler;
-import org.soulwing.snmp.VarbindCollection;
 
 /**
- * An example that shows how to perform a GETNEXT operation asynchronously.
+ * An example that shows how to receive SNMP TRAP or INFORM notifications.
  *
  * @author Carl Harris
  */
-public class ExampleNotificationHandling {
+public class Example09_NotificationHandling {
+
+  static final int PORT = 11162;
 
   public static void main(String[] args) throws Exception {
     Mib mib = MibFactory.getInstance().newMib();
     mib.load("SNMPv2-MIB");
 
-    SnmpListener listener = SnmpFactory.getInstance().newListener(10162, mib);
+    SnmpListener listener = SnmpFactory.getInstance().newListener(PORT, mib);
     try {
       listener.addHandler(new SnmpNotificationHandler() {
         @Override
@@ -51,11 +47,18 @@ public class ExampleNotificationHandling {
         }
       });
 
+      System.out.println("waiting for notifications");
+
       Thread.sleep(60000L);     // wait for some notifications to arrive
+
+      System.out.println("shutting down");
+
     }
     finally {
-      listener.close();         // listeners must be closed when no longer needed
+      listener.close();     // listeners must be closed when no longer needed
     }
+
+    SnmpFactory.getInstance().close();
   }
 
 }

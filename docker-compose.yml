@@ -1,0 +1,10 @@
+version: "2"
+
+services:
+  netsnmp:
+    image: tnm4j-netsnmp
+    restart: always
+    build:
+      context: src/examples/docker
+    ports:
+      - "127.0.0.1:11611:161/udp"

@@ -19,12 +19,12 @@
 
 import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.MibFactory;
-import org.soulwing.snmp.SimpleSnmpV2cTarget;
 import org.soulwing.snmp.SnmpCallback;
 import org.soulwing.snmp.SnmpContext;
 import org.soulwing.snmp.SnmpEvent;
 import org.soulwing.snmp.SnmpException;
 import org.soulwing.snmp.SnmpFactory;
+import org.soulwing.snmp.SnmpTarget;
 import org.soulwing.snmp.VarbindCollection;
 
 /**
@@ -32,22 +32,28 @@ import org.soulwing.snmp.VarbindCollection;
  *
  * @author Carl Harris
  */
-public class ExampleAsyncGetNextOperation {
+public class Example07_AsyncGetNextOperation {
 
   public static void main(String[] args) throws Exception {
     Mib mib = MibFactory.getInstance().newMib();
     mib.load("SNMPv2-MIB");
 
-    SimpleSnmpV2cTarget target = new SimpleSnmpV2cTarget();
-    target.setAddress(System.getProperty("tnm4j.agent.address", "10.0.0.1"));
-    target.setCommunity(System.getProperty("tnm4j.agent.community", "public"));
-
+    SnmpTarget target = ExampleTargets.v2ReadOnly();
     SnmpContext context = SnmpFactory.getInstance().newContext(target, mib);
+
+    // create the callback and send the request
 
     ExampleCallback callback = new ExampleCallback();
     context.asyncGetNext(callback, "sysName", "sysUpTime");
 
+    // Since we have nothing else to do, we're just going to wait for the
+    // signal that our request was completed. Presumably, in a real network
+    // management application, we'll have plenty of other things to do while
+    // we wait. :-)
+
     callback.awaitCompletion();
+
+    SnmpFactory.getInstance().close();
   }
 
   static class ExampleCallback implements SnmpCallback<VarbindCollection> {
@@ -58,7 +64,7 @@ public class ExampleAsyncGetNextOperation {
     public void onSnmpResponse(SnmpEvent<VarbindCollection> event) {
       try {
         VarbindCollection result = event.getResponse().get();
-        System.out.format("%s uptime %s\n",
+        System.out.format("Response Callback: %s uptime %s\n",
             result.get("sysName"),
             result.get("sysUpTime"));
       }
@@ -66,6 +72,7 @@ public class ExampleAsyncGetNextOperation {
         ex.printStackTrace(System.err);
       }
       finally {
+        // set the flag to indicate that our request was completed
         synchronized (this) {
           completed = true;
           this.notifyAll();
@@ -74,7 +81,8 @@ public class ExampleAsyncGetNextOperation {
       }
     }
 
-    public synchronized void awaitCompletion() throws InterruptedException {
+    synchronized void awaitCompletion() throws InterruptedException {
+      // wait for the completed flag to get set to true
       while (!completed) {
         this.wait();
       }

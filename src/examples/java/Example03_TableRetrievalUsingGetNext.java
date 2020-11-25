@@ -19,9 +19,9 @@
 
 import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.MibFactory;
-import org.soulwing.snmp.SimpleSnmpV2cTarget;
 import org.soulwing.snmp.SnmpContext;
 import org.soulwing.snmp.SnmpFactory;
+import org.soulwing.snmp.SnmpTarget;
 import org.soulwing.snmp.VarbindCollection;
 
 /**
@@ -29,30 +29,32 @@ import org.soulwing.snmp.VarbindCollection;
  *
  * @author Carl Harris
  */
-class ExampleTableRetrievalUsingGetNext {
+public class Example03_TableRetrievalUsingGetNext {
 
   public static void main(String[] args) throws Exception {
     Mib mib = MibFactory.getInstance().newMib();
     mib.load("SNMPv2-MIB");
     mib.load("IF-MIB");
 
-    SimpleSnmpV2cTarget target = new SimpleSnmpV2cTarget();
-    target.setAddress(System.getProperty("tnm4j.agent.address", "10.0.0.1"));
-    target.setCommunity(System.getProperty("tnm4j.agent.community", "public"));
+    SnmpTarget target = ExampleTargets.v2ReadOnly();
 
-    SnmpContext context = SnmpFactory.getInstance().newContext(target, mib);
-    try {
+    try (SnmpContext context = SnmpFactory.getInstance().newContext(target, mib)) {
       final String[] columns = {
           "sysUpTime", "ifName", "ifDescr", "ifAdminStatus", "ifOperStatus",
           "ifInOctets", "ifOutOctets"
       };
+
+      System.out.format("%-14s %-8s %-20s %-5s %-5s %15s %15s\n",
+          "UpTime", "Name", "Description", "Admin", "Oper", "In Octets", "Out Octets");
+
       VarbindCollection row = context.getNext(columns).get();
       while (row.get("ifName") != null) {
         if (row.size() < columns.length) {
           System.err.println("truncated row; too many objects requested");
           break;
         }
-        System.out.format("%14s %-8s %-20s %-4s %-4s %,15d %,15d\n",
+
+        System.out.format("%14s %-8s %-20s %-5s %-5s %,15d %,15d\n",
             row.get("sysUpTime"),
             row.get("ifName"),
             row.get("ifDescr"),
@@ -60,11 +62,11 @@ class ExampleTableRetrievalUsingGetNext {
             row.get("ifOperStatus"),
             row.get("ifInOctets").asLong(),
             row.get("ifOutOctets").asLong());
+
         row = context.getNext(row.nextIdentifiers("sysUpTime")).get();
       }
     }
-    finally {
-      context.close();
-    }
+
+    SnmpFactory.getInstance().close();
   }
 }

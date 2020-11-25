@@ -1,5 +1,5 @@
 /*
- * File created on Apr 12, 2015
+ * File created on Apr 13, 2015
  *
  * Copyright (c) 2015 Carl Harris, Jr
  * and others as noted
@@ -17,37 +17,46 @@
  * limitations under the License.
  */
 
+import org.soulwing.snmp.BlockingQueueSnmpCompletionService;
 import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.MibFactory;
-import org.soulwing.snmp.SimpleSnmpV2cTarget;
+import org.soulwing.snmp.SnmpCompletionService;
 import org.soulwing.snmp.SnmpContext;
+import org.soulwing.snmp.SnmpEvent;
 import org.soulwing.snmp.SnmpFactory;
+import org.soulwing.snmp.SnmpTarget;
 import org.soulwing.snmp.VarbindCollection;
 
 /**
- * An example that shows how to use a MIB to perform a GETNEXT operation using
- * named objects.
+ * An example that illustrates the use of {@link SnmpCompletionService}
  *
  * @author Carl Harris
  */
-public class ExampleUsingMib {
+public class Example08_UsingCompletionService {
 
   public static void main(String[] args) throws Exception {
     Mib mib = MibFactory.getInstance().newMib();
     mib.load("SNMPv2-MIB");
 
-    SimpleSnmpV2cTarget target = new SimpleSnmpV2cTarget();
-    target.setAddress(System.getProperty("tnm4j.agent.address", "10.0.0.1"));
-    target.setCommunity(System.getProperty("tnm4j.agent.community", "public"));
+    SnmpCompletionService<VarbindCollection> completionService =
+        new BlockingQueueSnmpCompletionService<>();
 
+    SnmpTarget target = ExampleTargets.v2ReadOnly();
     SnmpContext context = SnmpFactory.getInstance().newContext(target, mib);
-    try {
-      VarbindCollection result = context.getNext("sysUpTime").get();
-      System.out.println(result.get("sysUpTime"));
+    completionService.submit(context.newGetNext("sysName", "sysUpTime"));
+
+    while (!completionService.isIdle()) {
+      SnmpEvent<VarbindCollection> event = completionService.take();
+      VarbindCollection result = event.getResponse().get();
+      System.out.format("%s: sysName=%s sysUpTime=%s\n",
+          event.getContext().getTarget().getAddress(),
+          result.get("sysName"),
+          result.get("sysUpTime"));
+
+      event.getContext().close();
     }
-    finally {
-      context.close();
-    }
+
+    SnmpFactory.getInstance().close();
   }
 
 }

@@ -19,9 +19,9 @@
 
 import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.MibFactory;
-import org.soulwing.snmp.SimpleSnmpV2cTarget;
 import org.soulwing.snmp.SnmpContext;
 import org.soulwing.snmp.SnmpFactory;
+import org.soulwing.snmp.SnmpTarget;
 import org.soulwing.snmp.SnmpWalker;
 import org.soulwing.snmp.VarbindCollection;
 
@@ -31,24 +31,29 @@ import org.soulwing.snmp.VarbindCollection;
  *
  * @author Carl Harris
  */
-class ExampleTableRetrievalUsingWalk {
+public class Example05_TableRetrievalUsingWalk {
 
   public static void main(String[] args) throws Exception {
     Mib mib = MibFactory.getInstance().newMib();
     mib.load("SNMPv2-MIB");
     mib.load("IF-MIB");
 
-    SimpleSnmpV2cTarget target = new SimpleSnmpV2cTarget();
-    target.setAddress(System.getProperty("tnm4j.agent.address", "10.0.0.1"));
-    target.setCommunity(System.getProperty("tnm4j.agent.community", "public"));
+    SnmpTarget target = ExampleTargets.v2ReadOnly();
 
-    SnmpContext context = SnmpFactory.getInstance().newContext(target, mib);
-    try {
-      SnmpWalker<VarbindCollection> walker = context.walk(1, "sysUpTime", "ifName",
-          "ifDescr", "ifAdminStatus", "ifOperStatus", "ifInOctets", "ifOutOctets");
+    try (SnmpContext context = SnmpFactory.getInstance().newContext(target, mib)) {
+
+      final String[] columns = {"sysUpTime", "ifName",
+          "ifDescr", "ifAdminStatus", "ifOperStatus", "ifInOctets", "ifOutOctets"};
+
+      System.out.format("%-14s %-8s %-20s %-5s %-5s %15s %15s\n",
+          "UpTime", "Name", "Description", "Admin", "Oper", "In Octets", "Out Octets");
+
+      SnmpWalker<VarbindCollection> walker = context.walk(1, columns);
+
       VarbindCollection row = walker.next().get();
       while (row != null) {
-        System.out.format("%14s %-8s %-20s %-4s %-4s %,15d %,15d\n",
+
+        System.out.format("%14s %-8s %-20s %-5s %-5s %,15d %,15d\n",
             row.get("sysUpTime"),
             row.get("ifName"),
             row.get("ifDescr"),
@@ -56,14 +61,12 @@ class ExampleTableRetrievalUsingWalk {
             row.get("ifOperStatus"),
             row.get("ifInOctets").asLong(),
             row.get("ifOutOctets").asLong());
+
         row = walker.next().get();
       }
-    }
-    finally {
-      context.close();
-    }
 
-    SnmpFactory.getInstance().close();
+      SnmpFactory.getInstance().close();
+    }
   }
 
 }

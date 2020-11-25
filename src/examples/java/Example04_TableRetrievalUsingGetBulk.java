@@ -19,28 +19,28 @@
 
 import java.util.List;
 
-import org.soulwing.snmp.*;
+import org.soulwing.snmp.Mib;
+import org.soulwing.snmp.MibFactory;
+import org.soulwing.snmp.SnmpContext;
+import org.soulwing.snmp.SnmpFactory;
+import org.soulwing.snmp.SnmpTarget;
+import org.soulwing.snmp.VarbindCollection;
 
 /**
  * An example that show how to retrieve the contents of a table using GETBULK.
  *
  * @author Carl Harris
  */
-class ExampleTableRetrievalUsingGetBulk {
+public class Example04_TableRetrievalUsingGetBulk {
 
   public static void main(String[] args) throws Exception {
     Mib mib = MibFactory.getInstance().newMib();
     mib.load("SNMPv2-MIB");
     mib.load("IF-MIB");
 
-    SimpleSnmpV2cTarget target = new SimpleSnmpV2cTarget();
-    target.setAddress(System.getProperty("tnm4j.agent.address", "10.0.0.1"));
-    target.setCommunity(System.getProperty("tnm4j.agent.community", "public"));
+    SnmpTarget target = ExampleTargets.v2ReadOnly();
 
-    Thread.sleep(15000);
-
-    SnmpContext context = SnmpFactory.getInstance().newContext(target, mib);
-    try {
+    try (SnmpContext context = SnmpFactory.getInstance().newContext(target, mib)) {
       final int maxRepetitions = 10;
 
       final String[] columns = {
@@ -48,21 +48,25 @@ class ExampleTableRetrievalUsingGetBulk {
           "ifInOctets", "ifOutOctets"
       };
 
+      System.out.format("%-14s %-8s %-20s %-5s %-5s %15s %15s\n",
+          "UpTime", "Name", "Description", "Admin", "Oper", "In Octets", "Out Octets");
+
       List<VarbindCollection> rows =
           context.getBulk(1, maxRepetitions, columns).get();
 
       outer:
       while (!rows.isEmpty()) {
         VarbindCollection lastRow = null;
-        inner:
+
         for (VarbindCollection row : rows) {
 
           if (row.get("ifName") == null) break outer;
 
-          if (row.size() < columns.length) break inner;
+          if (row.size() < columns.length) break;
 
           lastRow = row;
-          System.out.format("%14s %-8s %-20s %-4s %-4s %,15d %,15d\n",
+
+          System.out.format("%14s %-8s %-20s %-5s %-5s %,15d %,15d\n",
               row.get("sysUpTime"),
               row.get("ifName"),
               row.get("ifDescr"),
@@ -70,6 +74,7 @@ class ExampleTableRetrievalUsingGetBulk {
               row.get("ifOperStatus"),
               row.get("ifInOctets").asLong(),
               row.get("ifOutOctets").asLong());
+
         }
         if (lastRow == null) {
           System.err.println("incomplete first row; too many objects requested");
@@ -79,11 +84,7 @@ class ExampleTableRetrievalUsingGetBulk {
             lastRow.nextIdentifiers("sysUpTime")).get();
       }
     }
-    finally {
-      context.close();
-    }
 
-    Thread.sleep(10000);
     SnmpFactory.getInstance().close();
   }
 
