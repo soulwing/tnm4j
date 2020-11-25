@@ -64,9 +64,9 @@ public class Example05_TableRetrievalUsingWalk {
 
         row = walker.next().get();
       }
-
-      SnmpFactory.getInstance().close();
     }
+
+    SnmpFactory.getInstance().close();
   }
 
 }
