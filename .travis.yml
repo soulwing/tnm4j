@@ -1,3 +1,5 @@
 language: java
+virt: lxd
+arch: amd64
 script:
   - mvn install
