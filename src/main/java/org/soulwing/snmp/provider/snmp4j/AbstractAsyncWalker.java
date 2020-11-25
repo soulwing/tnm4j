@@ -87,15 +87,7 @@ abstract class AbstractAsyncWalker<V>
     lock.lock();
     try {
       this.offset = 0;
-      try {
-        validateResponse(event);        
-        response = event.getResponse();
-      }
-      catch (RuntimeException ex) {
-        callback.onSnmpResponse(new SnmpEvent<SnmpAsyncWalker<V>>(context,
-            new ExceptionResponse<SnmpAsyncWalker<V>>(ex)));
-      }
-  
+      validateResponse(event);
       /*
        * Since we're in a response handler, we need to dispatch the callback
        * on another thread, so that it can invoke another request if needed.
@@ -103,11 +95,21 @@ abstract class AbstractAsyncWalker<V>
       SnmpFactory.getInstance().getExecutorService().execute(new Runnable() {
         @Override
         public void run() {
-          // FIXME -- if an exception is thrown here we should stop the walk
-          callback.onSnmpResponse(new SnmpEvent<SnmpAsyncWalker<V>>(context,
-              new SuccessResponse<SnmpAsyncWalker<V>>(AbstractAsyncWalker.this)));
-        } 
+          try {
+            response = event.getResponse();
+            callback.onSnmpResponse(new SnmpEvent<SnmpAsyncWalker<V>>(context,
+                new SuccessResponse<SnmpAsyncWalker<V>>(AbstractAsyncWalker.this)));
+          }
+          catch (RuntimeException ex) {
+            callback.onSnmpResponse(new SnmpEvent<SnmpAsyncWalker<V>>(context,
+                new ExceptionResponse<SnmpAsyncWalker<V>>(ex)));
+          }
+        }
       });
+    }
+    catch (TimeoutException ex) {
+      callback.onSnmpResponse(new SnmpEvent<SnmpAsyncWalker<V>>(context,
+          new ExceptionResponse<SnmpAsyncWalker<V>>(ex)));
     }
     finally {
       lock.unlock();
