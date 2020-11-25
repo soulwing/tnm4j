@@ -17,7 +17,6 @@
  */
 package org.soulwing.snmp.provider.snmp4j;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +37,6 @@ import org.soulwing.snmp.Mib;
 import org.soulwing.snmp.SnmpAsyncWalker;
 import org.soulwing.snmp.SnmpCallback;
 import org.soulwing.snmp.SnmpContext;
-import org.soulwing.snmp.SnmpException;
 import org.soulwing.snmp.SnmpOperation;
 import org.soulwing.snmp.SnmpResponse;
 import org.soulwing.snmp.SnmpTarget;

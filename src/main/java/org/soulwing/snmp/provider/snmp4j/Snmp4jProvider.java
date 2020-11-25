@@ -59,8 +59,9 @@ public class Snmp4jProvider implements SnmpProvider, DisposeListener {
   };
 
   private static final PduFactoryStrategy[] pduFactoryStrategies = {
+      new SnmpV3PduFactoryStrategy(),
       new SnmpV2cPduFactoryStrategy(),
-      new SnmpV3PduFactoryStrategy()
+      new SnmpV1PduFactoryStrategy()
   };
 
   private final Lock lock = new ReentrantLock();

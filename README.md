@@ -72,14 +72,15 @@ with SNMP agents: *targets*, *contexts*, and *operations*.
 
 A *target* is a simple object that describes the relevant characteristics of a
 remote agent necessary for communication.  A target implements either the
-`SnmpV2cTarget` or `SnmpV3Target` interface, depending on whether the remote
-agent supports the SNMPv2c or SNMPv3 protocol.  These interfaces describe
-properties such as network address and security characteristics of the remote
-agent.  Tnm4j provides simple concrete target implementations --
-`SimpleSnmpV2cTarget` and  `SimpleSnmpV3Target` -- that your application can
-construct and configure directly.  Alternatively, your domain model objects
-representing network devices could easily implement these interfaces, allowing
-your model objects to be used directly as targets.
+`SnmpV3Target`, `SnmpV2cTarget`, or `SnmpV1Target` interface, depending on 
+whether the remote agent supports the SNMPv3, SNMPv2c, or SNMPv1 protocol, 
+respectively.  These interfaces describe properties such as network address and 
+security characteristics of the remote agent.  Tnm4j provides simple concrete 
+target implementations -- `SimpleSnmpV3Target`, `SimpleSnmpV2cTarget`,
+and `SimpleV1Target` -- that your application can construct and configure 
+directly.  Alternatively, your domain model objects representing network devices
+could easily implement these interfaces, allowing your model objects to be used
+directly as targets.
 
 A *context* provides the ability to invoke SNMP operations on a given target.
 You create a context using `SnmpFactory` and providing the target to the
