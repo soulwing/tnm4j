@@ -107,7 +107,7 @@ abstract class AbstractAsyncWalker<V>
         }
       });
     }
-    catch (TimeoutException ex) {
+    catch (SnmpException ex) {
       callback.onSnmpResponse(new SnmpEvent<SnmpAsyncWalker<V>>(context,
           new ExceptionResponse<SnmpAsyncWalker<V>>(ex)));
     }
@@ -166,7 +166,7 @@ abstract class AbstractAsyncWalker<V>
           "response contains no repeaters; too many non-repeaters?");
     }
     
-    if (nonRepeaters + repeaters >= responseSize) {
+    if (nonRepeaters + repeaters > responseSize) {
       if (context.getConfig().isWalkAllowsTruncatedRepetition()) {
         this.repeaters = responseSize - nonRepeaters;
       }
