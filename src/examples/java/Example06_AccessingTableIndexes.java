@@ -26,7 +26,7 @@ import org.soulwing.snmp.SnmpWalker;
 import org.soulwing.snmp.VarbindCollection;
 
 /**
- * An example that show how to access table index values when walking a table.
+ * An example that shows how to access table index values when walking a table.
  *
  * @author Carl Harris
  */

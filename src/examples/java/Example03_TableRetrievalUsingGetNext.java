@@ -25,7 +25,7 @@ import org.soulwing.snmp.SnmpTarget;
 import org.soulwing.snmp.VarbindCollection;
 
 /**
- * An example that show how to retrieve the contents of a table using GETNEXT.
+ * An example that shows how to retrieve the contents of a table using GETNEXT.
  *
  * @author Carl Harris
  */

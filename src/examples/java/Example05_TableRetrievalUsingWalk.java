@@ -26,7 +26,7 @@ import org.soulwing.snmp.SnmpWalker;
 import org.soulwing.snmp.VarbindCollection;
 
 /**
- * An example that show how to retrieve the contents of a table using the
+ * An example that shows how to retrieve the contents of a table using the
  * high level walk operation.
  *
  * @author Carl Harris

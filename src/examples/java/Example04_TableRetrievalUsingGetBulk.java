@@ -27,7 +27,7 @@ import org.soulwing.snmp.SnmpTarget;
 import org.soulwing.snmp.VarbindCollection;
 
 /**
- * An example that show how to retrieve the contents of a table using GETBULK.
+ * An example that shows how to retrieve the contents of a table using GETBULK.
  *
  * @author Carl Harris
  */
