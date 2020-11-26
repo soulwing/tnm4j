@@ -100,6 +100,9 @@ abstract class AbstractAsyncWalker<V>
             callback.onSnmpResponse(new SnmpEvent<SnmpAsyncWalker<V>>(context,
                 new SuccessResponse<SnmpAsyncWalker<V>>(AbstractAsyncWalker.this)));
           }
+          catch (WouldBlockException ex) {
+            invoke(callback);
+          }
           catch (RuntimeException ex) {
             callback.onSnmpResponse(new SnmpEvent<SnmpAsyncWalker<V>>(context,
                 new ExceptionResponse<SnmpAsyncWalker<V>>(ex)));

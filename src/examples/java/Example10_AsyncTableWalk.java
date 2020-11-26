@@ -27,7 +27,6 @@ import org.soulwing.snmp.SnmpException;
 import org.soulwing.snmp.SnmpFactory;
 import org.soulwing.snmp.SnmpTarget;
 import org.soulwing.snmp.VarbindCollection;
-import org.soulwing.snmp.WouldBlockException;
 
 /**
  * An example that shows how to asynchronously retrieve the contents of a table.
@@ -42,14 +41,14 @@ public class Example10_AsyncTableWalk {
     mib.load("HOST-RESOURCES-MIB");
 
     SnmpTarget target = ExampleTargets.v2ReadOnly();
-    SnmpContext context = SnmpFactory.getInstance().newContext(target, mib);
+    try (SnmpContext context = SnmpFactory.getInstance().newContext(target, mib)) {
+      ExampleCallback callback = new ExampleCallback();
 
-    ExampleCallback callback = new ExampleCallback();
+      context.asyncWalk(callback, 1, "sysUpTime", "hrSWInstalledName",
+          "hrSWInstalledType");
 
-    context.asyncWalk(callback, 1, "sysUpTime", "hrSWInstalledName",
-        "hrSWInstalledType");
-
-    callback.awaitCompletion();
+      callback.awaitCompletion();
+    }
 
     SnmpFactory.getInstance().close();
   }
@@ -68,30 +67,23 @@ public class Example10_AsyncTableWalk {
         final SnmpAsyncWalker<VarbindCollection> walker = event.getResponse().get();
 
         VarbindCollection row = walker.next().get();
-        try {
-          while (row != null) {
-            System.out.format("%s %d %s %s\n",
-                row.get("sysUpTime").asString(),
-                row.get("hrSWInstalledIndex").asInt(),
-                row.get("hrSWInstalledName").asString(),
-                row.get("hrSWInstalledType").asString());
-            row = walker.next().get();
-          }
+        while (row != null) {
+          System.out.format("%s %d %s %s\n",
+              row.get("sysUpTime").asString(),
+              row.get("hrSWInstalledIndex").asInt(),
+              row.get("hrSWInstalledName").asString(),
+              row.get("hrSWInstalledType").asString());
+          row = walker.next().get();
+        }
 
-          // When the next row is null, we've reached the end of the table.
-          signalCompletion();
-          event.getContext().close();
-        }
-        catch (WouldBlockException ex) {
-          // Indicates we've reached the end of the rows from last request to
-          // the remote agent, so we make another another request.
-          walker.invoke(this);
-        }
+        // When the next row is null, we've reached the end of the table.
+        signalCompletion();
       }
       catch (SnmpException ex) {
-        // If things go awry, we signal completion passing the exception
+        // An exception occurred, the event that was passed to us will throw
+        // the exception when we call event.getResponse().get(). In this case,
+        // we signal completion, but pass along the exception.
         signalCompletion(ex);
-        event.getContext().close();
       }
     }
 
