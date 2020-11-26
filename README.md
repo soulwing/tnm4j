@@ -1078,3 +1078,152 @@ hard-to-debug) conditional logic for sorting out what kind of notification was
 received and what do about it.
 
 
+Best Practices
+--------------
+
+When using Tnm4j in an application, there are a few other best practices that
+you should observe.
+
+### Close the `SnmpFactory` Before Exit
+
+SNMP operations invariably involve waiting for things to happen, and in Java, 
+waiting invariably involves thread management. The singleton `SnmpFactory`
+instance holds references to a couple of thread pools used for making SNMP
+requests and scheduling timeouts. In order for your application to exit 
+cleanly, your code must eventually invoke `close` on the `SnmpFactory` instance.
+
+In a JavaSE application you can register a _shutdown hook_ via the `Runtime`
+class to close the factory instance as shown here.
+
+```java
+Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+  public void run() {
+    try {
+      SnmpFactory.getInstance().close();
+    }
+    catch (InterruptedException ex) {
+      Thread.currentThread().interrupt();
+    }
+  }
+}));
+```
+
+In a JavaEE application or in similar frameworks such as Spring, you can use
+a method annotated using `@PreDestroy` in one of your application beans to 
+close the `SnmpFactory`, as shown below.
+
+### Inject `SnmpFactory` as a Dependency
+
+`SnmpFactory` provides a singleton instance via its `getInstance()` method,
+to make it relatively easy to use in simple Java SE applications. However, when 
+using Tnm4j in an application framework such as Java EE, CDI, or Spring that 
+supports dependency injection, you should create some form of _producer_ method 
+and use it to inject an `SnmpFactory` instance into beans that require it. This 
+simplifies application design and makes it possible to mock the `SnmpFactory` 
+for testing.
+
+Using CDI (with or without Java EE), you can easily create a bean that acts
+as a producer for the `SnmpFactory` instance.
+
+```java
+@ApplicationScoped
+public class SnmpFactoryProducerBean {
+
+  private SnmpFactory snmpFactory;
+  
+  @PostConstruct
+  public void init() {
+    snmpFactory = SnmpFactory.newInstance();
+  }
+  
+  @PreDestroy
+  public void destroy() {
+    try {
+      snnpFactory.close();
+    }
+    catch (InterruptedException ex) {
+      Thread.currentThread().interrupt();
+    }
+  }
+  
+  @Produces
+  public SnmpFactory snmpFactory() {
+    return snmpFactory;
+  }
+}
+```
+
+In addition to providing an init method to create and store a reference to
+the `SnmpFactory` instance, this bean also illustrates the best practice of 
+closing the factory when it is no longer needed.
+
+Having defined a producer bean, you can then use standard dependency injection
+to get the `SnmpFactory` instance into any bean that needs it.
+
+```java
+public class MySnmpAppBean {
+
+  @Inject
+  SnmpFactory snmpFactory;
+  
+  // ...
+}
+```
+
+### Use a `ManagedThreadFactory` in Java EE Applications
+
+Java EE containers generally want to manage all resources used by an
+application, including any threads that the application needs to create. The
+`SnmpFactory` instance in Tnm4j needs to create threads to make SNMP requests,
+wait for results, and to dispatch control to user-provided callbacks when 
+performing asynchronous SNMP operations. 
+
+As of Java EE 7, a Java EE container is obligated to provide a default 
+`ManagedThreadFactory` instance that can be injected into application beans
+using an `@Resource` annotation. Most containers will also all an administrator
+to define additional managed thread factory instances that can be injected 
+into an application bean by specifying a JNDI name with the `@Resource`
+annotation.
+
+It is a best practice, when using Tnm4j in a Java EE environment, to use a
+`ManagedThreadFactory` instance when creating the `SnmpFactory` instance.
+A simple approach to ensuring that Tnm4j uses a managed thread factory is to
+define a singleton EJB that is instantiated at application startup, as follows.
+
+```java
+@EJB
+@Singleton
+public class SnmpFactoryConfiguratorBean {
+  
+  @Resource
+  ManagedThreadFactory threadFactory;
+  
+  private SnmpFactory snmpFactory;
+  
+  @PostConstruct
+  public void init() {
+    snmpFactory = SnmpFactory.getInstance(threadFactory);
+  }
+  
+  @PreDestroy
+  public void destroy() {
+    try {
+      snnpFactory.close();
+    }
+    catch (InterruptedException ex) {
+      Thread.currentThread().interrupt();
+    }
+  }
+    
+  @Produces
+  public SnmpFactory snmpFactory() {
+    return snmpFactory;
+  }
+  
+}
+```
+
+Notice that this approach extends the prior example of using dependency
+injection to provide the `SnmpFactory` instance. It differs only in that it is
+an EJB and it initializes the `SnmpFactory` using a managed thread factory. 
+
