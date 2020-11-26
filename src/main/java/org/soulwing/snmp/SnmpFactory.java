@@ -17,7 +17,6 @@
  */
 package org.soulwing.snmp;
 
-import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -84,7 +83,10 @@ public class SnmpFactory {
    * @param threadFactory thread factory that will be used to create threads
    *    as needed for components produced by this factory
    * @return factory object
+   * @deprecated Using this method in combination with `#getInstance()` in
+   *    a multi-thread application can lead to a race condition. Use
    */
+  @Deprecated
   public static SnmpFactory getInstance(ThreadFactory threadFactory) {
     return getInstance(
         new SnmpFactoryConfig(), new TrivialThreadFactory());
@@ -96,27 +98,53 @@ public class SnmpFactory {
    * @param threadFactory thread factory that will be used to create threads
    *    as needed for components produced by this factory
    * @return factory object
+   * @deprecated Using this method in combination with `#getInstance()` in
+   *    a multi-thread application can lead to a race condition. Use
    */
+  @Deprecated
   public static SnmpFactory getInstance(SnmpFactoryConfig config, 
       ThreadFactory threadFactory) {
     if (instance == null) {
       synchronized (SnmpFactory.class) {
         if (instance == null) {
-          ExecutorService executorService = new ThreadPoolExecutor(
-              config.getWorkerPoolSize(), config.getWorkerPoolSize(), 0L,
-              TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
-              threadFactory);
-          ScheduledThreadPoolExecutor scheduledExecutorService =
-              new ScheduledThreadPoolExecutor(
-                  config.getScheduledWorkerPoolSize(),
-                  new ScheduledThreadFactory(threadFactory));
-          scheduledExecutorService.setRemoveOnCancelPolicy(true);
-          instance = new SnmpFactory(executorService, scheduledExecutorService,
-              threadFactory, config);
+          instance = newInstance(threadFactory, config);
         }
       }
     }
     return instance;
+  }
+
+  /**
+   * Creates a new factory instance.
+   * @param threadFactory thread factory that will be used to create threads
+   *    as needed by the factory
+   * @return factory instance
+   */
+  public static SnmpFactory newInstance(
+      ThreadFactory threadFactory) {
+    return newInstance(threadFactory, new SnmpFactoryConfig());
+  }
+
+  /**
+   * Creates a new factory instance.
+   * @param threadFactory thread factory that will be used to create threads
+   *    as needed by the factory
+   * @param config factory configuration
+   * @return factory instance
+   */
+  public static SnmpFactory newInstance(ThreadFactory threadFactory,
+      SnmpFactoryConfig config) {
+    ExecutorService executorService = new ThreadPoolExecutor(
+        config.getWorkerPoolSize(), config.getWorkerPoolSize(), 0L,
+        TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+        threadFactory);
+    ScheduledThreadPoolExecutor scheduledExecutorService =
+        new ScheduledThreadPoolExecutor(
+            config.getScheduledWorkerPoolSize(),
+            new ScheduledThreadFactory(threadFactory));
+    scheduledExecutorService.setRemoveOnCancelPolicy(true);
+    return new SnmpFactory(executorService, scheduledExecutorService,
+        threadFactory, config);
   }
 
   private static class TrivialThreadFactory implements ThreadFactory {
@@ -129,7 +157,7 @@ public class SnmpFactory {
 
     private final ThreadFactory delegate;
 
-    public ScheduledThreadFactory(ThreadFactory delegate) {
+    ScheduledThreadFactory(ThreadFactory delegate) {
       this.delegate = delegate;
     }
 
@@ -181,7 +209,7 @@ public class SnmpFactory {
 
   /**
    * Closes this factory, releasing any resources it might be holding.
-   * @throws InterruptedException
+   * @throws InterruptedException if interrupted while closing
    */
   public void close() throws InterruptedException {
     if (!closed.compareAndSet(false, true)) return;
@@ -399,10 +427,8 @@ public class SnmpFactory {
    *    when the specified name is {@code null}
    */
   private SnmpProvider findProvider(String providerName) {
-    Iterator<SnmpProvider> i = loader.iterator();
-    while (i.hasNext()) {
-      SnmpProvider provider = i.next();
-      if (providerName == null 
+    for (SnmpProvider provider : loader) {
+      if (providerName == null
           || provider.getName().equalsIgnoreCase(providerName)) {
         return provider;
       }
