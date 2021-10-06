@@ -21,6 +21,7 @@ import org.snmp4j.Target;
 import org.snmp4j.UserTarget;
 import org.snmp4j.mp.MPv3;
 import org.snmp4j.mp.SnmpConstants;
+import org.snmp4j.security.AuthHMAC192SHA256;
 import org.snmp4j.security.AuthMD5;
 import org.snmp4j.security.AuthSHA;
 import org.snmp4j.security.Priv3DES;
@@ -94,6 +95,8 @@ class UserTargetStrategy implements TargetStrategy {
     switch (v3Target.getAuthType()) {
       case SHA:
         return AuthSHA.ID;
+      case SHA256:
+        return AuthHMAC192SHA256.ID;
       case MD5:
         return AuthMD5.ID;
       default:
