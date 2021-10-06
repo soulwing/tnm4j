@@ -35,7 +35,7 @@ public interface SnmpV3Target extends SnmpTarget {
    * An enumeration of SNMPv3 authentication types.
    */
   enum AuthType {
-    SHA, MD5
+    SHA, SHA256, MD5
   }
 
   /**
