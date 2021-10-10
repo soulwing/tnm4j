@@ -1180,7 +1180,7 @@ performing asynchronous SNMP operations.
 
 As of Java EE 7, a Java EE container is obligated to provide a default 
 `ManagedThreadFactory` instance that can be injected into application beans
-using an `@Resource` annotation. Most containers will also all an administrator
+using an `@Resource` annotation. Most containers will also allow an administrator
 to define additional managed thread factory instances that can be injected 
 into an application bean by specifying a JNDI name with the `@Resource`
 annotation.
