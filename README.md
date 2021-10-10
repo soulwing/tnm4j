@@ -635,7 +635,7 @@ identifiers in it as the starting point for the next GETBULK operation -- we
 assign the row to *lastRow* for this purpose.
 
 If we fall out of the `inner` loop without having processed at least one full
-row, that means we're asking for two many objects in a single request -- we did
+row, that means we're asking for too many objects in a single request -- we did
 something similar in our example using GETNEXT.
 
 At the bottom of the `outer` loop we use the identifiers in the last full row 
