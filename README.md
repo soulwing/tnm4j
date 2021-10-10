@@ -963,7 +963,7 @@ private static SnmpOperation<VarbindCollection> newOperation(String address,
 ```
 
 As we've seen in previous examples, we create a target that describes the
-SNMP agent on which we wish to execute an operation.  When use `SnmpFactory`
+SNMP agent on which we wish to execute an operation.  We use `SnmpFactory`
 to obtain a context for our target, and we use the `newGetNext` factory 
 method to obtain an `SnmpOperation` that will perform a GETNEXT for the *sysName* 
 and *sysUpTime* objects.
