@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.soulwing</groupId>
     <artifactId>soulwing-parent</artifactId>
-    <version>20</version>
+    <version>22</version>
   </parent>
   <groupId>org.soulwing.snmp</groupId>
   <artifactId>tnm4j</artifactId>
