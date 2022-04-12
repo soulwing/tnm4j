@@ -113,6 +113,14 @@ class SessionWrapper implements Snmp4jSession {
   }
 
   @Override
+  public void setLocalEngine(byte[] bytes, int i, int i1) {}
+
+  @Override
+  public byte[] getLocalEngineID() {
+    return new byte[0];
+  }
+
+  @Override
   public ResponseEvent get(PDU pdu, Target target) throws IOException {
     pdu.setType(PDU.GET);
     return send(pdu, target);
