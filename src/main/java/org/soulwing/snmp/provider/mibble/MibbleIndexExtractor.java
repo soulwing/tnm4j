@@ -19,7 +19,6 @@ package org.soulwing.snmp.provider.mibble;
 
 import java.util.List;
 
-import net.percederberg.mibble.Mib;
 import net.percederberg.mibble.MibType;
 import net.percederberg.mibble.MibTypeTag;
 import net.percederberg.mibble.MibValue;
@@ -112,8 +111,8 @@ class MibbleIndexExtractor implements IndexExtractor {
     else if (type.hasTag(MibTypeTag.OCTET_STRING))  {
       List<?> constraints = ((SizeConstraint) 
           ((StringType) type).getConstraint()).getValues();
-      for (int i = 0; i < constraints.size(); i++) {
-        if (constraints.get(i) instanceof ValueConstraint) {
+      for (Object constraint : constraints) {
+        if (constraint instanceof ValueConstraint) {
           MibValue sizeValue = ((ValueConstraint) constraints.get(0)).getValue();
           return ((Number) sizeValue.toObject()).intValue();
         }
