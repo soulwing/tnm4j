@@ -66,8 +66,8 @@ class UserTargetStrategy implements TargetStrategy {
     SecurityModels.getInstance().addSecurityModel(usm);
 
     usm.addUser(new UsmUser(securityName, 
-            authType(v3Target), authPassphrase(v3Target.getAuthPassphrase()),
-            privType(v3Target), privPassphrase(v3Target.getPrivPassphrase())
+            authType(v3Target), authPassphrase(v3Target),
+            privType(v3Target), privPassphrase(v3Target)
     ));
 
     SecurityModels.getInstance().addSecurityModel(new TSM(localEngineId, false));
@@ -92,13 +92,13 @@ class UserTargetStrategy implements TargetStrategy {
     return userTarget;
   }
 
-  private OctetString privPassphrase(String phrase) {
-    if(phrase != null) return new OctetString(phrase);
+  private OctetString privPassphrase(SnmpV3Target v3Target) {
+    if(v3Target.getPrivPassphrase() != null && v3Target.getPrivType() != null) return new OctetString(v3Target.getPrivPassphrase());
     return null;
   }
 
-  private OctetString authPassphrase(String phrase) {
-    if(phrase != null) return new OctetString(phrase);
+  private OctetString authPassphrase(SnmpV3Target v3Target) {
+    if(v3Target.getAuthPassphrase() != null && v3Target.getAuthType() != null) return new OctetString(v3Target.getAuthPassphrase());
     return null;
   }
 
