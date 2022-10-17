@@ -25,7 +25,7 @@ public class SnmpV2cAsyncDemo {
   private static final String NOT_AVAILABLE = "N/A";
   
   private static final Pattern CISCOIOS_PATTERN =
-      Pattern.compile("Software \\(([^)]+)\\).*Version  *([^ ,]+) *");
+      Pattern.compile("Software \\(([^)]+)\\).*Version +([^ ,]+) *");
   
   public static void main(String[] args) throws Exception {    
     final String deviceName = System.getProperty("agent.name", "foo");
@@ -42,7 +42,7 @@ public class SnmpV2cAsyncDemo {
     SnmpContext snmp = SnmpFactory.getInstance().newContext(target, mib);
 
     SnmpCompletionService<VarbindCollection> completionService =
-        new BlockingQueueSnmpCompletionService<VarbindCollection>();
+            new BlockingQueueSnmpCompletionService<>();
 
     completionService.submit(snmp.newGetNext("sysDescr", "sysUpTime"));
     while (!completionService.isIdle()) {

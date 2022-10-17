@@ -25,7 +25,7 @@ public class SnmpV2cDemo {
   private static final String NOT_AVAILABLE = "N/A";
   
   private static final Pattern CISCOIOS_PATTERN =
-      Pattern.compile("Software \\(([^)]+)\\).*Version  *([^ ,]+) *");
+      Pattern.compile("Software \\(([^)]+)\\).*Version +([^ ,]+) *");
   
   public static void main(String[] args) throws Exception {
     final String deviceName = System.getProperty("agent.name", "foo");
