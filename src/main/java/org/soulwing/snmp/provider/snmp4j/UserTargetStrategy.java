@@ -66,8 +66,9 @@ class UserTargetStrategy implements TargetStrategy {
     SecurityModels.getInstance().addSecurityModel(usm);
 
     usm.addUser(new UsmUser(securityName, 
-            authType(v3Target), new OctetString(v3Target.getAuthPassphrase()),
-            privType(v3Target), new OctetString(v3Target.getPrivPassphrase())));    
+            authType(v3Target), authPassphrase(v3Target),
+            privType(v3Target), privPassphrase(v3Target)
+    ));
 
     SecurityModels.getInstance().addSecurityModel(new TSM(localEngineId, false));
     UserTarget userTarget = new UserTarget();
@@ -91,7 +92,18 @@ class UserTargetStrategy implements TargetStrategy {
     return userTarget;
   }
 
+  private OctetString privPassphrase(SnmpV3Target v3Target) {
+    if(v3Target.getPrivPassphrase() != null && v3Target.getPrivType() != null) return new OctetString(v3Target.getPrivPassphrase());
+    return null;
+  }
+
+  private OctetString authPassphrase(SnmpV3Target v3Target) {
+    if(v3Target.getAuthPassphrase() != null && v3Target.getAuthType() != null) return new OctetString(v3Target.getAuthPassphrase());
+    return null;
+  }
+
   private OID authType(SnmpV3Target v3Target) {
+    if(v3Target.getAuthType() == null) return null;
     switch (v3Target.getAuthType()) {
       case SHA:
         return AuthSHA.ID;
@@ -105,6 +117,7 @@ class UserTargetStrategy implements TargetStrategy {
   }
   
   private OID privType(SnmpV3Target v3Target) {
+    if(v3Target.getPrivType() == null) return null;
     switch (v3Target.getPrivType()) {
       case DES:
         return PrivDES.ID;
